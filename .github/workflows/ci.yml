@@ -47,4 +47,3 @@ jobs:
           -H 'Accept: application/vnd.github.v3+json' \
           -u ${{ secrets.GHCR_TOKEN }} \
           -d '{"event_type": "FRONTEND_TEST_FINISH_TRIGGER", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'" }}'
-[출처] Frontend CI/CD (에디로봇아카데미) | 작성자 링크쌤
