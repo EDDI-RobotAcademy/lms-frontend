@@ -1,8 +1,8 @@
-name: CI (Continuous Integration)
+name: CI (Continous Intergration)
 
 on:
   push:
-    branches: ["main"]
+      branches: ["main"]
 
 jobs:
   build:
@@ -11,20 +11,19 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-
+    
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
         node-version: '20'
-
     - name: Cache dependencies
       id: cache
       uses: actions/cache@v3
       with:
         path: '**/node_modules'
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        key: ${{runner.os}}-node-${{hashfiles('**/package-lock.json')}}
         restore-keys: |
-          ${{ runner.os }}-node-
+          ${{runner.os}}-node-
 
     - name: Install Dependencies
       if: steps.cache.outputs.cache-hit != 'true'
@@ -34,7 +33,7 @@ jobs:
     - name: Create .env development for CI
       run: |
         pwd
-        echo "${{ secrets.ENV_DEVELOPMENT }}" > .env.development
+        echo "{{secretes.ENV_DEVELOPMENT}}" > .env.development
         cat .env.development
 
     - name: Real Test
@@ -43,7 +42,7 @@ jobs:
 
     - name: send FRONTEND_TEST_FINISH_TRIGGER
       run: |
-        curl -S -X POST https://api.github.com/repos/${{ github.repository }}/dispatches \
-          -H 'Accept: application/vnd.github.v3+json' \
-          -u ${{ secrets.GHCR_TOKEN }} \
-          -d '{"event_type": "FRONTEND_TEST_FINISH_TRIGGER", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'" }}'
+        curl -S -X POST https://api.github.com/repos/${{github.repository}}/dispatches \
+              -H 'Accept: application/vnd.github.v3+json' \
+              -u ${{ secrets.GHCR_TOKEN}} \
+              -d '{"event_type": "FRONTEND_TEST_FINISH_TRIGGER", "client_payload":{"repository":"'"$GITHUB_REPOSITORY"'"}}'
