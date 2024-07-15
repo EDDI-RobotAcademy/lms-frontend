@@ -33,7 +33,7 @@ jobs:
     - name: Create .env development for CI
       run: |
         pwd
-        echo "${{secretes.ENV_DEVELOPMENT}}" > .env.development
+        echo "{{secretes.ENV_DEVELOPMENT}}" > .env.development
         cat .env.development
 
     - name: Real Test
