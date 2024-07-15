@@ -2,7 +2,7 @@ name: CD (Continuous Deploy)
 
 on:
   repository_dispatch:
-    types: [FRONTEND_TEST_fINISH_TRIGGER]
+    types: [FRONTEND_TEST_FINISH_TRIGGER]
 
 jobs:
   build:
