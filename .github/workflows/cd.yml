@@ -58,7 +58,7 @@ jobs:
         host: ${{ secrets.HOST_IP }}
         username: ec2-user
         password: ${{ secrets.PRIVATE_KEY }}
-        port: ${{ secretes.SSH_PORT }}
+        port: ${{ secrets.SSH_PORT }}
         source: "./dist/**"
         target: "/home/ec2-user/lms/actions-frontend"
 
