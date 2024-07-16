@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     volumes:
       - /home/ec2-user/lms/vue-frontend/conf:/etc/nginx/conf.d
-      - /home/ec2-user/lms/vue-frontend/html:/usr/ahre/nginx/html
+      - /home/ec2-user/lms/vue-frontend/html:/usr/share/nginx/html
     ports:
       - "80:80"
     networks:
