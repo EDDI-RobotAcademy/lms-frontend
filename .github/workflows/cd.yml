@@ -77,6 +77,17 @@ jobs:
     runs-on: [ self-hosted, deploy-lms-frontend ]
     steps:
       - name: Deploy to Production
-        run: |
-          echo "ready for deploy"
-          
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+        host: ${{secrets.HOST_IP}}
+        username: ec2-user
+        key: ${{secrets.PRIVATE_KEY}}
+        script_stop: true
+        script: |
+          cd lms/vue-frontend
+          cp -r /home/ec2-user/lms/actions-frontend/dist/* ./html/
+
+          docker image prune -f
+          docker logout
+
+          docker-compose up -d
