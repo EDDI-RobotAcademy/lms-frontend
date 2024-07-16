@@ -1,4 +1,4 @@
-name: CI (Continous Intergration)
+name: CI (Continuous Intergration)
 
 on:
   push:
