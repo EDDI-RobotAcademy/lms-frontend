@@ -300,7 +300,3 @@ pyrightconfig.json
 /.pnp
 .pnp.js
 
-# exclude images
-*.png
-*.jpg
-*.jpeg
