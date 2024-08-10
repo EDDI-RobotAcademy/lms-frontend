@@ -6,7 +6,7 @@
                     <v-card-title class="text-h5 mb-2">회원가입</v-card-title>
                     <v-divider class="mb-9"></v-divider>
                     <v-card-text align="center">
-                        <v-form>
+                        <v-form ref="form">
                             <v-text-field max-width="400" v-model="email" label="이메일" outlined required
                                 :rules="[v => !!v || '필수 항목']"></v-text-field>
                             <v-text-field class="mt-3" type="password" max-width="400" v-model="password" label="비밀번호"
@@ -36,6 +36,10 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import router from "@/router";
+
+const accountModule = 'accountModule'
 export default {
     data() {
         return {
@@ -51,6 +55,21 @@ export default {
         }
     },
     methods: {
+        ...mapActions(accountModule, ['requestCreateNewAccountToDjango']),
+        async registerUser () {
+            console.log('회원가입 하기 누름')
+            if (this.$refs.form.validate()) {
+                const accountInfo = {
+                    email: this.email,
+                    password: this.password,
+                }
+                try {
+                    await this.requestCreateNewAccountToDjango(accountInfo)
+                } catch (error) {
+                    console.error('회원가입 실패:', error)
+                }
+            }
+        },
         checkPasswordRules() {
             const password = this.password;
             this.passwordRules[0].met = password.length >= 10;
@@ -72,7 +91,7 @@ export default {
                 }
             });
             if (allRulesMet) {
-                console.log("패스워드 규칙 통과")
+                this.registerUser();
             }
         }
     },
