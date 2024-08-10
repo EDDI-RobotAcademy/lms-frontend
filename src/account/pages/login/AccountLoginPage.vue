@@ -7,11 +7,14 @@
                     <v-divider class="mb-9"></v-divider>
                     <v-card-text align="center">
                         <p class="mb-4">로그인하거나 계정을 생성하려면 이메일 주소를 입력해 주세요</p>
-                        <v-form @submit.prevent="submit">
-                            <v-text-field max-width="300" v-model="email" label="이메일" outlined required
+                        <v-form>
+                            <v-text-field v-if="isShowEmail" max-width="300" v-model="email" label="이메일" outlined
+                                required :rules="[v => !!v || '필수 항목']"></v-text-field>
+                            <v-text-field v-if="!isShowEmail" type="password" password="@" max-width="300"
+                                v-model="password" label="비밀번호" outlined required
                                 :rules="[v => !!v || '필수 항목']"></v-text-field>
                             <div class="d-flex justify-center">
-                                <v-btn type="submit" class="submit-button mt-4" max-width="150">
+                                <v-btn class="submit-button mt-4" max-width="150" @click="checkEmailDuplication">
                                     계속
                                 </v-btn>
                             </div>
@@ -26,14 +29,35 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import router from "@/router";
 
+const accountModule = 'accountModule'
 export default {
-    data: () => ({
-        email: '',
-    }),
+    data() {
+        return {
+            email: '',
+            password: '',
+            isShowEmail: true
+        }
+    },
     methods: {
-        submit() {
-            console.log('이메일 제출:', this.email);
+        ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango',]),
+        async checkEmailDuplication() {
+            console.log('이메일 중복 검사')
+            try {
+                const isDuplicate = await this.requestEmailDuplicationCheckToDjango(this.email.trim())
+                if (isDuplicate) {
+                    console.log('email 사용중')
+                    this.isShowEmail = false
+                } else {
+                    console.log('email 미사용중')
+                    router.push("/account/regiser")
+                }
+            } catch (error) {
+                alert('이메일 중복 확인 실패')
+                this.isEmailValid = false
+            }
         },
     },
 }
@@ -43,6 +67,7 @@ export default {
 .v-container {
     background-color: #F6F1EB;
 }
+
 .v-card {
     background-color: #fffcf7 !important;
     height: 490px;
