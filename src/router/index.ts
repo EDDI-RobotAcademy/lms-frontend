@@ -3,11 +3,13 @@ import HomeView from '../views/HomeView.vue'
 import BoardRoutes from '@/board/router/BoardRoutes'
 import ChatbotRoutes from '@/chatbot/router/ChatbotRoutes'
 import HomeRoutes from '@/home/router/HomeRoutes'
+import AccountRoutes from '@/account/router/AccountRoutes'
 
 const routes: Array<RouteRecordRaw> = [
   ...HomeRoutes,
   ...BoardRoutes,
-  ...ChatbotRoutes
+  ...ChatbotRoutes,
+  ...AccountRoutes,
 ]
 
 const router = createRouter({
