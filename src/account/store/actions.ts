@@ -3,18 +3,14 @@ import { AccountState } from "./states"
 import axiosInst from "@/utility/axiosInstance"
 
 export type AccountActions = {
-    requestEmailDuplicationCheckToDjango(
-        context: ActionContext<AccountState, any>,
-        email: string
-    ): Promise<boolean>
+    requestEmailDuplicationCheckToDjango(context: ActionContext<AccountState, any>,email: string): Promise<boolean>
     requestCreateNewAccountToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
     requestNormalLoginToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
+    requestGoogleLoginToDjango(context: ActionContext<AccountState, any>, googleInfo: { credential: string, clientId: string }): Promise<any>
 }
-
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
-        context: ActionContext<AccountState, any>,
-        email: string
+        context: ActionContext<AccountState, any>,email: string
     ): Promise<boolean> {
 
         const response = await axiosInst.djangoAxiosInst.post(
@@ -39,6 +35,19 @@ const actions: AccountActions = {
         } catch (error) {
             console.error('로그인 실패:', error);
             throw error;
+        }
+    },
+    async requestGoogleLoginToDjango(
+        context: ActionContext<AccountState, any>,
+        googleInfo: { credential: string, clientId: string }
+    ): Promise<any> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post(
+                '/google_oauth/login', googleInfo)
+            return response.data
+        } catch (error) {
+            console.error('Google 로그인 실패:', error)
+            throw error
         }
     },
 };
