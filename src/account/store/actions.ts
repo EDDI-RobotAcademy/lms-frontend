@@ -8,6 +8,7 @@ export type AccountActions = {
         email: string
     ): Promise<boolean>
     requestCreateNewAccountToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
+    requestNormalLoginToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
 }
 
 const actions: AccountActions = {
@@ -28,6 +29,16 @@ const actions: AccountActions = {
         } catch (error) {
             console.error('신규 계정 생성 실패:', error)
             throw error
+        }
+    },
+    async requestNormalLoginToDjango(context: ActionContext<AccountState, any>,
+        accountInfo: { email: string, password: string }): Promise<void> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post('/account/login', accountInfo);
+            return response.data
+        } catch (error) {
+            console.error('로그인 실패:', error);
+            throw error;
         }
     },
 };
