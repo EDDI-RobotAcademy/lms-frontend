@@ -42,12 +42,18 @@ export default {
     data() {
         return {
             email: '',
+            name: '',
             password: '',
-            isShowEmail: true
+            isShowEmail: true,
+            clientId: ''
         }
     },
+    created() {
+        this.clientId = process.env.VUE_APP_GOOGLE_CLIENT_ID;
+        console.log('Client ID:', this.clientId);
+    },
     methods: {
-        ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango', 'requestNormalLoginToDjango']),
+        ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango', 'requestNormalLoginToDjango', 'requestGoogleLoginToDjango']),
         async checkEmailDuplication() {
             console.log('이메일 중복 검사')
             try {
@@ -91,11 +97,49 @@ export default {
                 }
             }
         },
-        goToGoogleLogin(){
+        goToGoogleLogin() {
             console.log("구현 예정")
-        }
+        },
+        async handleGoogleLogin(googleResponse) {
+            console.log("Google 응답 진입", googleResponse);
+            if (googleResponse.credential) {
+                const credential = googleResponse.credential;
+                try {
+                    console.log('Django 서버로 Google 인증 요청');
+                    const response = await this.requestGoogleLoginToDjango({
+                        credential: credential,
+                        clientId: this.clientId
+                    });
+                    console.log("Django 응답", response)
+                } catch (error) {
+                    console.log('Google 로그인 요청 실패', error);
+                }
+            } else {
+                console.log('Google 인증 정보를 찾을 수 없음');
+            }
+        },
+        initializeGoogleSignIn() {
+            if (typeof window.google !== 'undefined') {
+                window.google.accounts.id.initialize({
+                    client_id: this.clientId,
+                    callback: this.handleGoogleLogin
+                });
+                window.google.accounts.id.prompt();
+            } else {
+                console.error('구글 API 설정 누락');
+            }
+        },
     },
-}
+    mounted() {
+        if (typeof window.google !== 'undefined') {
+            this.initializeGoogleSignIn();
+        } else {
+            window.onload = () => {
+                this.initializeGoogleSignIn();
+            };
+        }
+    }
+};
 </script>
 
 <style scoped>
