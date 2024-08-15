@@ -90,17 +90,18 @@ export default {
                 try {
                     console.log('로그인 요청');
                     const response = await this.requestNormalLoginToDjango(accountInfo);
-                    console.log('로그인 요청 완료');
-
-                    if (response.access_token) {
-                        const accessToken = response.access_token;
-                        console.log('액세스 토큰:', accessToken);
-
-                        localStorage.setItem('access_token', accessToken);
-
-                        this.$router.push('/');
-                    } else {
-                        console.log('액세스 토큰을 찾을 수 없음');
+                    if (response)
+                    {
+                        const responseRedis = await this.requestAddRedisAccessTokenToDjango(this.email.trim())
+                        if (responseRedis){
+                            router.push('/')
+                        }
+                        else{
+                            console.log("일반 로그인 responseRedis 오류")
+                        }
+                    }
+                    else{
+                        console.log("로그인 요청 에러")
                     }
                 } catch (error) {
                     console.log('로그인 요청 실패', error);
@@ -116,8 +117,13 @@ export default {
                 const googleEmail = response.email
                 const isDuplicate = await this.requestEmailDuplicationCheckToDjango(googleEmail.trim())
                 if (isDuplicate) {
-                    await this.requestAddRedisAccessTokenToDjango(googleEmail.trim())
-                    router.push('/')
+                    const response = await this.requestAddRedisAccessTokenToDjango(googleEmail.trim())
+                    if (response){
+                        router.push('/')
+                    }
+                    else{
+                        console.log("구글 isDuplicate 오류")
+                    }
                 } else {
                     await this.requestCreateNewSocialAccountToDjango(googleEmail.trim())
                 }            
