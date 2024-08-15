@@ -36,8 +36,9 @@
 <script>
 import { mapActions } from 'vuex'
 import router from "@/router";
-
+const authenticationModule = 'authenticationModule'
 const accountModule = 'accountModule'
+
 export default {
     data() {
         return {
@@ -54,6 +55,7 @@ export default {
     },
     methods: {
         ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango', 'requestNormalLoginToDjango', 'requestGoogleLoginToDjango', 'requestCreateNewSocialAccountToDjango','requestEmailLoginTypeToDjango']),
+        ...mapActions(authenticationModule, ['requestAddRedisAccessTokenToDjango']),
         async checkEmailDuplication() {
             console.log('이메일 중복 검사')
             try {
@@ -114,12 +116,13 @@ export default {
                 const googleEmail = response.email
                 const isDuplicate = await this.requestEmailDuplicationCheckToDjango(googleEmail.trim())
                 if (isDuplicate) {
-                    console.log('google email 사용중')
+                    await this.requestAddRedisAccessTokenToDjango(googleEmail.trim())
+                    router.push('/')
                 } else {
                     await this.requestCreateNewSocialAccountToDjango(googleEmail.trim())
                 }            
             } catch (error) {
-                alert('이메일 중복 확인 실패')
+                console.log('이메일 중복 확인 실패', error)
                 this.isEmailValid = false
             }
         },
