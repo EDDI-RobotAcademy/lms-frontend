@@ -7,6 +7,8 @@ export type AccountActions = {
     requestCreateNewAccountToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
     requestNormalLoginToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
     requestGoogleLoginToDjango(context: ActionContext<AccountState, any>, googleInfo: { credential: string, clientId: string }): Promise<any>
+    requestCreateNewSocialAccountToDjango(context: ActionContext<AccountState, any>,email: string): Promise<void>
+    requestEmailLoginTypeToDjango(context: ActionContext<AccountState, any>,email: string): Promise<void>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
@@ -49,6 +51,22 @@ const actions: AccountActions = {
             console.error('Google 로그인 실패:', error)
             throw error
         }
+    },
+    async requestCreateNewSocialAccountToDjango(
+        context: ActionContext<AccountState, any>,email: string
+    ): Promise<void> {
+
+        const response = await axiosInst.djangoAxiosInst.post(
+            '/account/register-social', { email })
+        return response.data
+    },
+    async requestEmailLoginTypeToDjango(
+        context: ActionContext<AccountState, any>,email: string
+    ): Promise<void> {
+
+        const response = await axiosInst.djangoAxiosInst.post(
+            '/account/login-type', { email })
+        return response.data
     },
 };
 

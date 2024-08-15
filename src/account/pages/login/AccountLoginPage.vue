@@ -53,14 +53,22 @@ export default {
         console.log('Client ID:', this.clientId);
     },
     methods: {
-        ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango', 'requestNormalLoginToDjango', 'requestGoogleLoginToDjango']),
+        ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango', 'requestNormalLoginToDjango', 'requestGoogleLoginToDjango', 'requestCreateNewSocialAccountToDjango','requestEmailLoginTypeToDjango']),
         async checkEmailDuplication() {
             console.log('이메일 중복 검사')
             try {
                 const isDuplicate = await this.requestEmailDuplicationCheckToDjango(this.email.trim())
                 if (isDuplicate) {
-                    console.log('email 사용중')
-                    this.isShowEmail = false
+                    const response = await this.requestEmailLoginTypeToDjango(this.email.trim())
+                    console.log("로그인 타입 출력",response.isLoginType)
+                    const LoginType = response.isLoginType
+                    if (LoginType == "NORMAL") {
+                        this.isShowEmail = false;
+                    } else if (LoginType == "GOOGLE") {
+                        alert('구글 회원 입니다.');
+                    } else {
+                        alert('관리자');
+                    }
                 } else {
                     console.log('email 미사용중')
                     router.push("/account/register")
@@ -100,6 +108,21 @@ export default {
         goToGoogleLogin() {
             console.log("구현 예정")
         },
+        async checkGoogleEmailDuplication(response) {
+            console.log('구글 이메일 중복 검사')
+            try {
+                const googleEmail = response.email
+                const isDuplicate = await this.requestEmailDuplicationCheckToDjango(googleEmail.trim())
+                if (isDuplicate) {
+                    console.log('google email 사용중')
+                } else {
+                    await this.requestCreateNewSocialAccountToDjango(googleEmail.trim())
+                }            
+            } catch (error) {
+                alert('이메일 중복 확인 실패')
+                this.isEmailValid = false
+            }
+        },
         async handleGoogleLogin(googleResponse) {
             console.log("Google 응답 진입", googleResponse);
             if (googleResponse.credential) {
@@ -110,7 +133,14 @@ export default {
                         credential: credential,
                         clientId: this.clientId
                     });
-                    console.log("Django 응답", response)
+                    if (response){
+                        this.checkGoogleEmailDuplication(response)
+                    }
+                    else
+                    {
+                        console.log("에러 발생")
+                    }
+                   
                 } catch (error) {
                     console.log('Google 로그인 요청 실패', error);
                 }
