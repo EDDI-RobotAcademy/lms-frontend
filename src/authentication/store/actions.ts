@@ -7,6 +7,12 @@ export type AuthenticationActions = {
     requestAddRedisAccessTokenToDjango(
         context: ActionContext<AuthenticationState, any>,email: string
     ): Promise<any>
+    requestRedisGetEmailToDjango(
+        context: ActionContext<AuthenticationState, any>,usertoken: string
+    ): Promise<any>
+    requestRedisGetPaidMemberTypeToDjango(
+        context: ActionContext<AuthenticationState, any>,usertoken: string
+    ): Promise<any>
 }
 
 const actions: AuthenticationActions = {
@@ -24,6 +30,30 @@ const actions: AuthenticationActions = {
             return response.data;
         } catch (error) {
             console.error('Error adding redis access token:', error);
+            throw error;
+        }
+    },
+    async requestRedisGetEmailToDjango(context: ActionContext<AuthenticationState, any>,usertoken: string
+    ): Promise<any> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post(
+                '/google_oauth/redis-get-email', { usertoken })
+
+            return response.data;
+        } catch (error) {
+            console.error('requestRedisGetValueToDjango() 오류 발생', error);
+            throw error;
+        }
+    },
+    async requestRedisGetPaidMemberTypeToDjango(context: ActionContext<AuthenticationState, any>,usertoken: string
+    ): Promise<any> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post(
+                '/google_oauth/redis-get-paidmembertype', { usertoken })
+
+            return response.data;
+        } catch (error) {
+            console.error('requestRedisGetValueToDjango() 오류 발생', error);
             throw error;
         }
     },
