@@ -12,25 +12,42 @@
         </v-col>
       </v-row>
     </div>
+    <PopUpView v-if="openModal == true" @sendClose="closeModalView" />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script>
+import { mapState } from "vuex";
+import PopUpView from '@/popup/pages/HomePopup.vue'
+const authenticationModule = "authenticationModule";
 
 export default {
+  components: {
+    PopUpView
+  },
   data () {
     return {
-
+      openModal: true
     }
   },
   methods: {
     goToChatbotPage() {
-        // this.$router.push({ name: 'ChatbotPage' }); 
         console.log('페이지 이동')
+    },
+    closeModalView(data){
+      this.openModal = data
+    },
+  },
+  mounted(){
+    const userToken = localStorage.getItem("userToken");
+    if (userToken) {
+      console.log("You already has a userToken!");
+      this.$store.state.authenticationModule.isAuthenticated = true;
     }
-
-}
+  },
+  computed: {
+    ...mapState(authenticationModule, ["isAuthenticated"]),
+  },
 };
 </script>
 
