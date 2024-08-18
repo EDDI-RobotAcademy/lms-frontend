@@ -1,16 +1,15 @@
-<template>
-  <div class="chat-container">
-    <div class="chat-messages">
-      <div v-for="(message, index) in messages" :key="index" :class="message.role">
-        <p>{{ message.content }}</p>
-      </div>
+<template class="chat-container">
+  <div class="chat-messages">
+    <div v-for="(message, index) in messages" :key="index" :class="message.role">
+      <p>{{ message.content }}</p>
     </div>
-    <div class="chat-input" align="center">
-      <v-text-field v-model="userInput" @keyup.enter="sendMessage" placeholder="어떤 레시피를 알려드릴까요?" class="custom-text-field" hide-details dense />
-      <v-btn @click="toggleSpeechRecognition" :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
-             :color="isListening ? '#F2B8B5' : '#ffff'" class="mic-button">
-      </v-btn>
-    </div>
+  </div>
+  <div class="chat-input" align="center">
+    <v-text-field v-model="userInput" @keyup.enter="sendMessage" placeholder="어떤 레시피를 알려드릴까요?" class="custom-text-field"
+      hide-details dense />
+    <v-btn @click="toggleSpeechRecognition" :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
+      :color="isListening ? '#F2B8B5' : '#ffff'" class="mic-button">
+    </v-btn>
   </div>
 </template>
 
@@ -144,16 +143,23 @@ export default {
 }
 
 .chat-input {
+  position: fixed;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
   display: flex;
-  margin-left: 20%;
-  margin-right: 20%;
   align-items: center;
+  margin: 0;
+  background-color: #F6F1EB;
+  padding: 10px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .chat-messages {
   flex-grow: 1;
   overflow-y: auto;
   padding: 10px;
+  margin-bottom: 70px;
 }
 
 .user,
@@ -179,7 +185,7 @@ export default {
 }
 
 .custom-text-field ::v-deep .v-input__control {
-  min-height: 40px; /* 텍스트 필드의 높이 조정 */
+  min-height: 40px;
 }
 
 .custom-text-field ::v-deep .v-input__slot {
