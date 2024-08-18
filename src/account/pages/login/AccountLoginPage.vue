@@ -105,7 +105,7 @@ export default {
                     }
                 } else {
                     console.log('email 미사용중')
-                    router.push("/account/register");
+                    router.push({ path: "/account/register", query: { email: this.email.trim() } });
                 }
             } catch (error) {
                 alert('이메일 중복 확인 실패')
