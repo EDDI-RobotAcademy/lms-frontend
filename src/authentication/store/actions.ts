@@ -5,19 +5,22 @@ import axiosInst from "@/utility/axiosInstance"
 
 export type AuthenticationActions = {
     requestAddRedisAccessTokenToDjango(
-        context: ActionContext<AuthenticationState, any>,email: string
+        context: ActionContext<AuthenticationState, any>, email: string
     ): Promise<any>
     requestRedisGetEmailToDjango(
-        context: ActionContext<AuthenticationState, any>,usertoken: string
+        context: ActionContext<AuthenticationState, any>, usertoken: string
     ): Promise<any>
     requestRedisGetPaidMemberTypeToDjango(
-        context: ActionContext<AuthenticationState, any>,usertoken: string
+        context: ActionContext<AuthenticationState, any>, usertoken: string
+    ): Promise<any>
+    requestRedisGetTicketToDjango(
+        context: ActionContext<AuthenticationState, any>, usertoken: string
     ): Promise<any>
 }
 
 const actions: AuthenticationActions = {
     async requestAddRedisAccessTokenToDjango(
-        { commit, state }: ActionContext<AuthenticationState, any>,email: string
+        { commit, state }: ActionContext<AuthenticationState, any>, email: string
     ): Promise<any> {
         try {
             const response = await axiosInst.djangoAxiosInst.post(
@@ -33,7 +36,7 @@ const actions: AuthenticationActions = {
             throw error;
         }
     },
-    async requestRedisGetEmailToDjango(context: ActionContext<AuthenticationState, any>,usertoken: string
+    async requestRedisGetEmailToDjango(context: ActionContext<AuthenticationState, any>, usertoken: string
     ): Promise<any> {
         try {
             const response = await axiosInst.djangoAxiosInst.post(
@@ -45,15 +48,27 @@ const actions: AuthenticationActions = {
             throw error;
         }
     },
-    async requestRedisGetPaidMemberTypeToDjango(context: ActionContext<AuthenticationState, any>,usertoken: string
+    async requestRedisGetPaidMemberTypeToDjango(context: ActionContext<AuthenticationState, any>, usertoken: string
     ): Promise<any> {
         try {
             const response = await axiosInst.djangoAxiosInst.post(
-                '/google_oauth/redis-get-paidmembertype', { usertoken })
+                '/google_oauth/redis-get-paid-member-type', { usertoken })
 
             return response.data;
         } catch (error) {
             console.error('requestRedisGetValueToDjango() 오류 발생', error);
+            throw error;
+        }
+    },
+    async requestRedisGetTicketToDjango(context: ActionContext<AuthenticationState, any>, usertoken: string
+    ): Promise<any> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post(
+                '/google_oauth/redis-get-ticket', { usertoken })
+
+            return response.data;
+        } catch (error) {
+            console.error('requestRedisGetTicketToDjango() 오류 발생', error);
             throw error;
         }
     },
