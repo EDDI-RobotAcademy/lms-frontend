@@ -20,6 +20,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import cat from '@/assets/images/fixed/cat.glb'
 import character_head from '@/assets/images/fixed/character_head.glb'
 import running_jerry from '@/assets/images/fixed/running_jerry.glb'
+import pac_man from '@/assets/images/fixed/pac_man.glb'
+import inosuke_mask from '@/assets/images/fixed/inosuke_mask.glb'
 export default {
     data() {
         return {
@@ -27,8 +29,8 @@ export default {
                 { name: '최민지', title: '조장', description: '네 맞습니다 LMS 조의 조장입니다.', modelUrl: cat },
                 { name: '이민재', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: character_head },
                 { name: '이근', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: running_jerry },
-                { name: '이현석', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: cat },
-                { name: '이재호', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: cat },
+                { name: '이현석', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: pac_man },
+                { name: '이재호', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: inosuke_mask },
             ],
             scenes: [],
         }
@@ -58,9 +60,12 @@ export default {
             if (this.cards[index].modelUrl === character_head) {
                 camera.position.set(0, 0.5, 100);
                 controls.target.set(0, 0.5, 0);
-            } else if (this.cards[index].modelUrl === running_jerry) {
+            } else if (this.cards[index].modelUrl === pac_man) {
+                camera.position.set(0, 0, 60);
+            }  else if (this.cards[index].modelUrl === running_jerry) {
                 camera.position.set(0, 0, 34);
-            } else {
+            }
+            else {
                 camera.position.set(0, 2, 6);
                 controls.target.set(0, 0, 0);
             }
