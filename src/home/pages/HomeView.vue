@@ -24,7 +24,7 @@ import { mapActions, mapState } from "vuex";
 import PopUpView from '@/popup/pages/HomePopup.vue'
 const authenticationModule = "authenticationModule";
 
-export default defineComponent({
+export default ({
   name: 'App',
   data() {
     return {
