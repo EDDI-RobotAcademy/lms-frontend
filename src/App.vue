@@ -2,6 +2,7 @@
   <v-app>
     <custom-side-bar/>
     <v-main>
+      <ContactButton></ContactButton>
       <router-view/>
     </v-main>
   </v-app>
