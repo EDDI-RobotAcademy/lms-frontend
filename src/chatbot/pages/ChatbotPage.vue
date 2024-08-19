@@ -15,9 +15,10 @@
 
 
 <script>
+const authenticationModule = "authenticationModule";
 import { ref, onMounted } from 'vue';
 import OpenAI from 'openai';
-
+import { mapActions, mapState } from "vuex";
 export default {
   name: 'ChatGPTClone',
   setup() {
@@ -75,9 +76,20 @@ export default {
     return {
       isListening: false,
       recognition: null,
+      UserTicket: '',
     };
   },
+  computed: {
+    ...mapState(authenticationModule, ["isAuthenticated"]),
+  },
   mounted() {
+    const userToken = localStorage.getItem("userToken");
+    if (userToken) {
+      this.requestUserToken();
+    }
+    else {
+      console.log("mounted 비회원")
+    }
     if ('webkitSpeechRecognition' in window) {
       const SpeechRecognition = window.webkitSpeechRecognition;
       this.recognition = new SpeechRecognition();
@@ -107,6 +119,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango']),
     toggleSpeechRecognition() {
       if (this.recognition) {
         if (this.isListening) {
@@ -126,6 +139,21 @@ export default {
       if (this.recognition && this.isListening) {
         this.isListening = false;
         this.recognition.stop();
+      }
+    },
+    async requestUserToken() {
+      const userToken = localStorage.getItem("userToken");
+      if (userToken) {
+        console.log("유저 토큰 확인");
+        this.$store.state.authenticationModule.isAuthenticated = true;
+        try {
+          const response = await this.requestRedisGetTicketToDjango(userToken.trim());
+          console.log("requestRedisGetTicketToDjango:", response.ticket)
+          this.ticket = response.ticket;
+          console.log("유저 티켓 반환",this.ticket)
+        } catch (error) {
+          console.error("Error fetching paid member type:", error);
+        }
       }
     },
   },
