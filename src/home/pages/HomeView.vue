@@ -1,3 +1,4 @@
+<!-- App.vue -->
 <template>
   <div id="app">
     <main>
@@ -16,7 +17,6 @@
       </div>
     </main>
   </div>  
-
 </template>
 
 <script>
@@ -164,3 +164,4 @@ h1 {
   font-size: 14px;
 }
 </style>
+
