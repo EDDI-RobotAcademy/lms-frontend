@@ -8,15 +8,18 @@
                     <v-card-text align="center">
                         <v-form ref="form">
                             <v-text-field max-width="400" v-model="email" label="이메일" outlined required
-                                :rules="[v => !!v || '필수 항목']"></v-text-field>
+                                :rules="[v => !!v || '필수 항목']" readonly></v-text-field>
+
                             <v-text-field class="mt-3" type="password" max-width="400" v-model="password" label="비밀번호"
                                 outlined required :rules="[v => !!v || '필수 항목']"></v-text-field>
                             <p class="text-medium-emphasis text-caption">보안을 위해 다음 기준에 따라 비밀번호를 설정하시기 바랍니다:</p>
                             <v-row class="security text-medium-emphasis text-caption mt-3">
                                 <v-col cols="6" v-for="(rule, index) in passwordRules" :key="index">
                                     <div class="d-flex align-center" :class="{ 'shake': rule.shake }">
-                                        <v-icon v-if="password && rule.met" color="green" small class="mr-2">mdi-check</v-icon>
-                                        <v-icon v-if="password && !rule.met" color="red" small class="mr-2">mdi-close</v-icon>
+                                        <v-icon v-if="password && rule.met" color="green" small
+                                            class="mr-2">mdi-check</v-icon>
+                                        <v-icon v-if="password && !rule.met" color="red" small
+                                            class="mr-2">mdi-close</v-icon>
                                         <span v-if="!password" class="mr-2" style="width: 24px;"></span>
                                         <span>{{ rule.text }}</span>
                                     </div>
@@ -56,7 +59,7 @@ export default {
     },
     methods: {
         ...mapActions(accountModule, ['requestCreateNewAccountToDjango']),
-        async registerUser () {
+        async registerUser() {
             console.log('회원가입 하기 누름')
             if (this.$refs.form.validate()) {
                 const accountInfo = {
@@ -100,6 +103,11 @@ export default {
             this.checkPasswordRules();
         }
     },
+    mounted() {
+        if (this.$route.query.email) {
+            this.email = this.$route.query.email;
+        }
+    }
 }
 </script>
 
@@ -135,11 +143,25 @@ export default {
 }
 
 @keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(5px); }
-    50% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-    100% { transform: translateX(0); }
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(5px);
+    }
+
+    50% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
 }
 
 .shake {

@@ -16,10 +16,13 @@
       </div>
     </main>
   </div>  
+
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script>
+import { mapActions, mapState } from "vuex";
+import PopUpView from '@/popup/pages/HomePopup.vue'
+const authenticationModule = "authenticationModule";
 
 export default defineComponent({
   name: 'App',

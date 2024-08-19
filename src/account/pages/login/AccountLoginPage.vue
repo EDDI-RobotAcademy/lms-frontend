@@ -10,12 +10,14 @@
                         <v-form ref="form">
                             <v-text-field v-if="isShowEmail" max-width="300" v-model="email" label="이메일" outlined
                                 required :rules="[v => !!v || '필수 항목']"></v-text-field>
+                            <span v-if="!emailRulesCheck" class="security text-medium-emphasis text-caption">
+                                죄송합니다. 표기가 잘못되었습니다. name@domain.com과 같은 형식의 유효한 이메일을 입력해 주세요.</span>
                             <v-text-field v-if="!isShowEmail" type="password" password="@" max-width="300"
                                 v-model="password" label="비밀번호" outlined required
                                 :rules="[v => !!v || '필수 항목']"></v-text-field>
                             <div class="d-flex justify-center">
                                 <v-btn v-if="isShowEmail" class="submit-button mt-4" max-width="150"
-                                    @click="checkEmailDuplication">
+                                    @click="checkEmail">
                                     계속
                                 </v-btn>
                                 <v-btn v-if="!isShowEmail" class="submit-button mt-4" max-width="150"
@@ -36,8 +38,9 @@
 <script>
 import { mapActions } from 'vuex'
 import router from "@/router";
-
+const authenticationModule = 'authenticationModule'
 const accountModule = 'accountModule'
+
 export default {
     data() {
         return {
@@ -45,7 +48,14 @@ export default {
             name: '',
             password: '',
             isShowEmail: true,
-            clientId: ''
+            clientId: '',
+            emailRulesCheck: true,
+            emailRules: [
+                { met: false },
+                { met: false },
+                { met: false },
+                { met: false },
+            ],
         }
     },
     created() {
@@ -53,17 +63,49 @@ export default {
         console.log('Client ID:', this.clientId);
     },
     methods: {
-        ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango', 'requestNormalLoginToDjango', 'requestGoogleLoginToDjango']),
+        ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango', 'requestNormalLoginToDjango', 'requestGoogleLoginToDjango', 'requestCreateNewSocialAccountToDjango', 'requestEmailLoginTypeToDjango']),
+        ...mapActions(authenticationModule, ['requestAddRedisAccessTokenToDjango']),
+        checkEmailRules() {
+            const email = this.email;
+            this.emailRules[0].met = /[@]/.test(email);
+            this.emailRules[1].met = /[a-z]/.test(email);
+            this.emailRules[2].met = /\.com$/.test(email);
+            this.emailRules[3].met = /@.+\.com$/.test(email);
+        },
+        checkEmail() {
+            this.checkEmailRules();
+            let allRulesMet = true;
+            this.emailRules.forEach(rule => {
+                if (!rule.met) {
+                    allRulesMet = false;
+                    this.emailRulesCheck = false;
+                    console.log("조건 충족 안됨")
+                }
+            });
+            if (allRulesMet) {
+                this.emailRulesCheck = true;
+                this.checkEmailDuplication()
+            }
+        },
         async checkEmailDuplication() {
             console.log('이메일 중복 검사')
             try {
+                console.log("이메일 중복 검사 이메일:",this.email.trim())
                 const isDuplicate = await this.requestEmailDuplicationCheckToDjango(this.email.trim())
                 if (isDuplicate) {
-                    console.log('email 사용중')
-                    this.isShowEmail = false
+                    const response = await this.requestEmailLoginTypeToDjango(this.email.trim())
+                    console.log("로그인 타입 출력", response.isLoginType)
+                    const LoginType = response.isLoginType
+                    if (LoginType == "NORMAL") {
+                        this.isShowEmail = false;
+                    } else if (LoginType == "GOOGLE") {
+                        alert('구글 회원 입니다.');
+                    } else {
+                        alert('관리자');
+                    }
                 } else {
                     console.log('email 미사용중')
-                    router.push("/account/register")
+                    router.push({ path: "/account/register", query: { email: this.email.trim() } });
                 }
             } catch (error) {
                 alert('이메일 중복 확인 실패')
@@ -80,17 +122,17 @@ export default {
                 try {
                     console.log('로그인 요청');
                     const response = await this.requestNormalLoginToDjango(accountInfo);
-                    console.log('로그인 요청 완료');
-
-                    if (response.access_token) {
-                        const accessToken = response.access_token;
-                        console.log('액세스 토큰:', accessToken);
-
-                        localStorage.setItem('access_token', accessToken);
-
-                        this.$router.push('/');
-                    } else {
-                        console.log('액세스 토큰을 찾을 수 없음');
+                    if (response) {
+                        const responseRedis = await this.requestAddRedisAccessTokenToDjango(this.email.trim())
+                        if (responseRedis) {
+                            router.push('/')
+                        }
+                        else {
+                            console.log("일반 로그인 responseRedis 오류")
+                        }
+                    }
+                    else {
+                        console.log("로그인 요청 에러")
                     }
                 } catch (error) {
                     console.log('로그인 요청 실패', error);
@@ -99,6 +141,27 @@ export default {
         },
         goToGoogleLogin() {
             console.log("구현 예정")
+        },
+        async checkGoogleEmailDuplication(response) {
+            console.log('구글 이메일 중복 검사')
+            try {
+                const googleEmail = response.email
+                const isDuplicate = await this.requestEmailDuplicationCheckToDjango(googleEmail.trim())
+                if (isDuplicate) {
+                    const response = await this.requestAddRedisAccessTokenToDjango(googleEmail.trim())
+                    if (response) {
+                        router.push('/')
+                    }
+                    else {
+                        console.log("구글 isDuplicate 오류")
+                    }
+                } else {
+                    await this.requestCreateNewSocialAccountToDjango(googleEmail.trim())
+                }
+            } catch (error) {
+                console.log('이메일 중복 확인 실패', error)
+                this.isEmailValid = false
+            }
         },
         async handleGoogleLogin(googleResponse) {
             console.log("Google 응답 진입", googleResponse);
@@ -110,7 +173,13 @@ export default {
                         credential: credential,
                         clientId: this.clientId
                     });
-                    console.log("Django 응답", response)
+                    if (response) {
+                        this.checkGoogleEmailDuplication(response)
+                    }
+                    else {
+                        console.log("에러 발생")
+                    }
+
                 } catch (error) {
                     console.log('Google 로그인 요청 실패', error);
                 }
@@ -174,5 +243,10 @@ export default {
     background-position: center;
     height: 50px;
     width: 200px;
+}
+
+.security {
+    color: #9d2a1e !important;
+    font-size: 9px !important;
 }
 </style>
