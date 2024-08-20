@@ -11,72 +11,61 @@
       :color="isListening ? '#F2B8B5' : '#ffff'" class="mic-button">
     </v-btn>
   </div>
-</template>
+</template> 
 
 
 <script>
-const authenticationModule = "authenticationModule";
-import { ref, onMounted } from 'vue';
 import OpenAI from 'openai';
 import { mapActions, mapState } from "vuex";
-export default {
-  name: 'ChatGPTClone',
-  setup() {
-    const messages = ref([]);
-    const userInput = ref('');
-    const openai = new OpenAI({
+
+const authenticationModule = "authenticationModule";
+const openai = new OpenAI({
       apiKey: process.env.VUE_APP_OPENAI_API_KEY,
       dangerouslyAllowBrowser: true
     });
 
-    onMounted(() => {
-      // OpenAI 클라이언트 초기화
-      // 주의: API 키를 클라이언트 측에 노출하는 것은 보안상 위험할 수 있습니다.
-      // 실제 프로덕션 환경에서는 서버 측에서 API 호출을 처리하는 것이 좋습니다.
-      openai.value = new OpenAI({
-        apiKey: process.env.VUE_APP_OPENAI_API_KEY,
-        dangerouslyAllowBrowser: true
-      });
-    });
-
-    const sendMessage = async () => {
-      if (!userInput.value.trim()) return;
-
-      const userMessage = { role: 'user', content: userInput.value };
-      messages.value.push(userMessage);
-
-      try {
-        const stream = await openai.value.chat.completions.create({
-          model: 'gpt-3.5-turbo',
-          messages: messages.value,
-          stream: true,
-        });
-
-        let assistantResponse = '';
-        for await (const chunk of stream) {
-          assistantResponse += chunk.choices[0]?.delta?.content || '';
-        }
-
-        messages.value.push({ role: 'assistant', content: assistantResponse });
-      } catch (error) {
-        console.error('Error:', error);
-        messages.value.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
-      }
-
-      userInput.value = '';
-    };
-
-    return {
-      messages,
-      userInput,
-      sendMessage,
-    };
-  },
+    export default {
+  name: 'Corner-Chefbot',
   data() {
     return {
       isListening: false,
       recognition: null,
       UserTicket: '',
+      assistantMessages: '',  // 챗봇 응답을 저장하기 위한 변수 추가
+      messages: [],
+      userInput: '',
+      globalClasses: {},
+      globalStyles: {},
+      voices: [],
+      displaySettings: {
+        play: {
+          show: true,
+          text: 'Play',
+          icons: "",
+          displayAsIcon: false,
+          classes: "",
+          style: ""
+        },
+        stop: {
+          show: true,
+          text: 'Stop',
+          icons: "",
+          displayAsIcon: false,
+          classes: "",
+          style: ""
+        },
+        pause: {
+          show: true,
+          text: 'Pause',
+          icons: "",
+          displayAsIcon: false,
+          classes: "",
+          style: ""
+        }
+      },
+      supported: true, // 브라우저에서 TTS를 지원하는지 확인
+      utterance: new SpeechSynthesisUtterance(),
+      isPaused: false,
     };
   },
   computed: {
@@ -156,10 +145,68 @@ export default {
         }
       }
     },
+    async sendMessage() {
+      if (!this.userInput.trim()) return;
+
+      const userMessage = { role: 'user', content: this.userInput };
+      this.messages.push(userMessage);
+
+      try {
+        const response = await openai.chat.completions.create({
+          model: 'gpt-3.5-turbo',
+          messages: [...this.messages, userMessage],
+        });
+
+        this.assistantMessage = response.choices[0]?.message?.content || 'Sorry, an error occurred.';
+        this.messages.push({ role: 'assistant', content: this.assistantMessage });
+
+        // TTS 기능 실행
+        this.speak();
+
+      } catch (error) {
+        console.error('Error:', error);
+        this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
+        
+      }
+      this.userInput = '';
+    },
+    speak() {
+      console.log('speak');
+      this.utterance.text = this.assistantMessage;
+      this.utterance.pitch = 1; // 기본 피치 설정
+      this.utterance.voice = this.getVoiceByLanguage(); // 언어에 맞는 음성 설정
+      this.utterance.rate = 1; // 기본 속도 설정
+      this.utterance.onstart = () => {
+        console.log("TTS 시작");
+      };
+      this.utterance.onend = () => {
+        console.log("TTS 종료");
+      };
+      window.speechSynthesis.speak(this.utterance);
+    },
+    stop() {
+      window.speechSynthesis.cancel();
+    },
+    pause() {
+      this.isPaused = !this.isPaused;
+      if (this.isPaused) {
+        window.speechSynthesis.pause();
+      } else {
+        window.speechSynthesis.resume();
+      }
+    },
+    getVoiceByLanguage() {
+      const lang = 'ko-KR';  // 한국어 음성 선택
+      for (const voice of window.speechSynthesis.getVoices()) {
+        if (voice.lang === lang) {
+          return voice;
+        }
+      }
+      return window.speechSynthesis.getVoices()[0];
+    }
   },
 };
 </script>
-
 
 <style scoped>
 .chat-container {
