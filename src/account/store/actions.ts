@@ -4,7 +4,7 @@ import axiosInst from "@/utility/axiosInstance"
 
 export type AccountActions = {
     requestEmailDuplicationCheckToDjango(context: ActionContext<AccountState, any>,email: string): Promise<boolean>
-    requestCreateNewAccountToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
+    requestCreateNewAccountToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string, nickname: string }): Promise<void>
     requestNormalLoginToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
     requestGoogleLoginToDjango(context: ActionContext<AccountState, any>, googleInfo: { credential: string, clientId: string }): Promise<any>
     requestCreateNewSocialAccountToDjango(context: ActionContext<AccountState, any>,email: string): Promise<void>
@@ -20,7 +20,7 @@ const actions: AccountActions = {
         return response.data.isDuplicate
     },
     async requestCreateNewAccountToDjango(context: ActionContext<AccountState, any>,
-        accountInfo: { email: string, password: string }): Promise<void> {
+        accountInfo: { email: string, password: string, nickname: string }): Promise<void> {
         try {
             alert('신규 계정이 생성되었습니다!')
             await axiosInst.djangoAxiosInst.post('/account/register', accountInfo)

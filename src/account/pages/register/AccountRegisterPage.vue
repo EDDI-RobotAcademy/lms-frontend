@@ -7,6 +7,7 @@
                     <v-divider class="mb-9"></v-divider>
                     <v-card-text align="center">
                         <v-form ref="form">
+                            <v-text-field class="mb-3" max-width="400" v-model="nickname" label="닉네임"></v-text-field>
                             <v-text-field max-width="400" v-model="email" label="이메일" outlined required
                                 :rules="[v => !!v || '필수 항목']" readonly></v-text-field>
 
@@ -48,6 +49,7 @@ export default {
         return {
             email: '',
             password: '',
+            nickname: '',
             passwordRules: [
                 { text: '최소 10자', met: false, shake: false },
                 { text: '최소 1개의 숫자', met: false, shake: false },
@@ -65,6 +67,7 @@ export default {
                 const accountInfo = {
                     email: this.email,
                     password: this.password,
+                    nickname: this.nickname,
                 }
                 try {
                     await this.requestCreateNewAccountToDjango(accountInfo)
@@ -118,7 +121,7 @@ export default {
 
 .v-card {
     background-color: #fffcf7 !important;
-    height: 550px;
+    height: 700px;
 }
 
 .submit-button {
