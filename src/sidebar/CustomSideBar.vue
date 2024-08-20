@@ -26,7 +26,7 @@
           </div>
           <div id="nav-footer-titlebox">
             <a id="nav-footer-title" target="_blank">{{ UserEmail }}</a>
-            <span id="nav-footer-subtitle">Admin</span>
+            <span id="nav-footer-subtitle">{{ nickname }}</span>
           </div>
         </div>
         <button v-if="!isAuthenticated" id="nav-footer" @click="goToLogin">LOGIN</button>
@@ -44,11 +44,12 @@ export default ({
   data() {
     return {
       isExpanded: false,
-      UserEmail: ''
+      UserEmail: '',
+      nickname: ''
     }
   },
   methods: {
-    ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango','requestRedisGetTicketToDjango','requestRedisGetNicknameToDjango']),
     goToLogin() {
       router.push('/account/login')
     },
@@ -58,11 +59,18 @@ export default ({
         console.log("유저 토큰 확인");
         this.$store.state.authenticationModule.isAuthenticated = true;
         try {
-          const response = await this.requestRedisGetEmailToDjango(userToken.trim());
-          console.log("requestRedisGetEmailToDjango:", response.EmailInfo)
-          this.UserEmail = response.EmailInfo;
+          const email = await this.requestRedisGetEmailToDjango(userToken.trim());
+          console.log("requestRedisGetEmailToDjango:", email.EmailInfo)
+          this.UserEmail = email.EmailInfo;
+          const ticket = await this.requestRedisGetTicketToDjango(userToken.trim());
+          console.log("requestRedisGetTicketToDjango:", ticket.ticket)
+          this.ticket = ticket.ticket;
+          const nickname = await this.requestRedisGetNicknameToDjango(userToken.trim());
+          console.log("requestRedisGetTicketToDjango:", nickname.nickname)
+          this.nickname = nickname.nickname;
+          console.log("유저 닉네임 반환",this.nickname)
         } catch (error) {
-          console.error("Error fetching paid member type:", error);
+          console.error("Error requestUserToken:", error);
         }
       }
     },
