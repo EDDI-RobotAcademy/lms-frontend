@@ -108,7 +108,7 @@ const openai = new OpenAI({
     }
   },
   methods: {
-    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango', 'requestRedisUpdateTicketToDjango']),
     toggleSpeechRecognition() {
       if (this.recognition) {
         if (this.isListening) {
@@ -146,6 +146,9 @@ const openai = new OpenAI({
       }
     },
     async sendMessage() {
+      const userToken = localStorage.getItem("userToken");
+      const response = await this.requestRedisUpdateTicketToDjango(userToken.trim());
+      console.log("requestRedisUpdateTicketToDjango 결과",response)
       if (!this.userInput.trim()) return;
 
       const userMessage = { role: 'user', content: this.userInput };
