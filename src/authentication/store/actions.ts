@@ -16,6 +16,9 @@ export type AuthenticationActions = {
     requestRedisGetTicketToDjango(
         context: ActionContext<AuthenticationState, any>, usertoken: string
     ): Promise<any>
+    requestRedisUpdateTicketToDjango(
+        context: ActionContext<AuthenticationState, any>, usertoken: string
+    ): Promise<any>
 }
 
 const actions: AuthenticationActions = {
@@ -69,6 +72,18 @@ const actions: AuthenticationActions = {
             return response.data;
         } catch (error) {
             console.error('requestRedisGetTicketToDjango() 오류 발생', error);
+            throw error;
+        }
+    },
+    async requestRedisUpdateTicketToDjango(context: ActionContext<AuthenticationState, any>, usertoken: string
+    ): Promise<any> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post(
+                '/google_oauth/redis-update-ticket', { usertoken })
+
+            return response.data;
+        } catch (error) {
+            console.error('requestRedisUpdateTicketToDjango() 오류 발생', error);
             throw error;
         }
     },
