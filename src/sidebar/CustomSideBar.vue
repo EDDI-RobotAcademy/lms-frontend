@@ -25,7 +25,7 @@
             <img src="https://gravatar.com/avatar/4474ca42d303761c2901fa819c4f2547">
           </div>
           <div id="nav-footer-titlebox">
-            <a id="nav-footer-title" href="https://codepen.io/uahnbu/pens/public" target="_blank">user</a>
+            <a id="nav-footer-title" target="_blank">{{ UserEmail }}</a>
             <span id="nav-footer-subtitle">Admin</span>
           </div>
         </div>
@@ -37,23 +37,50 @@
 
 <script>
 const authenticationModule = "authenticationModule";
-import { mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 import router from "@/router";
+
 export default ({
   data() {
     return {
-      isExpanded: false
+      isExpanded: false,
+      UserEmail: ''
     }
   },
   methods: {
+    ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango']),
     goToLogin() {
       router.push('/account/login')
-    }
+    },
+    async requestUserToken() {
+      const userToken = localStorage.getItem("userToken");
+      if (userToken) {
+        console.log("유저 토큰 확인");
+        this.$store.state.authenticationModule.isAuthenticated = true;
+        try {
+          const response = await this.requestRedisGetEmailToDjango(userToken.trim());
+          console.log("requestRedisGetEmailToDjango:", response.EmailInfo)
+          this.UserEmail = response.EmailInfo;
+        } catch (error) {
+          console.error("Error fetching paid member type:", error);
+        }
+      }
+    },
   },
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated"]),
   },
+  mounted() {
+    const userToken = localStorage.getItem("userToken");
+    if (userToken) {
+      this.requestUserToken();
+    }
+    else {
+      console.log("mounted 비회원")
+    }
+  },
 });
+
 </script>
 
 <style>
@@ -69,7 +96,8 @@ export default ({
   --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   background: var(--background);
 }
@@ -211,5 +239,4 @@ html, body {
   color: var(--navbar-light-secondary);
   font-size: 0.6rem;
 }
-
 </style>
