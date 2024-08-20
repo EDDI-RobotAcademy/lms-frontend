@@ -1,8 +1,9 @@
 <template class="chat-container">
   <div class="chat-messages">
     <div v-for="(message, index) in messages" :key="index" :class="message.role">
-      <p>{{ message.content }}</p>
+      <p v-for="(line, lineIndex) in splitMessageContent(message.content)" :key="lineIndex">{{ line }}</p>
     </div>
+    <div v-if="isLoading" class="loading-spinner"></div>
   </div>
   <div class="chat-input" align="center">
     <v-text-field v-model="userInput" @keyup.enter="sendMessage" placeholder="어떤 레시피를 알려드릴까요?" class="custom-text-field"
@@ -66,6 +67,7 @@ const openai = new OpenAI({
       supported: true, // 브라우저에서 TTS를 지원하는지 확인
       utterance: new SpeechSynthesisUtterance(),
       isPaused: false,
+      isLoading: false // 로딩 상태
     };
   },
   computed: {
@@ -108,7 +110,7 @@ const openai = new OpenAI({
     }
   },
   methods: {
-    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango', 'requestRedisUpdateTicketToDjango']),
     toggleSpeechRecognition() {
       if (this.recognition) {
         if (this.isListening) {
@@ -146,15 +148,20 @@ const openai = new OpenAI({
       }
     },
     async sendMessage() {
+      const userToken = localStorage.getItem("userToken");
+      const response = await this.requestRedisUpdateTicketToDjango(userToken.trim());
+      console.log("requestRedisUpdateTicketToDjango 결과",response)
       if (!this.userInput.trim()) return;
 
       const userMessage = { role: 'user', content: this.userInput };
       this.messages.push(userMessage);
+      this.isLoading = true; // 로딩 
 
       try {
         const response = await openai.chat.completions.create({
           model: 'gpt-3.5-turbo',
           messages: [...this.messages, userMessage],
+          // stream: true // 해당 부분은 글자가 천천히 나오도록 할 수 있는 기능
         });
 
         this.assistantMessage = response.choices[0]?.message?.content || 'Sorry, an error occurred.';
@@ -167,15 +174,22 @@ const openai = new OpenAI({
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
         
+      } finally {
+        this.isLoading = false; // 로딩 종료
       }
       this.userInput = '';
     },
     speak() {
       console.log('speak');
-      this.utterance.text = this.assistantMessage;
-      this.utterance.pitch = 1; // 기본 피치 설정
+      // 아래 주석은 ESLint 주석임. 삭제 X
+      // eslint-disable-next-line no-useless-escape
+      const filteredMessage = this.assistantMessage.replace(/[-~!():;'"<>^*%@#&{}[\]|\\\/`.,?]/g, '');
+
+      this.utterance.text = filteredMessage;
+
+      this.utterance.pitch = 8; // 피치 설정
       this.utterance.voice = this.getVoiceByLanguage(); // 언어에 맞는 음성 설정
-      this.utterance.rate = 1; // 기본 속도 설정
+      this.utterance.rate = 2; // 속도 설정
       this.utterance.onstart = () => {
         console.log("TTS 시작");
       };
@@ -203,7 +217,11 @@ const openai = new OpenAI({
         }
       }
       return window.speechSynthesis.getVoices()[0];
-    }
+    },
+    splitMessageContent(content) {
+      // 마침표를 기준으로 줄바꿈하며 내용을 나누어 반환
+      return content.split(/(?<=\.)\s*/).map(sentence => sentence.trim()).filter(sentence => sentence);
+    },
   },
 };
 </script>

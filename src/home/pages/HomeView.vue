@@ -1,4 +1,3 @@
-<!-- App.vue -->
 <template>
   <div id="app">
     <main>
@@ -6,67 +5,81 @@
       <div class="chat-container">
         <div class="chat-messages">
           <div v-for="(message, index) in messages" :key="index" :class="message.role">
-            <p>{{ message.content }}</p>
+            <p v-for="(line, lineIndex) in splitMessageContent(message.content)" :key="lineIndex">{{ line }}</p>
           </div>
         </div>
         <div class="chat-input">
-          <input type="text" placeholder="가지고 계신 재료를 입력해주시면 근사한 레시피를 알려드릴게요!" v-model="message" @keyup.enter="sendMessage">
-          <button @click="sendMessage">🍳</button>
+          <input 
+            type="text" 
+            placeholder="가지고 계신 재료를 입력해주시면 근사한 레시피를 알려드릴게요!" 
+            v-model="userInput" 
+            @keyup.enter="sendMessage"
+            :disabled="isChatUsed"
+          >
+          <button 
+            @click="sendMessage" 
+            :disabled="isChatUsed"
+          >
+            🍳
+          </button>
         </div>
       </div>
       <div class="info">
         <p>서울시 금천구 가산동 670 18층 | PaikJongWon@theborn.com | Tel. 0507-1353-7302</p>
       </div>
     </main>
-  </div>  
+  </div>
 </template>
 
 <script>
-import { ref } from 'vue';
 import OpenAI from 'openai';
-import { mapActions, mapState } from "vuex";
-import PopUpView from '@/popup/pages/HomePopup.vue'
-const authenticationModule = "authenticationModule";
+
 const openai = new OpenAI({
-      apiKey: process.env.VUE_APP_OPENAI_API_KEY,
-      dangerouslyAllowBrowser: true
-    });
+  apiKey: process.env.VUE_APP_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true
+});
 
 export default {
   name: 'App',
-  setup() { // 반응형 API 사용을 위함
-    const message = ref('');
-    const messages = ref([]);
+  data() {
+    return {
+      messages: [],
+      userInput: '',
+      maxLength: 200,
+      isChatUsed: false,
+    }
+  },
+  methods: {
+    async sendMessage() {
+      if (!this.userInput.trim()) return;
 
-    const sendMessage = async () => {
-      if (!message.value.trim()) return;
-
-      const userMessage = { role: 'user', content: message.value };
-      messages.value.push(userMessage);
+      const userMessage = { role: 'user', content: this.userInput };
+      this.messages.push(userMessage);
 
       try {
-        // OpenAI API를 호출하여 챗봇의 응답을 가져옴
         const response = await openai.chat.completions.create({
           model: 'gpt-3.5-turbo',
-          messages: [...messages.value, userMessage] // 현재 메시지와 사용자 메시지를 포함
+          messages: [...this.messages, userMessage],
         });
 
-        const assistantMessage = response.choices[0]?.message?.content || 'Sorry, an error occurred.';
-        messages.value.push({ role: 'assistant', content: assistantMessage });
+        this.assistantMessage = response.choices[0]?.message?.content || 'Sorry, an error occurred.';
+        if (this.assistantMessage.length > this.maxLength) {
+              this.assistantMessage = this.assistantMessage.slice(0, this.maxLength) + '\n...';
+        this.messages.push({ role: 'assistant', content: this.assistantMessage });
+        }
+        this.isChatUsed = true; // 채팅 기능 사용 후 비활성화
+    
       } catch (error) {
         console.error('Error:', error);
-        messages.value.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
+        this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
       }
-
-      // 입력 필드를 비움
-      message.value = '';
-    };
-
-    return {
-      message,
-      messages,
-      sendMessage
-    };
+      
+      this.userInput = '';
+    },
+    splitMessageContent(content) {
+      // 마침표를 기준으로 줄바꿈하며 내용을 나누어 반환
+      return content.split(/(?<=\.)\s*/).map(sentence => sentence.trim()).filter(sentence => sentence);
+    },
   }
 };
 </script>
@@ -79,7 +92,6 @@ export default {
   src: url(https://fonts.gstatic.com/s/satisfy/v11/rP2Hp2yn6lkG50LoCZOIHQ.woff2) format('woff2');
   font-display: swap;
 }
-
 
 .corner-chef {
   font-family: 'Satisfy', cursive;
@@ -133,6 +145,7 @@ h1 {
   display: flex;
   flex-direction: column;
   margin: 0 auto;
+  position: relative; /* 로딩 스피너를 컨테이너에 맞게 위치시키기 위함 */
 }
 
 .chat-messages {
@@ -172,6 +185,30 @@ h1 {
 
 .chat-input button:hover {
   background-color: #FFC000;
+}
+
+.chat-input input:disabled,
+.chat-input button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 6px solid #f3f3f3; /* Light grey */
+  border-top: 6px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .info {
