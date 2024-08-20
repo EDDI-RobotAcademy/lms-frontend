@@ -5,7 +5,9 @@
       <h1 class="corner-chef">Corner-Chef</h1>
       <div class="chat-container">
         <div class="chat-messages">
-          <!-- 채팅 내용은 여기에 표시됨 -->
+          <div v-for="(message, index) in messages" :key="index" :class="message.role">
+            <p>{{ message.content }}</p>
+          </div>
         </div>
         <div class="chat-input">
           <input type="text" placeholder="가지고 계신 재료를 입력해주시면 근사한 레시피를 알려드릴게요!" v-model="message" @keyup.enter="sendMessage">
@@ -20,28 +22,53 @@
 </template>
 
 <script>
+import { ref } from 'vue';
+import OpenAI from 'openai';
 import { mapActions, mapState } from "vuex";
 import PopUpView from '@/popup/pages/HomePopup.vue'
 const authenticationModule = "authenticationModule";
+const openai = new OpenAI({
+      apiKey: process.env.VUE_APP_OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true
+    });
 
-export default ({
+export default {
   name: 'App',
-  data() {
+  setup() { // 반응형 API 사용을 위함
+    const message = ref('');
+    const messages = ref([]);
+
+    const sendMessage = async () => {
+      if (!message.value.trim()) return;
+
+      const userMessage = { role: 'user', content: message.value };
+      messages.value.push(userMessage);
+
+      try {
+        // OpenAI API를 호출하여 챗봇의 응답을 가져옴
+        const response = await openai.chat.completions.create({
+          model: 'gpt-3.5-turbo',
+          messages: [...messages.value, userMessage] // 현재 메시지와 사용자 메시지를 포함
+        });
+
+        const assistantMessage = response.choices[0]?.message?.content || 'Sorry, an error occurred.';
+        messages.value.push({ role: 'assistant', content: assistantMessage });
+      } catch (error) {
+        console.error('Error:', error);
+        messages.value.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
+      }
+
+      // 입력 필드를 비움
+      message.value = '';
+    };
+
     return {
-      message: '',
-      messages: []
-    }
-  },
-  // methods: {
-  //   sendMessage() {
-  //     if (this.message.trim()) {
-  //       this.messages.push(this.message);
-  //       this.message = '';
-  //       // 여기에 챗봇 응답 로직을 추가할 수 있습니다
-  //     }
-  //   }
-  // }
-});
+      message,
+      messages,
+      sendMessage
+    };
+  }
+};
 </script>
 
 <style>
