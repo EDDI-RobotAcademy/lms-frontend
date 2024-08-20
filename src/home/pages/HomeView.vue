@@ -47,12 +47,12 @@ export default {
       userInput: '',
       maxLength: 200,
       isChatUsed: false,
+      assistantMessage:''
     }
   },
   methods: {
     async sendMessage() {
       if (!this.userInput.trim()) return;
-
       const userMessage = { role: 'user', content: this.userInput };
       this.messages.push(userMessage);
 
@@ -63,17 +63,20 @@ export default {
         });
 
         this.assistantMessage = response.choices[0]?.message?.content || 'Sorry, an error occurred.';
+        console.log(' this.assistantMessage', this.assistantMessage)
+
         if (this.assistantMessage.length > this.maxLength) {
-              this.assistantMessage = this.assistantMessage.slice(0, this.maxLength) + '\n...';
-        this.messages.push({ role: 'assistant', content: this.assistantMessage });
+              this.assistantMessage = this.assistantMessage.slice(0, this.maxLength) + '\n ...';
+        
         }
+        this.messages.push({ role: 'assistant', content: this.assistantMessage });
         this.isChatUsed = true; // 채팅 기능 사용 후 비활성화
     
       } catch (error) {
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
       }
-      
+
       this.userInput = '';
     },
     splitMessageContent(content) {
@@ -151,7 +154,8 @@ h1 {
 .chat-messages {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 10px;
+  margin-bottom: 70px;
 }
 
 .chat-input {
