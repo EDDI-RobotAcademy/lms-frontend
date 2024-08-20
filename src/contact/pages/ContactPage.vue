@@ -1,5 +1,8 @@
 <template>
     <div class="container">
+        <h2>Hello LMS</h2>
+    </div>
+    <div class="page-container">
         <div v-for="(card, index) in cards" :key="index" class="content-wrapper" :class="{ 'right': index % 2 !== 0 }">
             <div class="model-container" :data-aos="index % 2 === 0 ? 'fade-right' : 'fade-left'">
                 <div :ref="`character${index}`" class="character-container"></div>
@@ -137,6 +140,17 @@ export default {
 </script>
 
 <style scoped>
+.page-container {
+    background-color: #ffffff; /* 전체 배경 색상을 흰색으로 설정 */
+    min-height: 100vh; /* 전체 화면 높이 설정 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
 .container {
     display: flex;
     flex-direction: column;
