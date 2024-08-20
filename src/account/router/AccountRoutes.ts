@@ -1,5 +1,6 @@
 import AccountLoginPage from "@/account/pages/login/AccountLoginPage.vue"
 import AccountRegisterPage from "@/account/pages/register/AccountRegisterPage.vue"
+import AttendanceCheck from "@/account/pages/login/AttendanceCheck.vue"
 
 const AccountRoutes = [
     {
@@ -12,6 +13,12 @@ const AccountRoutes = [
         name: 'AccountRegisterPage',
         component: AccountRegisterPage
     },
+    {
+        path: '/account/AttendanceCheck',
+        name: 'AttendanceCheck',
+        component: AttendanceCheck
+    },
+
 ]
 
 export default AccountRoutes
