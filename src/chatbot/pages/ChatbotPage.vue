@@ -3,6 +3,7 @@
     <div v-for="(message, index) in messages" :key="index" :class="message.role">
       <p v-for="(line, lineIndex) in splitMessageContent(message.content)" :key="lineIndex">{{ line }}</p>
     </div>
+    <div v-if="isLoading" class="loading-spinner"></div>
   </div>
   <div class="chat-input" align="center">
     <v-text-field v-model="userInput" @keyup.enter="sendMessage" placeholder="어떤 레시피를 알려드릴까요?" class="custom-text-field"
@@ -66,6 +67,7 @@ const openai = new OpenAI({
       supported: true, // 브라우저에서 TTS를 지원하는지 확인
       utterance: new SpeechSynthesisUtterance(),
       isPaused: false,
+      isLoading: false // 로딩 상태
     };
   },
   computed: {
@@ -153,11 +155,13 @@ const openai = new OpenAI({
 
       const userMessage = { role: 'user', content: this.userInput };
       this.messages.push(userMessage);
+      this.isLoading = true; // 로딩 
 
       try {
         const response = await openai.chat.completions.create({
           model: 'gpt-3.5-turbo',
           messages: [...this.messages, userMessage],
+          // stream: true // 해당 부분은 글자가 천천히 나오도록 할 수 있는 기능
         });
 
         this.assistantMessage = response.choices[0]?.message?.content || 'Sorry, an error occurred.';
@@ -170,6 +174,8 @@ const openai = new OpenAI({
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
         
+      } finally {
+        this.isLoading = false; // 로딩 종료
       }
       this.userInput = '';
     },
