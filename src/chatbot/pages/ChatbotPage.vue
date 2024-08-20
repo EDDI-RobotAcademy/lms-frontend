@@ -1,7 +1,7 @@
 <template class="chat-container">
   <div class="chat-messages">
     <div v-for="(message, index) in messages" :key="index" :class="message.role">
-      <p>{{ message.content }}</p>
+      <p v-for="(line, lineIndex) in splitMessageContent(message.content)" :key="lineIndex">{{ line }}</p>
     </div>
   </div>
   <div class="chat-input" align="center">
@@ -175,10 +175,15 @@ const openai = new OpenAI({
     },
     speak() {
       console.log('speak');
-      this.utterance.text = this.assistantMessage;
-      this.utterance.pitch = 1; // 기본 피치 설정
+      // 아래 주석은 ESLint 주석임. 삭제 X
+      // eslint-disable-next-line no-useless-escape
+      const filteredMessage = this.assistantMessage.replace(/[-~!():;'"<>^*%@#&{}[\]|\\\/`.,?]/g, '');
+
+      this.utterance.text = filteredMessage;
+
+      this.utterance.pitch = 8; // 피치 설정
       this.utterance.voice = this.getVoiceByLanguage(); // 언어에 맞는 음성 설정
-      this.utterance.rate = 1; // 기본 속도 설정
+      this.utterance.rate = 2; // 속도 설정
       this.utterance.onstart = () => {
         console.log("TTS 시작");
       };
@@ -206,7 +211,11 @@ const openai = new OpenAI({
         }
       }
       return window.speechSynthesis.getVoices()[0];
-    }
+    },
+    splitMessageContent(content) {
+      // 마침표를 기준으로 줄바꿈하며 내용을 나누어 반환
+      return content.split(/(?<=\.)\s*/).map(sentence => sentence.trim()).filter(sentence => sentence);
+    },
   },
 };
 </script>
