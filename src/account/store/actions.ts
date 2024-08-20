@@ -9,6 +9,7 @@ export type AccountActions = {
     requestGoogleLoginToDjango(context: ActionContext<AccountState, any>, googleInfo: { credential: string, clientId: string }): Promise<any>
     requestCreateNewSocialAccountToDjango(context: ActionContext<AccountState, any>,email: string): Promise<void>
     requestEmailLoginTypeToDjango(context: ActionContext<AccountState, any>,email: string): Promise<void>
+    requestNickNameDuplicationCheckToDjango(context: ActionContext<AccountState, any>,nickname: string): Promise<boolean>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
@@ -67,6 +68,14 @@ const actions: AccountActions = {
         const response = await axiosInst.djangoAxiosInst.post(
             '/account/login-type', { email })
         return response.data
+    },
+    async requestNickNameDuplicationCheckToDjango(
+        context: ActionContext<AccountState, any>,nickname: string
+    ): Promise<boolean> {
+
+        const response = await axiosInst.djangoAxiosInst.post(
+            '/account/nickname-duplication-check', { nickname })
+        return response.data.isNickNameDuplicate
     },
 };
 
