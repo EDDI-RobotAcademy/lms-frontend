@@ -22,17 +22,24 @@
       <div id="nav-footer">
         <div v-if="isAuthenticated" id="nav-footer-heading">
           <div id="nav-footer-avatar">
-            <img src="https://gravatar.com/avatar/4474ca42d303761c2901fa819c4f2547">
+            <img src="https://gravatar.com/avatar/4474ca42d303761c2901fa819c4f2547" alt="User Avatar">
           </div>
           <div id="nav-footer-titlebox">
-            <a id="nav-footer-title">{{ nickname }}</a>
-            <a id="ticket" class="text-medium-emphasis text-caption">
+            <span id="nav-footer-title">{{ nickname }}</span>
+            <span id="ticket" class="text-medium-emphasis text-caption">
               <i class="mdi mdi-ticket"></i> {{ ticket }}
-              <v-img class="cherry"/> {{ cherry }}
-            </a>
+              <span class="cherry-container">
+                <v-img class="cherry" /> {{ cherry }}
+              </span>
+            </span>
           </div>
+          <div id="nav-footer-settings">
+            <button @click="goToSettings" class="settings-button">
+              <i class="mdi mdi-cog"></i>
+            </button>
+          </div>
+          <button v-if="!isAuthenticated" id="nav-footer-login" @click="goToLogin">LOGIN</button>
         </div>
-        <button v-if="!isAuthenticated" id="nav-footer" @click="goToLogin">LOGIN</button>
       </div>
     </nav>
   </div>
@@ -57,6 +64,9 @@ export default ({
     ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango', 'requestRedisGetTicketToDjango', 'requestRedisGetCherryToDjango', 'requestRedisGetNicknameToDjango']),
     goToLogin() {
       router.push('/account/login')
+    },
+    goToMyPage() {
+      router.push('/account/mypage')
     },
     async requestUserToken() {
       const userToken = localStorage.getItem("userToken");
@@ -101,6 +111,15 @@ export default ({
 </script>
 
 <style>
+.cherry {
+  background-image: url('~@/assets/images/fixed/cherry.png');
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
 :root {
   --background: rgb(255, 194, 111);
   --navbar-width: 256px;
@@ -236,7 +255,9 @@ body {
 }
 
 #nav-footer-avatar img {
+  width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 #nav-footer-titlebox {
@@ -252,19 +273,58 @@ body {
   opacity: 1;
 }
 
-#nav-footer-subtitle {
-  color: var(--navbar-light-secondary);
-  font-size: 0.6rem;
+#nav-footer-title {
+  font-weight: bold;
 }
 
-.cherry {
-  background-image: url('~@/assets/images/fixed/cherry.png');
-  top: 3px;
+#ticket {
+  display: flex;
+  align-items: center;
+}
+
+.cherry-container {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.cherry-icon {
   width: 20px;
   height: 20px;
-  display: inline-block;
-  background-size: contain;
-  background-repeat: no-repeat;
+  margin-right: 4px;
 }
 
+#nav-footer-settings {
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+.settings-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.settings-button:hover {
+  background-color: var(--navbar-hover-color);
+}
+
+.settings-button .mdi-cog {
+  font-size: 24px;
+  color: var(--navbar-light-primary);
+}
+
+/* 좁은 화면에서도 클릭 가능한 영역 확보 */
+@media (max-width: 768px) {
+  .settings-button {
+    padding: 12px;
+  }
+  
+  .settings-button .mdi-cog {
+    font-size: 28px;
+  }
+}
 </style>
