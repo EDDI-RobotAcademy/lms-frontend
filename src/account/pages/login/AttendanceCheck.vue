@@ -18,29 +18,30 @@
                 </v-btn>
               </div>
             </header>
-            <div class="calendar">
-              <ul class="weeks">
-                <li v-for="day in weekDays" :key="day">{{ day }}</li>
-              </ul>
-              <ul class="days">
-                <li
-                  v-for="day in calendarDays"
-                  :key="day.date"
-                  :class="{
-                    inactive: !day.isCurrentMonth,
-                    active: isToday(day.date)
-                  }"
-                  @click="selectDate(day.date)"
-                >
-                  {{ day.date.getDate() }}
-                </li>
-              </ul>
-            </div>
+            <transition-group name="calendar" tag="div" class="calendar-container">
+              <div :key="currentMonthYear" class="calendar" :data-direction="direction">
+                <ul class="weeks">
+                  <li v-for="day in weekDays" :key="day">{{ day }}</li>
+                </ul>
+                <ul class="days">
+                  <li
+                    v-for="day in calendarDays"
+                    :key="day.date"
+                    :class="{
+                      inactive: !day.isCurrentMonth,
+                      active: isToday(day.date)
+                    }"
+                  >
+                    {{ day.date.getDate() }}
+                  </li>
+                </ul>
+              </div>
+            </transition-group>
           </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn id="Attendance-check-botton" color="white" @click="checkAttendance">🍒 수령완료</v-btn>
+          <v-btn id="Attendance-check-botton" color="white" @click="checkAttendance">🍒 수령하기</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
         <v-card-actions>
@@ -59,7 +60,7 @@ export default {
       dialog: true,
       currentDate: new Date(),
       weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      selectedDate: null,
+      direction: 'next',
     };
   },
   computed: {
@@ -100,6 +101,7 @@ export default {
   },
   methods: {
     changeMonth(delta) {
+      this.direction = delta > 0 ? 'next' : 'prev';
       this.currentDate = new Date(
         this.currentDate.getFullYear(),
         this.currentDate.getMonth() + delta,
@@ -114,32 +116,23 @@ export default {
         date.getFullYear() === today.getFullYear()
       );
     },
-    selectDate(date) {
-      this.selectedDate = date;
-      console.log('Selected date:', date);
-      // 여기에 날짜 선택 로직을 추가할 수 있습니다.
-    },
     closeDialog() {
       this.dialog = false;
       this.$emit('close');
     },
     checkAttendance() {
-      if (this.selectedDate) {
-        console.log('Checking attendance for:', this.selectedDate);
-        // 여기에 출석체크 로직을 추가할 수 있습니다.
-        this.closeDialog();
-      } else {
-        alert('날짜를 선택해주세요.');
-      }
+      console.log('Checking attendance for today');
+      // 여기에 출석체크 로직을 추가할 수 있습니다.
+      this.closeDialog();
     },
   },
 };
 </script>
 
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
-/* Attendance-check-dialog 스타일 추가 */
 .Attendance-check-dialog .v-card {
   border: 4px solid rgb(252, 118, 134);
   border-radius: 20px !important;
@@ -165,6 +158,18 @@ export default {
   font-weight: 600;
 }
 
+.calendar-container {
+  position: relative;
+  overflow: hidden;
+  height: 320px; /* Adjust this value based on your calendar's height */
+}
+
+.calendar {
+  position: absolute;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
 .calendar ul {
   display: flex;
   list-style: none;
@@ -188,15 +193,11 @@ export default {
 
 .calendar .days li {
   z-index: 1;
-  cursor: pointer;
 }
 
-
-/* 이번 달 날짜가 아닌 숫자들에 대한 색 */
 .days li.inactive {
   color: #0c0c0c1a;
 }
-
 
 .days li.active {
   color: #fff;
@@ -218,32 +219,41 @@ export default {
   background: #f2f2f2;
 }
 
-
-/* 선택 중인 요일에 대한 색표현 */
 .days li.active::before {
   background: rgb(252, 118, 134);
 }
-/* rgb(189, 0, 22); */
 
-/* 출석체크 버튼 버전-1 */
 #Attendance-check-botton {
   font-size: 1.5rem;
-  font-style: calc();
   width: 180px;
   height: 60px;
   border-radius: 13px;
   background: rgb(252, 118, 134);
-  
+  color: white;
 }
 
+.calendar-enter-active,
+.calendar-leave-active {
+  transition: all 0.3s ease;
+}
 
-/* 출석체크 버튼 버전-2 */
-/* #Attendance-check-botton {
-  font-size: 1.5rem;
-  border-width: 3.5px;
-  border-color: rgb(189, 0, 22);
-  width: 150px;
-  height: 80px;
-  border-radius: 30px;
-} */
+.calendar-enter-from[data-direction="next"] {
+  transform: translateX(100%);
+}
+
+.calendar-leave-to[data-direction="next"] {
+  transform: translateX(-100%);
+}
+
+.calendar-enter-from[data-direction="prev"] {
+  transform: translateX(-100%);
+}
+
+.calendar-leave-to[data-direction="prev"] {
+  transform: translateX(100%);
+}
+
+.calendar-move {
+  transition: transform 0.3s ease;
+}
 </style>
