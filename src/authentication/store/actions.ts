@@ -22,6 +22,9 @@ export type AuthenticationActions = {
     requestRedisGetNicknameToDjango(
         context: ActionContext<AuthenticationState, any>, usertoken: string
     ): Promise<any>
+    requestRedisGetCherryToDjango(
+        context: ActionContext<AuthenticationState, any>, usertoken: string
+    ): Promise<any>
 }
 
 const actions: AuthenticationActions = {
@@ -99,6 +102,18 @@ const actions: AuthenticationActions = {
             return response.data;
         } catch (error) {
             console.error('requestRedisGetNicknameToDjango() 오류 발생', error);
+            throw error;
+        }
+    },
+    async requestRedisGetCherryToDjango(context: ActionContext<AuthenticationState, any>, usertoken: string
+    ): Promise<any> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post(
+                '/google_oauth/redis-get-cherry', { usertoken })
+
+            return response.data;
+        } catch (error) {
+            console.error('requestRedisGetCherryToDjango() 오류 발생', error);
             throw error;
         }
     },

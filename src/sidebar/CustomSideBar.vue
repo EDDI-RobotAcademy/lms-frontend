@@ -25,8 +25,11 @@
             <img src="https://gravatar.com/avatar/4474ca42d303761c2901fa819c4f2547">
           </div>
           <div id="nav-footer-titlebox">
-            <a id="nav-footer-title" target="_blank">{{ UserEmail }}</a>
-            <span id="nav-footer-subtitle">{{ nickname }}</span>
+            <a id="nav-footer-title">{{ nickname }}</a>
+            <a id="ticket" class="text-medium-emphasis text-caption">
+              <i class="mdi mdi-ticket"></i> {{ ticket }}
+              <v-img class="cherry"/> {{ cherry }}
+            </a>
           </div>
         </div>
         <button v-if="!isAuthenticated" id="nav-footer" @click="goToLogin">LOGIN</button>
@@ -45,11 +48,13 @@ export default ({
     return {
       isExpanded: false,
       UserEmail: '',
-      nickname: ''
+      nickname: '',
+      ticket: '',
+      cherry: '',
     }
   },
   methods: {
-    ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango','requestRedisGetTicketToDjango','requestRedisGetNicknameToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango', 'requestRedisGetTicketToDjango', 'requestRedisGetCherryToDjango', 'requestRedisGetNicknameToDjango']),
     goToLogin() {
       router.push('/account/login')
     },
@@ -68,7 +73,11 @@ export default ({
           const nickname = await this.requestRedisGetNicknameToDjango(userToken.trim());
           console.log("requestRedisGetTicketToDjango:", nickname.nickname)
           this.nickname = nickname.nickname;
-          console.log("유저 닉네임 반환",this.nickname)
+          console.log("유저 닉네임 반환", this.nickname)
+          const cherry = await this.requestRedisGetCherryToDjango(userToken.trim());
+          console.log("requestRedisGetTicketToDjango:", cherry.cherry)
+          this.cherry = cherry.cherry;
+          console.log("유저 체리 반환", this.cherry)
         } catch (error) {
           console.error("Error requestUserToken:", error);
         }
@@ -247,4 +256,15 @@ body {
   color: var(--navbar-light-secondary);
   font-size: 0.6rem;
 }
+
+.cherry {
+  background-image: url('~@/assets/images/fixed/cherry.png');
+  top: 3px;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
 </style>
