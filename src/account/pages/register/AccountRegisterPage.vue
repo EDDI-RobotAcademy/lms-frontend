@@ -48,6 +48,7 @@ import { mapActions } from 'vuex'
 import router from "@/router";
 
 const accountModule = 'accountModule'
+const authenticationModule = 'authenticationModule'
 export default {
   data() {
     return {
@@ -65,7 +66,35 @@ export default {
     }
   },
   methods: {
-    ...mapActions(accountModule, ['requestCreateNewAccountToDjango', 'requestNickNameDuplicationCheckToDjango']),
+    ...mapActions(authenticationModule, ['requestAddRedisAccessTokenToDjango']),
+    ...mapActions(accountModule, ['requestCreateNewAccountToDjango', 'requestNickNameDuplicationCheckToDjango', 'requestNormalLoginToDjango']),
+    async loginUser() {
+      console.log('로그인 하기 누름')
+      if (this.$refs.form.validate()) {
+        const accountInfo = {
+          email: this.email,
+          password: this.password,
+        }
+        try {
+          console.log('로그인 요청');
+          const response = await this.requestNormalLoginToDjango(accountInfo);
+          if (response) {
+            const responseRedis = await this.requestAddRedisAccessTokenToDjango(this.email.trim())
+            if (responseRedis) {
+              router.push('/')
+            }
+            else {
+              console.log("일반 로그인 responseRedis 오류")
+            }
+          }
+          else {
+            console.log("로그인 요청 에러")
+          }
+        } catch (error) {
+          console.log('로그인 요청 실패', error);
+        }
+      }
+    },
     async registerUser() {
       console.log('회원가입 하기 누름')
       if (this.$refs.form.validate()) {
@@ -75,7 +104,9 @@ export default {
           nickname: this.nickname,
         }
         try {
-          await this.requestCreateNewAccountToDjango(accountInfo)
+          const CreateResponse = await this.requestCreateNewAccountToDjango(accountInfo)
+          console.log("CreateResponse 응답", CreateResponse)
+          this.loginUser()
         } catch (error) {
           console.error('회원가입 실패:', error)
         }
@@ -90,6 +121,7 @@ export default {
       this.passwordRules[4].met = /[a-z]/.test(password);
     },
     checkPassword() {
+      console.log("checkPassword() 접근")
       this.checkPasswordRules();
       let allRulesMet = true;
       this.passwordRules.forEach(rule => {
@@ -102,6 +134,7 @@ export default {
         }
       });
       if (allRulesMet) {
+        console.log("allRulesMet 접근")
         this.registerUser();
       }
     },
