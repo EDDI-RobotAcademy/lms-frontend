@@ -1,5 +1,6 @@
 import AccountLoginPage from "@/account/pages/login/AccountLoginPage.vue"
 import AccountRegisterPage from "@/account/pages/register/AccountRegisterPage.vue"
+import AccountMyPage from "@/account/pages/mypage/AccountMyPage.vue"
 import AttendanceCheck from "@/account/pages/login/AttendanceCheck.vue"
 
 const AccountRoutes = [
@@ -18,7 +19,11 @@ const AccountRoutes = [
         name: 'AttendanceCheck',
         component: AttendanceCheck
     },
-
+    {
+        path: '/account/mypage',
+        name: 'AccountMyPage',
+        component: AccountMyPage
+    },
 ]
 
 export default AccountRoutes
