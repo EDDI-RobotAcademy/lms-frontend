@@ -24,8 +24,14 @@
           </button>
         </div>
       </div>
+      
       <div class="info">
         <p>서울시 금천구 가산동 670 18층 | PaikJongWon@theborn.com | Tel. 0507-1353-7302</p>
+      </div>
+      <!-- 답변 생성 로딩 표시 -->
+      <div v-if="isLoadingMessage" class="loading-container">
+        <div class="spinner"></div>
+        <p>답변이 생성되는 중입니다...</p>
       </div>
     </main>
   </div>
@@ -47,7 +53,8 @@ export default {
       userInput: '',
       maxLength: 200,
       isChatUsed: false,
-      assistantMessage:''
+      assistantMessage:'',
+      isLoadingResponse: false,  // 답변 로딩 상태
     }
   },
   methods: {
@@ -57,6 +64,7 @@ export default {
       this.messages.push(userMessage);
       this.userInput = '';
       try {
+        this.isLoadingMessage = true; // 로딩 시작
         const response = await openai.chat.completions.create({
           model: 'gpt-3.5-turbo',
           messages: [...this.messages, userMessage],
@@ -75,6 +83,8 @@ export default {
       } catch (error) {
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
+      } finally {
+      this.isLoadingMessage = false; // 로딩 끝
       }
     },
     formatMessage(content) {
@@ -145,7 +155,6 @@ h1 {
   display: flex;
   flex-direction: column;
   margin: 0 auto;
-  position: relative; /* 로딩 스피너를 컨테이너에 맞게 위치시키기 위함 */
 }
 
 .chat-messages {
@@ -237,6 +246,37 @@ h1 {
 .info p {
   margin: 0;
   font-size: 14px;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -310px;
+  /* top: -20px; 위로 20px 올림 */
+}
+
+.loading-container p {
+  margin-left: 10px;
+  color: #555;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #09f;
+  animation: spin 1s ease infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
 
