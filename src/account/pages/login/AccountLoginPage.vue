@@ -8,11 +8,11 @@
                     <v-card-text align="center">
                         <p class="mb-4">로그인하거나 계정을 생성하려면 이메일 주소를 입력해 주세요</p>
                         <v-form ref="form">
-                            <v-text-field v-if="isShowEmail" max-width="300" v-model="email" label="이메일" outlined
+                            <v-text-field v-if="isShowEmail" @keydown.enter.prevent="checkEmail" max-width="300" v-model="email" label="이메일" outlined
                                 required :rules="[v => !!v || '필수 항목']"></v-text-field>
                             <span v-if="!emailRulesCheck" class="security text-medium-emphasis text-caption">
                                 죄송합니다. 표기가 잘못되었습니다. name@domain.com과 같은 형식의 유효한 이메일을 입력해 주세요.</span>
-                            <v-text-field v-if="!isShowEmail" type="password" password="@" max-width="300"
+                            <v-text-field v-if="!isShowEmail" @keydown.enter.prevent="loginUser" type="password" password="@" max-width="300"
                                 v-model="password" label="비밀번호" outlined required
                                 :rules="[v => !!v || '필수 항목']"></v-text-field>
                             <div class="d-flex justify-center">
@@ -125,6 +125,7 @@ export default {
                     if (response) {
                         const responseRedis = await this.requestAddRedisAccessTokenToDjango(this.email.trim())
                         if (responseRedis) {
+                            alert('첫 화면으로 이동합니다!')
                             router.push('/')
                         }
                         else {
@@ -150,6 +151,7 @@ export default {
                 if (isDuplicate) {
                     const response = await this.requestAddRedisAccessTokenToDjango(googleEmail.trim())
                     if (response) {
+                        alert('첫 화면으로 이동합니다!')
                         router.push('/')
                     }
                     else {

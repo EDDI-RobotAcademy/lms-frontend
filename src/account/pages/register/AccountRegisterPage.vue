@@ -17,7 +17,7 @@
               <v-text-field max-width="400" v-model="email" label="이메일" outlined required :rules="[v => !!v || '필수 항목']"
                 readonly></v-text-field>
 
-              <v-text-field class="mt-3" type="password" max-width="400" v-model="password" label="비밀번호" outlined
+              <v-text-field @keydown.enter.prevent="checkNickNameDuplication" class="mt-3" type="password" max-width="400" v-model="password" label="비밀번호" outlined
                 required :rules="[v => !!v || '필수 항목']"></v-text-field>
               <p class="text-medium-emphasis text-caption">보안을 위해 다음 기준에 따라 비밀번호를 설정하시기 바랍니다:</p>
               <v-row class="security text-medium-emphasis text-caption mt-3">
