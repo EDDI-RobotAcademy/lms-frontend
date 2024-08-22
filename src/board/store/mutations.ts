@@ -1,7 +1,5 @@
 import { MutationTree } from "vuex";
-import {
-    REQUEST_BOARD_LIST_TO_DJANGO 
-} from "./mutation-types";
+import {REQUEST_BOARD_LIST_TO_DJANGO } from "./mutation-types";
 import { Board, BoardState } from "./states";
 
 export interface BoardMutations extends MutationTree<BoardState> {
