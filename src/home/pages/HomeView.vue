@@ -5,7 +5,7 @@
       <div class="chat-container">
         <div class="chat-messages">
           <div v-for="(message, index) in messages" :key="index" :class="message.role">
-            <p v-for="(line, lineIndex) in splitMessageContent(message.content)" :key="lineIndex">{{ line }}</p>
+            <div v-html="formatMessage(message.content)"></div>
           </div>
         </div>
         <div class="chat-input">
@@ -55,7 +55,7 @@ export default {
       if (!this.userInput.trim()) return;
       const userMessage = { role: 'user', content: this.userInput };
       this.messages.push(userMessage);
-
+      this.userInput = '';
       try {
         const response = await openai.chat.completions.create({
           model: 'gpt-3.5-turbo',
@@ -76,12 +76,9 @@ export default {
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
       }
-
-      this.userInput = '';
     },
-    splitMessageContent(content) {
-      // 마침표를 기준으로 줄바꿈하며 내용을 나누어 반환
-      return content.split(/(?<=\.)\s*/).map(sentence => sentence.trim()).filter(sentence => sentence);
+    formatMessage(content) {
+      return content.replace(/\n/g, '<br>');
     },
   }
 };
