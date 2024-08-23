@@ -4,6 +4,8 @@ import ChatbotRoutes from '@/chatbot/router/ChatbotRoutes'
 import HomeRoutes from '@/home/router/HomeRoutes'
 import AccountRoutes from '@/account/router/AccountRoutes'
 import ContactRoutes from '@/contact/router/ContactRoutes'
+import aiCommandModule from '@/gatherEverything/store/aiCommandModule'
+import GatherEverythingRoutes from '@/gatherEverything/router/GatherEverythingRoutes'
 
 const routes: Array<RouteRecordRaw> = [
   ...HomeRoutes,
@@ -11,6 +13,7 @@ const routes: Array<RouteRecordRaw> = [
   ...ChatbotRoutes,
   ...AccountRoutes,
   ...ContactRoutes,
+  ...GatherEverythingRoutes,
 ]
 
 const router = createRouter({
