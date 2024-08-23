@@ -20,25 +20,26 @@
         <div id="nav-content-highlight"></div>
       </div>
       <div id="nav-footer">
-        <div v-if="isAuthenticated" id="nav-footer-heading">
+        <div id="nav-footer-heading">
           <div id="nav-footer-avatar">
             <img src="https://gravatar.com/avatar/4474ca42d303761c2901fa819c4f2547" alt="User Avatar">
           </div>
           <div id="nav-footer-titlebox">
             <span id="nav-footer-title">{{ nickname }}</span>
-            <span id="ticket" class="text-medium-emphasis text-caption">
-              <i class="mdi mdi-ticket"></i> {{ ticket }}
-              <span class="cherry-container">
-                <v-img class="cherry" /> {{ cherry }}
+            <div class="user-stats">
+              <span class="stat-container">
+                <i class="mdi mdi-ticket stat-icon"></i>
+                <span class="stat-count">{{ ticket }}</span>
               </span>
-            </span>
+              <span class="stat-container">
+                <span class="cherry stat-icon"></span>
+                <span class="stat-count">{{ cherry }}</span>
+              </span>
+            </div>
           </div>
-          <div id="nav-footer-settings">
-            <button @click="goToSettings" class="settings-button">
-              <i class="mdi mdi-cog"></i>
-            </button>
-          </div>
-          <button v-if="!isAuthenticated" id="nav-footer-login" @click="goToLogin">LOGIN</button>
+          <button @click="goToMyPage" class="mypage-button">
+            <i class="mdi mdi-cog"></i>
+          </button>
         </div>
       </div>
     </nav>
@@ -71,23 +72,16 @@ export default ({
     async requestUserToken() {
       const userToken = localStorage.getItem("userToken");
       if (userToken) {
-        console.log("유저 토큰 확인");
         this.$store.state.authenticationModule.isAuthenticated = true;
         try {
           const email = await this.requestRedisGetEmailToDjango(userToken.trim());
-          console.log("requestRedisGetEmailToDjango:", email.EmailInfo)
           this.UserEmail = email.EmailInfo;
           const ticket = await this.requestRedisGetTicketToDjango(userToken.trim());
-          console.log("requestRedisGetTicketToDjango:", ticket.ticket)
           this.ticket = ticket.ticket;
           const nickname = await this.requestRedisGetNicknameToDjango(userToken.trim());
-          console.log("requestRedisGetTicketToDjango:", nickname.nickname)
           this.nickname = nickname.nickname;
-          console.log("유저 닉네임 반환", this.nickname)
           const cherry = await this.requestRedisGetCherryToDjango(userToken.trim());
-          console.log("requestRedisGetTicketToDjango:", cherry.cherry)
           this.cherry = cherry.cherry;
-          console.log("유저 체리 반환", this.cherry)
         } catch (error) {
           console.error("Error requestUserToken:", error);
         }
@@ -111,31 +105,32 @@ export default ({
 </script>
 
 <style>
-.cherry {
-  background-image: url('~@/assets/images/fixed/cherry.png');
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  background-size: contain;
-  background-repeat: no-repeat;
+@font-face {
+    font-family: 'Danjo-bold-Regular';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-1@1.1/Danjo-bold-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
 }
 
 :root {
   --background: rgb(255, 194, 111);
   --navbar-width: 256px;
   --navbar-width-min: 80px;
-  --navbar-dark-primary: rgba(227, 139, 41, 0.9);
-  --navbar-dark-secondary: rgb(255, 194, 111);
+  --navbar-dark-primary: #FFFFFF;
+  --navbar-dark-secondary: #F6F1EB;
   --navbar-light-primary: #f5f6fa;
   --navbar-light-secondary: #eff1f3;
-  --navbar-hover-color: rgba(255, 255, 255, 0.1);
-  --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  --navbar-hover-color: rgba(68, 68, 68, 0.1);
+  --font-family: 'Danjo-bold-Regular', sans-serif;
+  --text-color: #444444;
 }
 
 html,
 body {
   margin: 0;
   background: var(--background);
+  color: var(--text-color);
+  font-family: var(--font-family);
 }
 
 #nav-bar {
@@ -147,14 +142,15 @@ body {
   background: var(--navbar-dark-primary);
   display: flex;
   flex-direction: column;
-  color: var(--navbar-light-primary);
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: var(--text-color);
+  font-family: var(--font-family);
   overflow: hidden;
   user-select: none;
   z-index: 3;
   width: var(--navbar-width-min);
   transition: width 0.3s ease, opacity 0.3s ease;
   opacity: 0;
+  border-radius: 10px;
 }
 
 #nav-bar:hover {
@@ -178,6 +174,7 @@ body {
   white-space: nowrap;
   opacity: 0;
   transition: opacity 0.3s ease;
+  color: var(--text-color);
 }
 
 #nav-bar:hover #nav-title {
@@ -202,7 +199,7 @@ body {
   height: 54px;
   display: flex;
   align-items: center;
-  color: var(--navbar-light-secondary);
+  color: var(--text-color);
   cursor: pointer;
   z-index: 1;
   transition: color 0.2s, background-color 0.2s;
@@ -243,15 +240,17 @@ body {
   height: 54px;
   display: flex;
   align-items: center;
+  padding: 0 12px;
+  box-sizing: border-box;
 }
 
 #nav-footer-avatar {
   position: relative;
-  margin: 11px 0 11px 16px;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   overflow: hidden;
+  margin-right: 12px;
 }
 
 #nav-footer-avatar img {
@@ -261,10 +260,10 @@ body {
 }
 
 #nav-footer-titlebox {
-  position: relative;
-  margin-left: 16px;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -275,56 +274,75 @@ body {
 
 #nav-footer-title {
   font-weight: bold;
+  margin-bottom: 2px;
+  color: var(--text-color);
 }
 
-#ticket {
+.user-stats {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
-.cherry-container {
+.stat-container {
   display: inline-flex;
   align-items: center;
-  margin-left: 8px;
 }
 
-.cherry-icon {
-  width: 20px;
-  height: 20px;
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-right: 4px;
 }
 
-#nav-footer-settings {
-  margin-left: auto;
-  margin-right: 8px;
+.cherry {
+  background-image: url('~@/assets/images/fixed/cherry.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
-.settings-button {
+.mdi-ticket {
+  font-size: 16px;
+  color: var(--text-color);
+}
+
+.stat-count {
+  color: var(--text-color);
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.mypage-button {
   background: none;
   border: none;
   cursor: pointer;
   padding: 8px;
+  margin-left: 8px;
   border-radius: 50%;
   transition: background-color 0.2s;
 }
 
-.settings-button:hover {
+.mypage-button:hover {
   background-color: var(--navbar-hover-color);
 }
 
-.settings-button .mdi-cog {
-  font-size: 24px;
-  color: var(--navbar-light-primary);
+.mypage-button .mdi-cog {
+  font-size: 20px;
+  color: var(--text-color);
 }
 
-/* 좁은 화면에서도 클릭 가능한 영역 확보 */
 @media (max-width: 768px) {
-  .settings-button {
+  .mypage-button {
     padding: 12px;
   }
-  
-  .settings-button .mdi-cog {
-    font-size: 28px;
+
+  .mypage-button .mdi-cog {
+    font-size: 24px;
   }
 }
 </style>
