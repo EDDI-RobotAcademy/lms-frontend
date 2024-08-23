@@ -8,13 +8,16 @@
                     <v-card-text align="center">
                         <p class="mb-4">로그인하거나 계정을 생성하려면 이메일 주소를 입력해 주세요</p>
                         <v-form ref="form">
-                            <v-text-field v-if="isShowEmail" @keydown.enter.prevent="checkEmail" max-width="300" v-model="email" label="이메일" outlined
-                                required :rules="[v => !!v || '필수 항목']"></v-text-field>
+                            <v-text-field v-if="isShowEmail" @keydown.enter.prevent="checkEmail" max-width="300"
+                                v-model="email" label="이메일" outlined required
+                                :rules="[v => !!v || '필수 항목']"></v-text-field>
                             <span v-if="!emailRulesCheck" class="security text-medium-emphasis text-caption">
                                 죄송합니다. 표기가 잘못되었습니다. name@domain.com과 같은 형식의 유효한 이메일을 입력해 주세요.</span>
-                            <v-text-field v-if="!isShowEmail" @keydown.enter.prevent="loginUser" type="password" password="@" max-width="300"
-                                v-model="password" label="비밀번호" outlined required
+                            <v-text-field v-if="!isShowEmail" @keydown.enter.prevent="loginUser" type="password"
+                                password="@" max-width="300" v-model="password" label="비밀번호" outlined required
                                 :rules="[v => !!v || '필수 항목']"></v-text-field>
+                            <span v-if="!passwordCheck" class="security text-medium-emphasis text-caption">
+                                비밀번호가 잘 못 입력되었습니다.</span>
                             <div class="d-flex justify-center">
                                 <v-btn v-if="isShowEmail" class="submit-button mt-4" max-width="150"
                                     @click="checkEmail">
@@ -56,6 +59,7 @@ export default {
                 { met: false },
                 { met: false },
             ],
+            passwordCheck: true,
         }
     },
     created() {
@@ -90,7 +94,7 @@ export default {
         async checkEmailDuplication() {
             console.log('이메일 중복 검사')
             try {
-                console.log("이메일 중복 검사 이메일:",this.email.trim())
+                console.log("이메일 중복 검사 이메일:", this.email.trim())
                 const isDuplicate = await this.requestEmailDuplicationCheckToDjango(this.email.trim())
                 if (isDuplicate) {
                     const response = await this.requestEmailLoginTypeToDjango(this.email.trim())
@@ -122,8 +126,10 @@ export default {
                 try {
                     console.log('로그인 요청');
                     const response = await this.requestNormalLoginToDjango(accountInfo);
-                    if (response) {
+                    console.log('response 응답', response);
+                    if (response.access_token != null) {
                         const responseRedis = await this.requestAddRedisAccessTokenToDjango(this.email.trim())
+                        console.log("response 답")
                         if (responseRedis) {
                             alert('첫 화면으로 이동합니다!')
                             router.push('/')
@@ -133,7 +139,7 @@ export default {
                         }
                     }
                     else {
-                        console.log("로그인 요청 에러")
+                        this.passwordCheck = false;
                     }
                 } catch (error) {
                     console.log('로그인 요청 실패', error);
@@ -249,6 +255,6 @@ export default {
 
 .security {
     color: #9d2a1e !important;
-    font-size: 9px !important;
+    font-size: 12px !important;
 }
 </style>
