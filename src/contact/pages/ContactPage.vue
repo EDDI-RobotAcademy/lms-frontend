@@ -1,18 +1,26 @@
 <template>
-    <div class="container">
-        <h2>Hello LMS</h2>
-    </div>
     <div class="page-container">
-        <div v-for="(card, index) in cards" :key="index" class="content-wrapper" :class="{ 'right': index % 2 !== 0 }">
-            <div class="model-container" :data-aos="index % 2 === 0 ? 'fade-right' : 'fade-left'">
-                <div :ref="`character${index}`" class="character-container"></div>
-            </div>
-            <div class="text-content" :class="{ 'text-right': index % 2 !== 0 }">
-                <h3>{{ card.name }}</h3>
-                <h4>{{ card.title }}</h4>
-                <p>{{ card.description }}</p>
+        <header class="header" data-aos="fade-down">
+            <h1>LMS</h1>
+        </header>
+
+        <div class="team-grid">
+            <div v-for="(member, index) in teamMembers" :key="index" class="team-member"
+                :data-aos="getAnimation(index)">
+                <div class="model-container">
+                    <div :ref="`character${index}`" class="character-container"></div>
+                </div>
+                <div class="member-info">
+                    <h2>{{ member.name }}</h2>
+                    <h3>{{ member.title }}</h3>
+                    <p>{{ member.description }}</p>
+                </div>
             </div>
         </div>
+
+        <footer class="footer" data-aos="fade-up">
+            <p>© 2024 Our Amazing Company. All rights reserved.</p>
+        </footer>
     </div>
 </template>
 
@@ -20,28 +28,37 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+
 import cat from '@/assets/images/fixed/cat.glb'
 import character_head from '@/assets/images/fixed/character_head.glb'
 import running_jerry from '@/assets/images/fixed/running_jerry.glb'
 import pac_man from '@/assets/images/fixed/pac_man.glb'
 import inosuke_mask from '@/assets/images/fixed/inosuke_mask.glb'
+
 export default {
     data() {
         return {
-            cards: [
-                { name: '최민지', title: '조장', description: '네 맞습니다 LMS 조의 조장입니다.', modelUrl: cat },
-                { name: '이민재', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: character_head },
-                { name: '이근', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: running_jerry },
-                { name: '이현석', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: pac_man },
-                { name: '이재호', title: '조원', description: '네 맞습니다 LMS 조의 조원입니다.', modelUrl: inosuke_mask },
+            teamMembers: [
+                { name: '최민지', title: '조장', description: 'brings over a decade of experience in design and branding to our team.', modelUrl: cat },
+                { name: '이민재', title: '조원', description: ' is a full-stack wizard with a passion for clean, efficient code.', modelUrl: character_head },
+                { name: '이근', title: '조원', description: ' s insights drive our user- centered design approach.', modelUrl: running_jerry },
+                { name: '이현석', title: '조원', description: ' keeps our projects on track and our clients happy.', modelUrl: pac_man },
+                { name: '이재호', title: '조원', description: ' crafts compelling stories that resonate with our audience.', modelUrl: inosuke_mask },
             ],
             scenes: [],
         }
     },
     mounted() {
         this.$nextTick(() => {
-            this.cards.forEach((card, index) => {
+            this.teamMembers.forEach((member, index) => {
                 this.initThreeJS(index);
+            });
+            AOS.init({
+                duration: 1000,
+                once: true,
+                offset: 200,
             });
         });
     },
@@ -60,15 +77,14 @@ export default {
             controls.dampingFactor = 0.25;
             controls.enableZoom = true;
 
-            if (this.cards[index].modelUrl === character_head) {
+            if (this.teamMembers[index].modelUrl === character_head) {
                 camera.position.set(0, 0.5, 100);
                 controls.target.set(0, 0.5, 0);
-            } else if (this.cards[index].modelUrl === pac_man) {
+            } else if (this.teamMembers[index].modelUrl === pac_man) {
                 camera.position.set(0, 0, 60);
-            }  else if (this.cards[index].modelUrl === running_jerry) {
+            } else if (this.teamMembers[index].modelUrl === running_jerry) {
                 camera.position.set(0, 0, 34);
-            }
-            else {
+            } else {
                 camera.position.set(0, 2, 6);
                 controls.target.set(0, 0, 0);
             }
@@ -82,7 +98,7 @@ export default {
 
             const loader = new GLTFLoader();
             loader.load(
-                this.cards[index].modelUrl,
+                this.teamMembers[index].modelUrl,
                 (gltf) => {
                     scene.add(gltf.scene);
                     gltf.scene.scale.set(1.5, 1.5, 1.5);
@@ -91,7 +107,7 @@ export default {
                     const center = box.getCenter(new THREE.Vector3());
                     gltf.scene.position.set(-center.x, -center.y, -center.z);
 
-                    if (this.cards[index].modelUrl !== character_head) {
+                    if (this.teamMembers[index].modelUrl !== character_head) {
                         gltf.scene.position.y += 0.2;
                     }
 
@@ -108,12 +124,11 @@ export default {
 
                     const animate = () => {
                         requestAnimationFrame(animate);
-                        if (this.cards[index].modelUrl == running_jerry) {
+                        if (this.teamMembers[index].modelUrl == running_jerry) {
                             mixer.update(0.02);
                         } else {
                             pivotPoint.rotation.y += 0.01;
                         }
-
 
                         controls.update();
                         renderer.render(scene, camera);
@@ -127,6 +142,10 @@ export default {
             );
 
             this.scenes.push({ scene, camera, renderer, controls });
+        },
+        getAnimation(index) {
+            const animations = ['fade-up', 'fade-down', 'fade-right', 'fade-left'];
+            return animations[index % animations.length];
         }
     },
     beforeUnmount() {
@@ -141,40 +160,47 @@ export default {
 
 <style scoped>
 .page-container {
-    background-color: #ffffff; /* 전체 배경 색상을 흰색으로 설정 */
-    min-height: 100vh; /* 전체 화면 높이 설정 */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    margin: 0 auto;
-    padding: 20px;
+    background-color: #f0f4f8;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+.header {
+    text-align: center;
+    padding: 60px 0;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: white;
+}
+
+.header h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    padding: 60px;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
 }
 
-.content-wrapper {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 100px;
+.team-member {
+    background-color: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
 }
 
-.content-wrapper.right {
-    flex-direction: row-reverse;
+.team-member:hover {
+    transform: translateY(-10px);
 }
 
 .model-container {
-    width: 300px;
-    height: 400px;
+    height: 300px;
+    background-color: #edf2f7;
 }
 
 .character-container {
@@ -182,47 +208,46 @@ export default {
     height: 100%;
 }
 
-.text-content {
-    padding: 0 20px;
-    max-width: 300px;
+.member-info {
+    padding: 20px;
 }
 
-.text-content h3 {
+.member-info h2 {
+    font-size: 1.5em;
+    color: #2d3748;
     margin-bottom: 5px;
-    color: #333;
 }
 
-.text-content h4 {
-    margin-bottom: 10px;
-    color: #666;
+.member-info h3 {
+    font-size: 1em;
+    color: #718096;
+    margin-bottom: 15px;
 }
 
-.text-content p {
-    color: #444;
+.member-info p {
+    color: #4a5568;
+    line-height: 1.6;
 }
 
-.text-content.text-right {
-    text-align: right;
+.footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #2d3748;
+    color: white;
 }
 
 @media (max-width: 768px) {
-
-    .content-wrapper,
-    .content-wrapper.right {
-        flex-direction: column;
-        align-items: center;
+    .team-grid {
+        grid-template-columns: 1fr;
+        padding: 30px;
     }
 
-    .model-container {
-        width: 100%;
-        max-width: 300px;
-        margin-bottom: 20px;
+    .header {
+        padding: 40px 20px;
     }
 
-    .text-content,
-    .text-content.text-right {
-        text-align: center;
-        padding: 0;
+    .header h1 {
+        font-size: 2em;
     }
 }
 </style>
