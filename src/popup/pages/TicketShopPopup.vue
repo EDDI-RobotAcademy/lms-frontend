@@ -53,15 +53,17 @@
 </template>
 
 <script>
+const authenticationModule = "authenticationModule";
+import { mapActions, mapState } from "vuex";
 export default {
   name: 'TicketShopPopup',
   data() {
     return {
       dialog: true,
       ticketOptions: [
-        { amount: 10, price: 1000, loading: false, icon: 'mdi-ticket-outline'},
-        { amount: 30, price: 2700, loading: false, icon: 'mdi-ticket-outline'},
-        { amount: 50, price: 4000, loading: false, icon: 'mdi-ticket-outline'},
+        { amount: 10, price: 1000, loading: false, icon: 'mdi-ticket-outline' },
+        { amount: 30, price: 2700, loading: false, icon: 'mdi-ticket-outline' },
+        { amount: 50, price: 78000, loading: false, icon: 'mdi-ticket-outline' },
       ],
       snackbar: false,
       snackbarText: '',
@@ -69,11 +71,39 @@ export default {
     }
   },
   methods: {
+    ...mapActions(authenticationModule, ['requestRedisPurchaseTicketToDjango','requestRedisUpdateCherryToDjango', 'requestRedisGetCherryToDjango']),
     async purchaseTickets(option) {
       option.loading = true;
       try {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        this.showSuccessMessage(option);
+        const userToken = localStorage.getItem("userToken");
+        const ticketInfo = {
+          usertoken: userToken,
+          ticket: option.amount,
+        }
+        const cherryInfo = {
+          usertoken: userToken,
+          cherry: option.price,
+        }
+        if (userToken) {
+          try {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            const checkCherry = await this.requestRedisGetCherryToDjango(userToken.trim());
+            console.log("옵션 프라이스", option.price)
+            console.log("체크 체리", checkCherry.cherry)
+            if (checkCherry.cherry > option.price)
+            {
+              await this.requestRedisUpdateCherryToDjango(cherryInfo);
+              await this.requestRedisPurchaseTicketToDjango(ticketInfo);
+              this.showSuccessMessage(option);
+            }
+            else
+            {
+              this.showFailedMessage(option, checkCherry.cherry);
+            }
+          } catch (error) {
+            console.error("Error requestUserToken:", error);
+          }
+        }
       } catch (error) {
         console.error('구매 중 오류 발생:', error);
         this.showErrorMessage();
@@ -88,6 +118,12 @@ export default {
     showSuccessMessage(option) {
       this.snackbarText = `🎉 ${option.amount}개의 티켓 구매가 완료되었습니다!`;
       this.snackbarColor = 'success';
+      this.snackbar = true;
+    },
+    showFailedMessage(option, userCherry) {
+      const cherryNeeded = option.price - userCherry;
+      this.snackbarText = `🍒 ${cherryNeeded}개의 체리가 부족합니다.`;
+      this.snackbarColor = 'warning';
       this.snackbar = true;
     },
     showErrorMessage() {
@@ -134,5 +170,4 @@ export default {
   background-position: center;
   margin-right: 5px;
 }
-
 </style>
