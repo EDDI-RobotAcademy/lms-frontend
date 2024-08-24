@@ -1,37 +1,138 @@
 <template>
-    <div class="shop-popup">
-      <div class="shop-content">
-        <h2>티켓 상점</h2>
-        <button @click="$emit('close')">닫기</button>
+  <div>
+    <v-dialog v-model="dialog" max-width="600px" transition="dialog-bottom-transition">
+      <v-card class="ticket-shop" color="#F6F1EB">
+        <v-card-title class="headline text-center py-4 relative mt-10" style="color: #444444;">
+          티켓 상점
+        </v-card-title>
+        <v-btn icon @click="closeDialog" class="close-btn" text>
+          <v-icon color="#444444">mdi-close</v-icon>
+        </v-btn>
+        <v-card-text class="pt-6">
+          <v-container>
+            <v-row justify="center">
+              <v-col cols="12" sm="4" v-for="option in ticketOptions" :key="option.amount">
+                <v-hover v-slot="{ hover }">
+                  <v-card class="ticket-option mx-auto" :class="{ 'on-hover': hover }" :elevation="hover ? 12 : 2"
+                    height="100%" color="#FFFCF7">
+                    <v-card-text class="text-center">
+                      <v-avatar size="80" color="#BAA28C" class="mb-4">
+                        <v-icon dark x-large>{{ option.icon }}</v-icon>
+                      </v-avatar>
+                      <h2 class="text-h4 font-weight-bold mb-6">{{ option.amount }}개</h2>
+                      <v-chip color="secondary" label x-large class="px-4 mb-4">
+                        <v-icon left> cherry </v-icon>
+                        {{ option.price }}개
+                      </v-chip>
+                      <v-btn block x-large color="#444444" :loading="option.loading" @click="purchaseTickets(option)"
+                        class="mt-4">
+                        구매
+                      </v-btn>
+                    </v-card-text>
+                  </v-card>
+                </v-hover>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" top rounded="pill">
+      <div class="d-flex align-center">
+        <v-icon left color="white">mdi-check-circle</v-icon>
+        {{ snackbarText }}
       </div>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    name: 'ShopPopup',
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar = false">
+          닫기
+        </v-btn>
+      </template>
+    </v-snackbar>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'TicketShopPopup',
+  data() {
+    return {
+      dialog: true,
+      ticketOptions: [
+        { amount: 10, price: 1000, loading: false, icon: 'mdi-ticket-outline'},
+        { amount: 30, price: 2700, loading: false, icon: 'mdi-ticket-outline'},
+        { amount: 50, price: 4000, loading: false, icon: 'mdi-ticket-outline'},
+      ],
+      snackbar: false,
+      snackbarText: '',
+      snackbarColor: 'success',
+    }
+  },
+  methods: {
+    async purchaseTickets(option) {
+      option.loading = true;
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        this.showSuccessMessage(option);
+      } catch (error) {
+        console.error('구매 중 오류 발생:', error);
+        this.showErrorMessage();
+      } finally {
+        option.loading = false;
+      }
+    },
+    closeDialog() {
+      this.dialog = false;
+      this.$emit('close');
+    },
+    showSuccessMessage(option) {
+      this.snackbarText = `🎉 ${option.amount}개의 티켓 구매가 완료되었습니다!`;
+      this.snackbarColor = 'success';
+      this.snackbar = true;
+    },
+    showErrorMessage() {
+      this.snackbarText = '구매 중 오류가 발생했습니다. 다시 시도해 주세요.';
+      this.snackbarColor = 'error';
+      this.snackbar = true;
+    }
   }
-  </script>
-  
-  <style scoped>
-  .shop-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .shop-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 500px;
-    width: 90%;
-  }
-  </style>
+}
+</script>
+
+<style scoped>
+.ticket-shop {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.ticket-option {
+  transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+  border-radius: 15px !important;
+}
+
+.ticket-option.on-hover {
+  transform: translateY(-10px);
+}
+
+.relative {
+  position: relative;
+}
+
+.close-btn {
+  position: absolute !important;
+  top: 8px;
+  right: 8px;
+  background-color: transparent !important;
+}
+
+.cherry {
+  width: 20px;
+  height: 20px;
+  background-image: url('~@/assets/images/fixed/cherry.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-right: 5px;
+}
+
+</style>
