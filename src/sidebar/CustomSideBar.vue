@@ -14,9 +14,9 @@
         <div class="nav-button"><i class="fas fa-heart"></i><span>구현 예정</span></div>
         <div class="nav-button"><i class="fas fa-chart-line"></i><span>구현 예정</span></div>
         <div class="nav-button"><i class="fas fa-fire"></i><span>구현 예정</span></div>
-        <div class="nav-button"><i class="fas fa-magic"></i><span>구현 예정</span></div>
+        <div class="nav-button"><i class="fas fa-magic"></i><span>출석체크</span></div>
         <hr>
-        <div class="nav-button"><i class="fas fa-gem"></i><span>구현 예정</span></div>
+        <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
         <div id="nav-content-highlight"></div>
       </div>
       <div id="nav-footer">
@@ -25,15 +25,17 @@
             <img src="https://gravatar.com/avatar/4474ca42d303761c2901fa819c4f2547" alt="User Avatar">
           </div>
           <div id="nav-footer-titlebox">
-            <span id="nav-footer-title">{{ nickname }}</span>
+            <span id="nav-footer-title">
+              <span class="nickname" @click="goToMyPage">{{ nickname }}</span>
+            </span>
             <div class="user-stats">
               <span class="stat-container">
                 <i class="mdi mdi-ticket stat-icon"></i>
-                <span class="stat-count">{{ ticket }}</span>
+                <span class="stat-count" @click="toggleShopPopup('ticket')">{{ ticket }}</span>
               </span>
               <span class="stat-container">
                 <span class="cherry stat-icon"></span>
-                <span class="stat-count">{{ cherry }}</span>
+                <span class="stat-count" @click="toggleShopPopup('cherry')">{{ cherry }}</span>
               </span>
             </div>
           </div>
@@ -43,6 +45,9 @@
         </div>
       </div>
     </nav>
+    <ShopPopup v-if="currentShop === 'main'" @close="closeShopPopup" />
+    <CherryShopPopup v-if="currentShop === 'cherry'" @close="closeShopPopup" />
+    <TicketShopPopup v-if="currentShop === 'ticket'" @close="closeShopPopup" />
   </div>
 </template>
 
@@ -50,8 +55,16 @@
 const authenticationModule = "authenticationModule";
 import { mapActions, mapState } from "vuex";
 import router from "@/router";
+import ShopPopup from "@/popup/pages/ShopPopup.vue";
+import CherryShopPopup from "@/popup/pages/CherryShopPopup.vue";
+import TicketShopPopup from "@/popup/pages/TicketShopPopup.vue";
 
 export default ({
+  components: {
+    ShopPopup,
+    CherryShopPopup,
+    TicketShopPopup,
+  },
   data() {
     return {
       isExpanded: false,
@@ -59,6 +72,7 @@ export default ({
       nickname: '',
       ticket: '',
       cherry: '',
+      currentShop: null,
     }
   },
   methods: {
@@ -68,6 +82,12 @@ export default ({
     },
     goToMyPage() {
       router.push('/account/mypage')
+    },
+    toggleShopPopup(shop) {
+      this.currentShop = this.currentShop === shop ? null : shop;
+    },
+    closeShopPopup() {
+      this.currentShop = null;
     },
     async requestUserToken() {
       const userToken = localStorage.getItem("userToken");
@@ -106,10 +126,10 @@ export default ({
 
 <style>
 @font-face {
-    font-family: 'Danjo-bold-Regular';
-    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-1@1.1/Danjo-bold-Regular.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
+  font-family: 'GangwonEduPowerExtraBoldA';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEduPowerExtraBoldA.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
 }
 
 :root {
@@ -121,7 +141,7 @@ export default ({
   --navbar-light-primary: #f5f6fa;
   --navbar-light-secondary: #eff1f3;
   --navbar-hover-color: rgba(68, 68, 68, 0.1);
-  --font-family: 'Danjo-bold-Regular', sans-serif;
+  --font-family: 'GangwonEduPowerExtraBoldA', sans-serif;
   --text-color: #444444;
 }
 
@@ -278,10 +298,20 @@ body {
   color: var(--text-color);
 }
 
+#nav-footer-title .nickname {
+  display: inline-block;
+  cursor: pointer;
+}
+
+#nav-footer-title .nickname:hover {
+  text-decoration: underline;
+}
+
 .user-stats {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: -2px;
 }
 
 .stat-container {
@@ -289,25 +319,32 @@ body {
   align-items: center;
 }
 
+
 .stat-icon {
-  width: 16px;
-  height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin-right: 4px;
+  position: relative;
 }
 
 .cherry {
+  width: 20px;
+  height: 20px;
   background-image: url('~@/assets/images/fixed/cherry.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  top: -2px;
 }
 
+
 .mdi-ticket {
+  width: 24px;
+  height: 24px;
   font-size: 16px;
   color: var(--text-color);
+  top: -2px;
 }
 
 .stat-count {
@@ -315,6 +352,11 @@ body {
   font-weight: bold;
   font-size: 12px;
   line-height: 1;
+}
+
+.stat-count:hover {
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .mypage-button {
