@@ -22,7 +22,7 @@
       <div id="nav-footer">
         <div id="nav-footer-heading">
           <div id="nav-footer-avatar">
-            <img src="https://gravatar.com/avatar/4474ca42d303761c2901fa819c4f2547" alt="User Avatar">
+            <img src="https://avatars.githubusercontent.com/u/583231?v=4" alt="User Avatar">
           </div>
           <div id="nav-footer-titlebox">
             <span id="nav-footer-title">
