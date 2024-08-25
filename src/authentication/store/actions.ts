@@ -31,6 +31,9 @@ export type AuthenticationActions = {
     requestRedisUpdateCherryToDjango(
         context: ActionContext<AuthenticationState, any>, cherryInfo: { usertoken: string, cherry: string }
     ): Promise<any>
+    requestRedisPurchaseCherryToDjango(
+        context: ActionContext<AuthenticationState, any>, cherryInfo: { usertoken: string, cherry: string }
+    ): Promise<any>
 }
 
 const actions: AuthenticationActions = {
@@ -144,6 +147,18 @@ const actions: AuthenticationActions = {
             return response.data;
         } catch (error) {
             console.error('requestRedisUpdateCherryToDjango() 오류 발생', error);
+            throw error;
+        }
+    },
+    async requestRedisPurchaseCherryToDjango(context: ActionContext<AuthenticationState, any>, cherryInfo: { usertoken: string, cherry: string }
+    ): Promise<any> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post(
+                '/google_oauth/redis-purchase-cherry', cherryInfo)
+
+            return response.data;
+        } catch (error) {
+            console.error('requestRedisPurchaseCherryToDjango() 오류 발생', error);
             throw error;
         }
     },
