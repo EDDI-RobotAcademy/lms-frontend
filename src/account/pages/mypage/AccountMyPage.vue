@@ -45,11 +45,19 @@
                 </div>
             </div>
         </div>
-        <password-change-popup 
-            v-if="isPasswordChangePopupVisible" 
-            :userEmail="UserEmail"
-            @close="hidePasswordChangePopup"
-        />
+        <password-change-popup v-if="isPasswordChangePopupVisible" :userEmail="UserEmail"
+            @close="hidePasswordChangePopup" @password-changed="handlePasswordChanged" />
+        <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" top rounded="pill">
+            <div class="d-flex align-center">
+                <v-icon left color="white">{{ snackbarIcon }}</v-icon>
+                {{ snackbarText }}
+            </div>
+            <template v-slot:action="{ attrs }">
+                <v-btn text v-bind="attrs" @click="snackbar = false">
+                    닫기
+                </v-btn>
+            </template>
+        </v-snackbar>
     </div>
 </template>
 
@@ -69,6 +77,10 @@ export default {
             ticket: '',
             cherry: '',
             isPasswordChangePopupVisible: false,
+            snackbar: false,
+            snackbarText: '',
+            snackbarColor: 'success',
+            snackbarIcon: 'mdi-check-circle',
         }
     },
     methods: {
@@ -105,6 +117,16 @@ export default {
         },
         hidePasswordChangePopup() {
             this.isPasswordChangePopupVisible = false;
+        },
+        handlePasswordChanged() {
+            this.hidePasswordChangePopup();
+            this.showSuccessMessage('비밀번호가 성공적으로 변경되었습니다.');
+        },
+        showSuccessMessage(message) {
+            this.snackbarText = message;
+            this.snackbarColor = 'success';
+            this.snackbarIcon = 'mdi-check-circle';
+            this.snackbar = true;
         },
     },
     mounted() {

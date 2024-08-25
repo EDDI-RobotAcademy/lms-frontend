@@ -47,18 +47,6 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-
-        <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" top rounded="pill">
-            <div class="d-flex align-center">
-                <v-icon left color="white">{{ snackbarIcon }}</v-icon>
-                {{ snackbarText }}
-            </div>
-            <template v-slot:action="{ attrs }">
-                <v-btn text v-bind="attrs" @click="snackbar = false">
-                    닫기
-                </v-btn>
-            </template>
-        </v-snackbar>
     </div>
 </template>
 
@@ -80,10 +68,6 @@ export default {
             newPassword: '',
             confirmPassword: '',
             loading: false,
-            snackbar: false,
-            snackbarText: '',
-            snackbarColor: 'success',
-            snackbarIcon: 'mdi-check-circle',
             email: this.userEmail,
             passwordRules: [
                 { text: '최소 10자', met: false, shake: false },
@@ -129,8 +113,7 @@ export default {
                         this.$refs.form.validate();
                     } else {
                         await this.requestChangePasswordToDjango(newAccountInfo);
-                        await new Promise(resolve => setTimeout(resolve, 1500));
-                        this.showSuccessMessage();
+                        this.$emit('password-changed');
                         this.closeDialog();
                     }
                 } catch (error) {
@@ -154,17 +137,8 @@ export default {
             this.dialog = false;
             this.$emit('close');
         },
-        showSuccessMessage() {
-            this.snackbarText = '비밀번호가 성공적으로 변경되었습니다.';
-            this.snackbarColor = 'success';
-            this.snackbarIcon = 'mdi-check-circle';
-            this.snackbar = true;
-        },
         showErrorMessage(message) {
-            this.snackbarText = message;
-            this.snackbarColor = 'error';
-            this.snackbarIcon = 'mdi-alert-circle';
-            this.snackbar = true;
+            this.$emit('show-error', message);
         }
     }
 }
