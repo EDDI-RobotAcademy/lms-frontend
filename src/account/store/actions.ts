@@ -10,6 +10,7 @@ export type AccountActions = {
     requestCreateNewSocialAccountToDjango(context: ActionContext<AccountState, any>,email: string): Promise<void>
     requestEmailLoginTypeToDjango(context: ActionContext<AccountState, any>,email: string): Promise<void>
     requestNickNameDuplicationCheckToDjango(context: ActionContext<AccountState, any>,nickname: string): Promise<boolean>
+    requestChangePasswordToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string}): Promise<boolean>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
@@ -76,6 +77,16 @@ const actions: AccountActions = {
         const response = await axiosInst.djangoAxiosInst.post(
             '/account/nickname-duplication-check', { nickname })
         return response.data.isNickNameDuplicate
+    },
+    async requestChangePasswordToDjango(context: ActionContext<AccountState, any>,
+        accountInfo: { email: string, password: string }): Promise<boolean> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post('/account/change-new-password', accountInfo);
+            return response.data.success
+        } catch (error) {
+            console.error('requestChangePasswordToDjango 실패', error);
+            throw error;
+        }
     },
 };
 

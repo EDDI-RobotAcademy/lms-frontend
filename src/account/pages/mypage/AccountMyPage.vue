@@ -14,6 +14,10 @@
                         <h4>이메일</h4>
                         <p class="value">{{ UserEmail }}</p>
                     </div>
+                    <div class="info-item">
+                        <h4>비밀번호</h4>
+                        <button @click="showPasswordChangePopup">비밀번호 변경</button>
+                    </div>
                 </div>
                 <div class="info-card activity-info">
                     <div class="info-item">
@@ -41,21 +45,30 @@
                 </div>
             </div>
         </div>
+        <password-change-popup 
+            v-if="isPasswordChangePopupVisible" 
+            :userEmail="UserEmail"
+            @close="hidePasswordChangePopup"
+        />
     </div>
 </template>
 
 <script>
 import { mapActions } from "vuex";
-
+import PasswordChangePopup from '@/popup/pages/ChangePassword.vue';
 const authenticationModule = "authenticationModule";
 
 export default {
+    components: {
+        PasswordChangePopup
+    },
     data() {
         return {
             UserEmail: '',
             nickname: '',
             ticket: '',
             cherry: '',
+            isPasswordChangePopupVisible: false,
         }
     },
     methods: {
@@ -86,6 +99,12 @@ export default {
                     console.error("Error requestUserToken:", error);
                 }
             }
+        },
+        showPasswordChangePopup() {
+            this.isPasswordChangePopupVisible = true;
+        },
+        hidePasswordChangePopup() {
+            this.isPasswordChangePopupVisible = false;
         },
     },
     mounted() {
