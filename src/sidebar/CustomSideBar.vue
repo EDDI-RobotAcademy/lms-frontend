@@ -2,12 +2,12 @@
   <div id="app">
     <nav id="nav-bar">
       <div id="nav-header">
-        <a id="nav-title" target="_blank">
-          <i class="fab fa-codepen"></i>MENU BOARD
+        <a id="nav-title" target="_blank" @click="goToHome()">
+          <i class="fab fa-codepen"></i>CORNER-CHEF
         </a>
       </div>
       <div id="nav-content">
-        <div class="nav-button"><i class="fas fa-palette"></i><span>New Chat</span></div>
+        <div class="nav-button start-new-chat" @click="goToChatbot()"><i class="fas fa-palette"></i><span>Start New Chat</span></div>
         <hr>
         <div class="nav-button"><i class="fas fa-images"></i><span>Recents</span></div>
         <div class="nav-button"><i class="fas fa-thumbtack"></i><span>토글 구현 예정</span></div>
@@ -83,6 +83,12 @@ export default ({
     goToMyPage() {
       router.push('/account/mypage')
     },
+    goToChatbot(){
+      router.push('/chatbot/page')
+    },
+    goToHome(){
+      router.push('/')
+    },
     toggleShopPopup(shop) {
       this.currentShop = this.currentShop === shop ? null : shop;
     },
@@ -150,6 +156,10 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--text-color);
+}
+
+.v-card-title,
+.v-btn{
   font-family: var(--font-family);
 }
 
@@ -186,7 +196,8 @@ body {
   z-index: 2;
   display: flex;
   align-items: center;
-  padding-left: 16px;
+  justify-content: center; /* 추가: 중앙 정렬을 위해 */
+  padding: 0 16px; /* 변경: 왼쪽 패딩 제거 및 오른쪽 패딩 추가 */
 }
 
 #nav-title {
@@ -199,6 +210,7 @@ body {
 
 #nav-bar:hover #nav-title {
   opacity: 1;
+  cursor: pointer;
 }
 
 #nav-content {
@@ -215,7 +227,7 @@ body {
 
 .nav-button {
   position: relative;
-  margin-left: 16px;
+  border-radius: 14px;
   height: 54px;
   display: flex;
   align-items: center;
@@ -371,6 +383,10 @@ body {
 
 .mypage-button:hover {
   background-color: var(--navbar-hover-color);
+}
+.nav-button.start-new-chat {
+  color: #EF6F2D;
+  font-weight: bold;
 }
 
 .mypage-button .mdi-cog {
