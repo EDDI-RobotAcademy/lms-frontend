@@ -36,11 +36,11 @@
                 <div class="info-card possession-info">
                     <div class="info-item">
                         <h4>체리</h4>
-                        <p class="value">{{ cherry }}</p>
+                        <p class="itemvalue" @click="toggleShopPopup('cherry')">{{ cherry }}</p>
                     </div>
                     <div class="info-item">
                         <h4>이용권</h4>
-                        <p class="value">{{ ticket }}</p>
+                        <p class="itemvalue" @click="toggleShopPopup('ticket')">{{ ticket }}</p>
                     </div>
                 </div>
             </div>
@@ -58,17 +58,23 @@
                 </v-btn>
             </template>
         </v-snackbar>
+        <CherryShopPopup v-if="currentShop === 'cherry'" @close="closeShopPopup" />
+        <TicketShopPopup v-if="currentShop === 'ticket'" @close="closeShopPopup" />
     </div>
 </template>
 
 <script>
 import { mapActions } from "vuex";
 import PasswordChangePopup from '@/popup/pages/ChangePassword.vue';
+import CherryShopPopup from "@/popup/pages/CherryShopPopup.vue";
+import TicketShopPopup from "@/popup/pages/TicketShopPopup.vue";
 const authenticationModule = "authenticationModule";
 
 export default {
     components: {
-        PasswordChangePopup
+        PasswordChangePopup,
+        CherryShopPopup,
+        TicketShopPopup,
     },
     data() {
         return {
@@ -81,6 +87,7 @@ export default {
             snackbarText: '',
             snackbarColor: 'success',
             snackbarIcon: 'mdi-check-circle',
+            currentShop: null,
         }
     },
     methods: {
@@ -90,6 +97,12 @@ export default {
             'requestRedisGetCherryToDjango',
             'requestRedisGetNicknameToDjango'
         ]),
+        toggleShopPopup(shop) {
+            this.currentShop = this.currentShop === shop ? null : shop;
+        },
+        closeShopPopup() {
+            this.currentShop = null;
+        },
         async requestUserToken() {
             const userToken = localStorage.getItem("userToken");
             if (userToken) {
@@ -212,6 +225,11 @@ h3 {
     margin-bottom: 20px;
 }
 
+.itemvalue:hover{
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 h4 {
     opacity: 0.5;
     font-size: 16px;
@@ -219,7 +237,7 @@ h4 {
     margin-bottom: 5px;
 }
 
-.value {
+.value,.itemvalue {
     font-size: 18px;
     color: #333;
 }
