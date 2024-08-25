@@ -7,7 +7,8 @@
         </a>
       </div>
       <div id="nav-content">
-        <div class="nav-button start-new-chat" @click="goToChatbot()"><i class="fas fa-palette"></i><span>Start New Chat</span></div>
+        <div class="nav-button start-new-chat" @click="goToChatbot()"><i class="fas fa-palette"></i><span>Start New
+            Chat</span></div>
         <hr>
         <div class="nav-button"><i class="fas fa-images"></i><span>Recents</span></div>
         <div class="nav-button"><i class="fas fa-thumbtack"></i><span>토글 구현 예정</span></div>
@@ -22,7 +23,14 @@
       <div id="nav-footer">
         <div id="nav-footer-heading">
           <div id="nav-footer-avatar">
-            <img src="https://avatars.githubusercontent.com/u/583231?v=4" alt="User Avatar">
+            <img v-if="ProfileImg == '0'" class="avatar" :src="require('@/assets/images/fixed/img0.jpg')"
+              alt="Default Avatar">
+            <img v-if="ProfileImg == '1'" class="avatar" :src="require('@/assets/images/fixed/img1.jpg')"
+              alt="Default Avatar">
+            <img v-if="ProfileImg == '2'" class="avatar" :src="require('@/assets/images/fixed/img2.jpg')"
+              alt="Default Avatar">
+            <img v-if="ProfileImg == '3'" class="avatar" :src="require('@/assets/images/fixed/img3.jpg')"
+              alt="Default Avatar">
           </div>
           <div id="nav-footer-titlebox">
             <span id="nav-footer-title">
@@ -53,7 +61,8 @@
 
 <script>
 const authenticationModule = "authenticationModule";
-import { mapActions, mapState } from "vuex";
+const accountModule = "accountModule";
+import { mapActions, mapState} from "vuex";
 import router from "@/router";
 import ShopPopup from "@/popup/pages/ShopPopup.vue";
 import CherryShopPopup from "@/popup/pages/CherryShopPopup.vue";
@@ -73,9 +82,11 @@ export default ({
       ticket: '',
       cherry: '',
       currentShop: null,
+      ProfileImg: '',
     }
   },
   methods: {
+    ...mapActions(accountModule, ['requestGetProfileImgToDjango']),
     ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango', 'requestRedisGetTicketToDjango', 'requestRedisGetCherryToDjango', 'requestRedisGetNicknameToDjango']),
     goToLogin() {
       router.push('/account/login')
@@ -83,10 +94,10 @@ export default ({
     goToMyPage() {
       router.push('/account/mypage')
     },
-    goToChatbot(){
+    goToChatbot() {
       router.push('/chatbot/page')
     },
-    goToHome(){
+    goToHome() {
       router.push('/')
     },
     toggleShopPopup(shop) {
@@ -102,6 +113,8 @@ export default ({
         try {
           const email = await this.requestRedisGetEmailToDjango(userToken.trim());
           this.UserEmail = email.EmailInfo;
+          const Img = await this.requestGetProfileImgToDjango(email.EmailInfo)
+          this.ProfileImg = Img
           const ticket = await this.requestRedisGetTicketToDjango(userToken.trim());
           this.ticket = ticket.ticket;
           const nickname = await this.requestRedisGetNicknameToDjango(userToken.trim());
@@ -159,7 +172,7 @@ body {
 }
 
 .v-card-title,
-.v-btn{
+.v-btn {
   font-family: var(--font-family);
 }
 
@@ -196,8 +209,10 @@ body {
   z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: center; /* 추가: 중앙 정렬을 위해 */
-  padding: 0 16px; /* 변경: 왼쪽 패딩 제거 및 오른쪽 패딩 추가 */
+  justify-content: center;
+  /* 추가: 중앙 정렬을 위해 */
+  padding: 0 16px;
+  /* 변경: 왼쪽 패딩 제거 및 오른쪽 패딩 추가 */
 }
 
 #nav-title {
@@ -384,6 +399,7 @@ body {
 .mypage-button:hover {
   background-color: var(--navbar-hover-color);
 }
+
 .nav-button.start-new-chat {
   color: #EF6F2D;
   font-weight: bold;

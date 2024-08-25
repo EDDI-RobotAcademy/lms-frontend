@@ -3,18 +3,19 @@ import { AccountState } from "./states"
 import axiosInst from "@/utility/axiosInstance"
 
 export type AccountActions = {
-    requestEmailDuplicationCheckToDjango(context: ActionContext<AccountState, any>,email: string): Promise<boolean>
+    requestEmailDuplicationCheckToDjango(context: ActionContext<AccountState, any>, email: string): Promise<boolean>
     requestCreateNewAccountToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string, nickname: string }): Promise<void>
     requestNormalLoginToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
     requestGoogleLoginToDjango(context: ActionContext<AccountState, any>, googleInfo: { credential: string, clientId: string }): Promise<any>
-    requestCreateNewSocialAccountToDjango(context: ActionContext<AccountState, any>,email: string): Promise<void>
-    requestEmailLoginTypeToDjango(context: ActionContext<AccountState, any>,email: string): Promise<void>
-    requestNickNameDuplicationCheckToDjango(context: ActionContext<AccountState, any>,nickname: string): Promise<boolean>
-    requestChangePasswordToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string}): Promise<boolean>
+    requestCreateNewSocialAccountToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
+    requestEmailLoginTypeToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
+    requestNickNameDuplicationCheckToDjango(context: ActionContext<AccountState, any>, nickname: string): Promise<boolean>
+    requestChangePasswordToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<boolean>
+    requestGetProfileImgToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
-        context: ActionContext<AccountState, any>,email: string
+        context: ActionContext<AccountState, any>, email: string
     ): Promise<boolean> {
 
         const response = await axiosInst.djangoAxiosInst.post(
@@ -55,7 +56,7 @@ const actions: AccountActions = {
         }
     },
     async requestCreateNewSocialAccountToDjango(
-        context: ActionContext<AccountState, any>,email: string
+        context: ActionContext<AccountState, any>, email: string
     ): Promise<void> {
 
         const response = await axiosInst.djangoAxiosInst.post(
@@ -63,7 +64,7 @@ const actions: AccountActions = {
         return response.data
     },
     async requestEmailLoginTypeToDjango(
-        context: ActionContext<AccountState, any>,email: string
+        context: ActionContext<AccountState, any>, email: string
     ): Promise<void> {
 
         const response = await axiosInst.djangoAxiosInst.post(
@@ -71,7 +72,7 @@ const actions: AccountActions = {
         return response.data
     },
     async requestNickNameDuplicationCheckToDjango(
-        context: ActionContext<AccountState, any>,nickname: string
+        context: ActionContext<AccountState, any>, nickname: string
     ): Promise<boolean> {
 
         const response = await axiosInst.djangoAxiosInst.post(
@@ -87,6 +88,16 @@ const actions: AccountActions = {
             console.error('requestChangePasswordToDjango 실패', error);
             throw error;
         }
+    },
+    async requestGetProfileImgToDjango(
+        { commit, state }: ActionContext<AccountState, any>, email: string
+    ): Promise<void> {
+
+        const response = await axiosInst.djangoAxiosInst.post(
+            '/account/profile-img', { email })
+
+        commit('REQUEST_IS_PROFILEIMG_TO_DJANGO', response.data.isProfileImg);
+        return response.data.isProfileImg
     },
 };
 
