@@ -7,8 +7,10 @@
         </a>
       </div>
       <div id="nav-content">
-        <div class="nav-button start-new-chat" @click="goToChatbot()"><i class="fas fa-palette"></i><span>Start New
-            Chat</span></div>
+        <div class="nav-button start-new-chat" @click="goToChatbot()">
+          <i class="fas fa-palette"></i>
+          <span>Start New Chat</span>
+        </div>
         <hr>
         <div class="nav-button"><i class="fas fa-images"></i><span>Recents</span></div>
         <div class="nav-button"><i class="fas fa-thumbtack"></i><span>토글 구현 예정</span></div>
@@ -20,37 +22,45 @@
         <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
         <div id="nav-content-highlight"></div>
       </div>
-      <div id="nav-footer">
-        <div id="nav-footer-heading">
-          <div id="nav-footer-avatar">
-            <img v-if="ProfileImg == '0'" class="avatar" :src="require('@/assets/images/fixed/img0.jpg')"
-              alt="Default Avatar">
-            <img v-if="ProfileImg == '1'" class="avatar" :src="require('@/assets/images/fixed/img1.jpg')"
-              alt="Default Avatar">
-            <img v-if="ProfileImg == '2'" class="avatar" :src="require('@/assets/images/fixed/img2.jpg')"
-              alt="Default Avatar">
-            <img v-if="ProfileImg == '3'" class="avatar" :src="require('@/assets/images/fixed/img3.jpg')"
-              alt="Default Avatar">
-          </div>
-          <div id="nav-footer-titlebox">
-            <span id="nav-footer-title">
-              <span class="nickname" @click="goToMyPage">{{ nickname }}</span>
-            </span>
-            <div class="user-stats">
-              <span class="stat-container">
-                <i class="mdi mdi-ticket stat-icon"></i>
-                <span class="stat-count" @click="toggleShopPopup('ticket')">{{ ticket }}</span>
-              </span>
-              <span class="stat-container">
-                <span class="cherry stat-icon"></span>
-                <span class="stat-count" @click="toggleShopPopup('cherry')">{{ cherry }}</span>
-              </span>
+      <div v-if="this.isAuthenticated">
+        <div id="nav-footer">
+          <div id="nav-footer-heading">
+            <div id="nav-footer-avatar">
+              <img v-if="ProfileImg == '0'" class="avatar" :src="require('@/assets/images/fixed/img0.jpg')"
+                alt="Default Avatar">
+              <img v-if="ProfileImg == '1'" class="avatar" :src="require('@/assets/images/fixed/img1.jpg')"
+                alt="Default Avatar">
+              <img v-if="ProfileImg == '2'" class="avatar" :src="require('@/assets/images/fixed/img2.jpg')"
+                alt="Default Avatar">
+              <img v-if="ProfileImg == '3'" class="avatar" :src="require('@/assets/images/fixed/img3.jpg')"
+                alt="Default Avatar">
             </div>
+            <div id="nav-footer-titlebox">
+              <span id="nav-footer-title">
+                <span class="nickname" @click="goToMyPage">{{ nickname }}</span>
+              </span>
+              <div class="user-stats">
+                <span class="stat-container">
+                  <i class="mdi mdi-ticket stat-icon"></i>
+                  <span class="stat-count" @click="toggleShopPopup('ticket')">{{ ticket }}</span>
+                </span>
+                <span class="stat-container">
+                  <span class="cherry stat-icon"></span>
+                  <span class="stat-count" @click="toggleShopPopup('cherry')">{{ cherry }}</span>
+                </span>
+              </div>
+            </div>
+            <button @click="goToMyPage" class="mypage-button">
+              <i class="mdi mdi-cog"></i>
+            </button>
           </div>
-          <button @click="goToMyPage" class="mypage-button">
-            <i class="mdi mdi-cog"></i>
-          </button>
         </div>
+      </div>
+      <div v-if="!this.isAuthenticated">
+        <button @click="goToLogin" class="nav-button goto-login">
+          <i class="fas fa-magic"></i>
+          <span>로그인하러 가기</span>    
+        </button>
       </div>
     </nav>
     <ShopPopup v-if="currentShop === 'main'" @close="closeShopPopup" />
@@ -83,10 +93,11 @@ export default ({
       cherry: '',
       currentShop: null,
       ProfileImg: '',
+      userToken: localStorage.getItem("userToken")
     }
   },
   methods: {
-    ...mapActions(accountModule, ['requestGetProfileImgToDjango']),
+    ...mapActions(accountModule, ['requestGetProfileImgToDjango', 'requestLogoutToDjango']),
     ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango', 'requestRedisGetTicketToDjango', 'requestRedisGetCherryToDjango', 'requestRedisGetNicknameToDjango']),
     goToLogin() {
       router.push('/account/login')
@@ -95,7 +106,11 @@ export default ({
       router.push('/account/mypage')
     },
     goToChatbot() {
-      router.push('/chatbot/page')
+      if (this.isAuthenticated){
+        router.push('/chatbot/page')
+      } else {
+        this.goToLogin()
+      }
     },
     goToHome() {
       router.push('/')
@@ -107,8 +122,7 @@ export default ({
       this.currentShop = null;
       location.reload();
     },
-    async requestUserToken() {
-      const userToken = localStorage.getItem("userToken");
+    async requestUserToken(userToken) {
       if (userToken) {
         this.$store.state.authenticationModule.isAuthenticated = true;
         try {
@@ -132,9 +146,8 @@ export default ({
     ...mapState(authenticationModule, ["isAuthenticated"]),
   },
   mounted() {
-    const userToken = localStorage.getItem("userToken");
-    if (userToken) {
-      this.requestUserToken();
+    if (this.userToken) {
+      this.requestUserToken(this.userToken);
     }
     else {
       console.log("mounted 비회원")
@@ -404,6 +417,14 @@ body {
 .nav-button.start-new-chat {
   color: #EF6F2D;
   font-weight: bold;
+}
+.nav-button.goto-login {
+  color: #681600;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 .mypage-button .mdi-cog {
