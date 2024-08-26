@@ -25,6 +25,9 @@
                         <h4>비밀번호</h4>
                         <button @click="showPasswordChangePopup">비밀번호 변경</button>
                     </div>
+                    <div class="info-item">
+                        <p @click="signOut">로그아웃</p>
+                    </div>
                 </div>
                 <div class="info-card activity-info">
                     <div class="info-item">
@@ -78,6 +81,7 @@ import PasswordChangePopup from '@/popup/pages/ChangePassword.vue';
 import CherryShopPopup from "@/popup/pages/CherryShopPopup.vue";
 import TicketShopPopup from "@/popup/pages/TicketShopPopup.vue";
 import ChoiseProfilePopup from "@/popup/pages/ChoiseProfileImg.vue";
+import router from "@/router";
 
 const authenticationModule = "authenticationModule";
 const accountModule = "accountModule";
@@ -102,6 +106,7 @@ export default {
             snackbarIcon: 'mdi-check-circle',
             currentShop: null,
             profileNumber: '',
+            userToken: localStorage.getItem("userToken")
         }
     },
     methods: {
@@ -109,7 +114,8 @@ export default {
             'requestRedisGetEmailToDjango',
             'requestRedisGetTicketToDjango',
             'requestRedisGetCherryToDjango',
-            'requestRedisGetNicknameToDjango'
+            'requestRedisGetNicknameToDjango',
+            'requestLogoutToDjango'
         ]),
         ...mapActions(accountModule, [
             'requestGetProfileImgToDjango',
@@ -121,8 +127,7 @@ export default {
             this.currentShop = null;
             location.reload();
         },
-        async requestUserToken() {
-            const userToken = localStorage.getItem("userToken");
+        async requestUserToken(userToken) {
             if (userToken) {
                 console.log("유저 토큰 확인");
                 this.$store.state.authenticationModule.isAuthenticated = true;
@@ -174,11 +179,15 @@ export default {
             this.snackbarIcon = 'mdi-check-circle';
             this.snackbar = true;
         },
+        signOut () {
+        this.requestLogoutToDjango(this.userToken)
+        alert('로그아웃 성공')
+        router.push('/')
+      },
     },
     mounted() {
-        const userToken = localStorage.getItem("userToken");
-        if (userToken) {
-            this.requestUserToken();
+        if (this.userToken) {
+            this.requestUserToken(this.userToken);
         } else {
             console.log("mounted 비회원")
         }

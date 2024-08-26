@@ -2,6 +2,7 @@ import { ActionContext } from "vuex"
 import { AuthenticationState } from "./states"
 import { AxiosResponse } from "axios"
 import axiosInst from "@/utility/axiosInstance"
+import { REQUEST_IS_AUTHENTICATED_TO_DJANGO } from './mutation-types'
 
 export type AuthenticationActions = {
     requestAddRedisAccessTokenToDjango(
@@ -34,6 +35,10 @@ export type AuthenticationActions = {
     requestRedisPurchaseCherryToDjango(
         context: ActionContext<AuthenticationState, any>, cherryInfo: { usertoken: string, cherry: string }
     ): Promise<any>
+    requestLogoutToDjango(
+        context: ActionContext<AuthenticationState, any>,
+        userToken: string
+    ): Promise<void>
 }
 
 const actions: AuthenticationActions = {
@@ -162,6 +167,21 @@ const actions: AuthenticationActions = {
             throw error;
         }
     },
-}
+    async requestLogoutToDjango(
+        context: ActionContext<AuthenticationState, any>, userToken: string): Promise<void> {
+        try {
+            const res = await axiosInst.djangoAxiosInst.post('/google_oauth/logout', {userToken: userToken})
+
+            console.log('res:', res.data.isSuccess)
+            if (res.data.isSuccess === true) {
+                context.commit(REQUEST_IS_AUTHENTICATED_TO_DJANGO, false)
+            }
+        } catch (error) {
+            console.error('requestLogoutToDjango() 중 에러 발생:', error)
+            throw error
+        }
+        localStorage.removeItem("userToken")
+    }
+};
 
 export default actions;
