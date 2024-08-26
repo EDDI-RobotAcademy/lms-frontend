@@ -13,6 +13,7 @@ export type AccountActions = {
     requestChangePasswordToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<boolean>
     requestGetProfileImgToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
     requestSetProfileImgToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, img_id: string }): Promise<void>
+    requestAccountCreateTimeToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
@@ -104,6 +105,14 @@ const actions: AccountActions = {
             '/account/set-profile-img', accountInfo)
 
         return response.data.setProfileImg
+    },
+    async requestAccountCreateTimeToDjango(
+        context: ActionContext<AccountState, any>, email: string
+    ): Promise<void> {
+
+        const response = await axiosInst.djangoAxiosInst.post(
+            '/account/account-create-time', { email })
+        return response.data.getCreateTime
     },
 };
 
