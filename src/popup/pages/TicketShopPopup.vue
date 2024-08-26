@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="dialog" max-width="600px" transition="dialog-bottom-transition">
+    <v-dialog v-model="dialog" max-width="600px" transition="dialog-bottom-transition" persistent>
       <v-card class="ticket-shop" color="#F6F1EB">
         <v-card-title class="headline text-center py-4 relative mt-10" style="color: #444444;">
           티켓 상점
