@@ -119,6 +119,7 @@ export default {
         },
         closeShopPopup() {
             this.currentShop = null;
+            location.reload();
         },
         async requestUserToken() {
             const userToken = localStorage.getItem("userToken");
