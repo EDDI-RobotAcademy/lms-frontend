@@ -32,7 +32,7 @@
                 <div class="info-card activity-info">
                     <div class="info-item">
                         <h4>가입일</h4>
-                        <p class="value">2019-09-17 15:20</p>
+                        <p class="value">{{ createTime }}</p>
                     </div>
                     <div class="info-item">
                         <h4>최근 로그인</h4>
@@ -98,6 +98,7 @@ export default {
             nickname: '',
             ticket: '',
             cherry: '',
+            createTime: '',
             isPasswordChangePopupVisible: false,
             isChoiseProfilePopupVisible: false,
             snackbar: false,
@@ -118,7 +119,7 @@ export default {
             'requestLogoutToDjango'
         ]),
         ...mapActions(accountModule, [
-            'requestGetProfileImgToDjango',
+            'requestGetProfileImgToDjango','requestAccountCreateTimeToDjango'
         ]),
         toggleShopPopup(shop) {
             this.currentShop = this.currentShop === shop ? null : shop;
@@ -146,6 +147,9 @@ export default {
 
                     const cherry = await this.requestRedisGetCherryToDjango(userToken.trim());
                     this.cherry = cherry.cherry;
+
+                    const createTimeResponse = await this.requestAccountCreateTimeToDjango(email.EmailInfo)
+                    this.createTime = createTimeResponse.split("T")[0];
                 } catch (error) {
                     console.error("Error requestUserToken:", error);
                 }
