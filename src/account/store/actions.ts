@@ -12,6 +12,7 @@ export type AccountActions = {
     requestNickNameDuplicationCheckToDjango(context: ActionContext<AccountState, any>, nickname: string): Promise<boolean>
     requestChangePasswordToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<boolean>
     requestGetProfileImgToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
+    requestSetProfileImgToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, img_id: string }): Promise<void>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
@@ -89,15 +90,20 @@ const actions: AccountActions = {
             throw error;
         }
     },
-    async requestGetProfileImgToDjango(
-        { commit, state }: ActionContext<AccountState, any>, email: string
-    ): Promise<void> {
+    async requestGetProfileImgToDjango(context: ActionContext<AccountState, any>,
+        email: string): Promise<void> {
 
         const response = await axiosInst.djangoAxiosInst.post(
-            '/account/profile-img', { email })
+            '/account/get-profile-img', { email })
 
-        commit('REQUEST_IS_PROFILEIMG_TO_DJANGO', response.data.isProfileImg);
-        return response.data.isProfileImg
+        return response.data.getProfileImg
+    },
+    async requestSetProfileImgToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, img_id: string }): Promise<void> {
+
+        const response = await axiosInst.djangoAxiosInst.post(
+            '/account/set-profile-img', accountInfo)
+
+        return response.data.setProfileImg
     },
 };
 
