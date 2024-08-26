@@ -54,7 +54,7 @@ export default {
       maxLength: 200,
       isChatUsed: false,
       assistantMessage:'',
-      isLoadingResponse: false,  // 답변 로딩 상태
+      isLoadingResponse: false
     }
   },
   methods: {
@@ -64,7 +64,7 @@ export default {
       this.messages.push(userMessage);
       this.userInput = '';
       try {
-        this.isLoadingMessage = true; // 로딩 시작
+        this.isLoadingMessage = true;
         const response = await openai.chat.completions.create({
           model: 'gpt-3.5-turbo',
           messages: [...this.messages, userMessage],
@@ -84,7 +84,7 @@ export default {
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
       } finally {
-      this.isLoadingMessage = false; // 로딩 끝
+      this.isLoadingMessage = false;
       }
     },
     formatMessage(content) {
