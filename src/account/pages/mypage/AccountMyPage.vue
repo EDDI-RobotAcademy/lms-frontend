@@ -2,8 +2,15 @@
     <div class="dashboard">
         <div class="content-wrapper">
             <div class="info-grid">
-                <div class="info-card profile-card">
-                    <img class="avatar" src="https://avatars.githubusercontent.com/u/583231?v=4" alt="Avatar">
+                <div class="info-card profile-card" @click="showChoiseProfilePopup">
+                    <img v-if="profileNumber == '0'" class="avatar" :src="require('@/assets/images/fixed/img0.jpg')"
+                        alt="Default Avatar">
+                    <img v-if="profileNumber == '1'" class="avatar" :src="require('@/assets/images/fixed/img1.jpg')"
+                        alt="Default Avatar">
+                    <img v-if="profileNumber == '2'" class="avatar" :src="require('@/assets/images/fixed/img2.jpg')"
+                        alt="Default Avatar">
+                    <img v-if="profileNumber == '3'" class="avatar" :src="require('@/assets/images/fixed/img3.jpg')"
+                        alt="Default Avatar">
                 </div>
                 <div class="info-card user-info">
                     <div class="info-item">
@@ -47,6 +54,8 @@
         </div>
         <password-change-popup v-if="isPasswordChangePopupVisible" :userEmail="UserEmail"
             @close="hidePasswordChangePopup" @password-changed="handlePasswordChanged" />
+        <choise-profile-popup v-if="isChoiseProfilePopupVisible" :userEmail="UserEmail" @close="hideChoiseProfilePopup"
+            @profile-changed="handleProfileChanged" />
         <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" top rounded="pill">
             <div class="d-flex align-center">
                 <v-icon left color="white">{{ snackbarIcon }}</v-icon>
@@ -68,13 +77,16 @@ import { mapActions } from "vuex";
 import PasswordChangePopup from '@/popup/pages/ChangePassword.vue';
 import CherryShopPopup from "@/popup/pages/CherryShopPopup.vue";
 import TicketShopPopup from "@/popup/pages/TicketShopPopup.vue";
-const authenticationModule = "authenticationModule";
+import ChoiseProfilePopup from "@/popup/pages/ChoiseProfileImg.vue";
 
+const authenticationModule = "authenticationModule";
+const accountModule = "accountModule";
 export default {
     components: {
         PasswordChangePopup,
         CherryShopPopup,
         TicketShopPopup,
+        ChoiseProfilePopup,
     },
     data() {
         return {
@@ -83,11 +95,13 @@ export default {
             ticket: '',
             cherry: '',
             isPasswordChangePopupVisible: false,
+            isChoiseProfilePopupVisible: false,
             snackbar: false,
             snackbarText: '',
             snackbarColor: 'success',
             snackbarIcon: 'mdi-check-circle',
             currentShop: null,
+            profileNumber: '',
         }
     },
     methods: {
@@ -96,6 +110,9 @@ export default {
             'requestRedisGetTicketToDjango',
             'requestRedisGetCherryToDjango',
             'requestRedisGetNicknameToDjango'
+        ]),
+        ...mapActions(accountModule, [
+            'requestGetProfileImgToDjango',
         ]),
         toggleShopPopup(shop) {
             this.currentShop = this.currentShop === shop ? null : shop;
@@ -111,6 +128,9 @@ export default {
                 try {
                     const email = await this.requestRedisGetEmailToDjango(userToken.trim());
                     this.UserEmail = email.EmailInfo;
+
+                    const profileImg = await this.requestGetProfileImgToDjango(email.EmailInfo)
+                    this.profileNumber = profileImg
 
                     const ticket = await this.requestRedisGetTicketToDjango(userToken.trim());
                     this.ticket = ticket.ticket;
@@ -131,9 +151,21 @@ export default {
         hidePasswordChangePopup() {
             this.isPasswordChangePopupVisible = false;
         },
+        showChoiseProfilePopup() {
+            this.isChoiseProfilePopupVisible = true;
+        },
+        hideChoiseProfilePopup() {
+            this.isChoiseProfilePopupVisible = false;
+            location.reload();
+        },
         handlePasswordChanged() {
             this.hidePasswordChangePopup();
             this.showSuccessMessage('비밀번호가 성공적으로 변경되었습니다.');
+        },
+        handleProfileChanged(newProfileIndex) {
+            this.$store.commit('accountModule/SET_PROFILE_IMG', newProfileIndex);
+            this.hideChoiseProfilePopup();
+            this.showSuccessMessage('프로필 이미지가 성공적으로 변경되었습니다.');
         },
         showSuccessMessage(message) {
             this.snackbarText = message;
@@ -160,7 +192,6 @@ export default {
     font-weight: normal;
     font-style: normal;
 }
-
 
 .dashboard {
     min-height: 100vh;
@@ -213,7 +244,6 @@ export default {
     object-fit: cover;
 }
 
-
 h3 {
     font-size: 20px;
     color: #333;
@@ -225,7 +255,7 @@ h3 {
     margin-bottom: 20px;
 }
 
-.itemvalue:hover{
+.itemvalue:hover {
     text-decoration: underline;
     cursor: pointer;
 }
@@ -237,7 +267,8 @@ h4 {
     margin-bottom: 5px;
 }
 
-.value,.itemvalue {
+.value,
+.itemvalue {
     font-size: 18px;
     color: #333;
 }
