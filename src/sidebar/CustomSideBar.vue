@@ -107,7 +107,7 @@ export default ({
       router.push('/account/mypage')
     },
     goToChatbot() {
-      if (this.isAuthenticated){
+      if (this.isLoggedIn){
         router.push('/chatbot/page')
       } else {
         this.goToLogin()
