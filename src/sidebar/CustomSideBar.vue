@@ -22,7 +22,7 @@
         <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
         <div id="nav-content-highlight"></div>
       </div>
-      <div v-if="this.isAuthenticated">
+      <div v-if="this.isLoggedIn">
         <div id="nav-footer">
           <div id="nav-footer-heading">
             <div id="nav-footer-avatar">
@@ -56,7 +56,7 @@
           </div>
         </div>
       </div>
-      <div v-if="!this.isAuthenticated">
+      <div v-if="!this.isLoggedIn">
         <button @click="goToLogin" class="nav-button goto-login">
           <i class="fas fa-magic"></i>
           <span>로그인하러 가기</span>    
@@ -93,7 +93,8 @@ export default ({
       cherry: '',
       currentShop: null,
       ProfileImg: '',
-      userToken: localStorage.getItem("userToken")
+      userToken: localStorage.getItem("userToken"),
+      isLoggedIn: false,
     }
   },
   methods: {
@@ -124,7 +125,6 @@ export default ({
     },
     async requestUserToken(userToken) {
       if (userToken) {
-        this.$store.state.authenticationModule.isAuthenticated = true;
         try {
           const email = await this.requestRedisGetEmailToDjango(userToken.trim());
           this.UserEmail = email.EmailInfo;
@@ -136,14 +136,12 @@ export default ({
           this.nickname = nickname.nickname;
           const cherry = await this.requestRedisGetCherryToDjango(userToken.trim());
           this.cherry = cherry.cherry;
+          this.isLoggedIn = true;
         } catch (error) {
           console.error("Error requestUserToken:", error);
         }
       }
     },
-  },
-  computed: {
-    ...mapState(authenticationModule, ["isAuthenticated"]),
   },
   mounted() {
     if (this.userToken) {
