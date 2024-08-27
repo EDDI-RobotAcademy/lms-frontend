@@ -26,7 +26,9 @@
                         <button @click="showPasswordChangePopup">비밀번호 변경</button>
                     </div>
                     <div class="info-item">
-                        <p @click="signOut">로그아웃</p>
+                        <h4>로그아웃</h4>
+                        <button @click="signOut">로그아웃</button>
+
                     </div>
                 </div>
                 <div class="info-card activity-info">
