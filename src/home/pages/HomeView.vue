@@ -9,17 +9,12 @@
           </div>
         </div>
         <div class="chat-input">
-          <input 
-            type="text" 
-            placeholder="가지고 계신 재료를 입력해주시면 근사한 레시피를 알려드릴게요!" 
-            v-model="userInput" 
-            @keyup.enter="sendMessage"
-            :disabled="isChatUsed"
-          >
+          <input type="text" placeholder="가지고 계신 재료를 입력해주시면 근사한 레시피를 알려드릴게요!" v-model="userInput"
+            @keyup.enter="sendMessage" :disabled="isChatUsed">
           <button @click="sendMessage" :disabled="isChatUsed">🍳</button>
         </div>
       </div>
-      
+
       <div class="info">
         <p>서울시 금천구 가산동 670 18층 | PaikJongWon@theborn.com | Tel. 0507-1353-7302</p>
       </div>
@@ -30,41 +25,41 @@
       </div>
 
       <v-dialog v-model="dialogForMember" class="pop-up-dialog">
-      <v-card>
-        <v-card-title class="headline grey lighten-2">
-          <v-text class="head-icon">🤗</v-text><br>
-          <v-text class="head-text">더 많은 레시피 물어보기</v-text>
-        </v-card-title>
-        <v-card-text class="pa-4">
-          <v-text class="middle-text">채팅 페이지에서 CORNER-CHEF와<br>더 많은 이야기를 나눠보세요!</v-text>
-        </v-card-text>
-        <v-card-actions class="dialog-botton">
-          <v-spacer></v-spacer>
-          <v-btn text @click="goToChatbot" class="button-go-page">레시피 만들러 가기</v-btn>
-          <v-btn icon @click="closeDialog" class="close-btn" text>
-          <v-icon color="#444444">mdi-close</v-icon>
-        </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <v-dialog v-model="dialogForNonMember" class="pop-up-dialog">
-      <v-card>
-        <v-card-title class="headline grey lighten-2">
-          <v-text class="head-icon">🎁</v-text><br>
-          <v-text class="head-text">신규 회원가입 혜택!</v-text>
-        </v-card-title>
-        <v-card-text class="pa-4">
-          <v-text class="middle-text">신규 회원가입 혜택을 지금 바로 받아보세요!</v-text>
-        </v-card-text>
-        <v-card-actions class="dialog-botton">
-          <v-spacer></v-spacer>
-          <v-btn text @click="goToLogin" class="button-go-page" >3초만에 가입하고 혜택 받기</v-btn>
-          <v-btn icon @click="closeDialog" class="close-btn" text>
-          <v-icon color="#444444">mdi-close</v-icon>
-        </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+        <v-card>
+          <v-card-title class="headline grey lighten-2">
+            <v-text class="head-icon">🤗</v-text><br>
+            <v-text class="head-text">더 많은 레시피 물어보기</v-text>
+          </v-card-title>
+          <v-card-text class="pa-4">
+            <v-text class="middle-text">채팅 페이지에서 CORNER-CHEF와<br>더 많은 이야기를 나눠보세요!</v-text>
+          </v-card-text>
+          <v-card-actions class="dialog-botton">
+            <v-spacer></v-spacer>
+            <v-btn text @click="goToChatbot" class="button-go-page">레시피 만들러 가기</v-btn>
+            <v-btn icon @click="closeDialog" class="close-btn" text>
+              <v-icon color="#444444">mdi-close</v-icon>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="dialogForNonMember" class="pop-up-dialog">
+        <v-card>
+          <v-card-title class="headline grey lighten-2">
+            <v-text class="head-icon">🎁</v-text><br>
+            <v-text class="head-text">신규 회원가입 혜택!</v-text>
+          </v-card-title>
+          <v-card-text class="pa-4">
+            <v-text class="middle-text">신규 회원가입 혜택을 지금 바로 받아보세요!</v-text>
+          </v-card-text>
+          <v-card-actions class="dialog-botton">
+            <v-spacer></v-spacer>
+            <v-btn text @click="goToLogin" class="button-go-page">3초만에 가입하고 혜택 받기</v-btn>
+            <v-btn icon @click="closeDialog" class="close-btn" text>
+              <v-icon color="#444444">mdi-close</v-icon>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
     </main>
   </div>
@@ -88,10 +83,11 @@ export default {
       messages: [],
       userInput: '',
       isChatUsed: false,
-      assistantMessage:'',
+      assistantMessage: '',
       isLoadingMessage: false,
       dialogForMember: false,
-      dialogForNonMember: false
+      dialogForNonMember: false,
+      refreshFlag: false,
     }
   },
   computed: {
@@ -113,21 +109,21 @@ export default {
         this.assistantMessage = response.choices[0]?.message?.content || 'Sorry, an error occurred.';
         this.messages.push({ role: 'assistant', content: this.assistantMessage });
         this.isChatUsed = true; // 채팅 기능 사용 후 비활성화
-    
+
       } catch (error) {
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
       } finally {
         this.isLoadingMessage = false;
         console.log('authentication:', this.isAuthenticated)
-        if (this.isAuthenticated){
+        if (this.isAuthenticated) {
           setTimeout(() => {
-              this.dialogForMember = true;
-            }, 3000);
-        } else if (!this.isAuthenticated) { 
+            this.dialogForMember = true;
+          }, 3000);
+        } else if (!this.isAuthenticated) {
           setTimeout(() => {
-          this.dialogForNonMember = true;
-           }, 3000);
+            this.dialogForNonMember = true;
+          }, 3000);
         }
       }
     },
@@ -143,7 +139,22 @@ export default {
     closeDialog() {
       this.dialogForMember = false; // 다이얼로그 닫기
     },
-  }
+    refreshPage() {
+      this.refreshFlag = true;
+      this.$nextTick(() => {
+        this.refreshFlag = false;
+      });
+    },
+  },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      if (from.path === '/account/login' || from.path === '/account/mypage') {
+        vm.$nextTick(() => {
+          window.location.reload();
+        });
+      }
+    });
+  },
 };
 </script>
 
@@ -179,20 +190,23 @@ main {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* 이 부분을 유지합니다 */
+  justify-content: space-between;
+  /* 이 부분을 유지합니다 */
   align-items: center;
   position: relative;
   z-index: 2;
   height: 100vh;
-  padding: 50px 0; /* 상하 패딩을 동일하게 설정 */
+  padding: 50px 0;
+  /* 상하 패딩을 동일하게 설정 */
   width: 100%;
-  box-sizing: border-box; /* 패딩을 높이에 포함 */
+  box-sizing: border-box;
+  /* 패딩을 높이에 포함 */
 }
 
 h1 {
   font-size: 4rem;
   color: #fff;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   margin-bottom: 2rem;
   text-align: center;
   width: 100%;
@@ -202,7 +216,8 @@ h1 {
   width: 80%;
   max-width: 600px;
   height: 60vh;
-  background-color: rgba(255, 255, 255, 0.5);  /* 마지막 0.5는 투명도에 관한 설정*/
+  background-color: rgba(255, 255, 255, 0.5);
+  /* 마지막 0.5는 투명도에 관한 설정*/
   border-radius: 10px;
   overflow: hidden;
   display: flex;
@@ -220,7 +235,8 @@ h1 {
 .chat-input {
   display: flex;
   padding: 1rem;
-  background-color: rgba(255, 255, 255, 1);  /* 마지막 1은 투명도에 관한 설정*/
+  background-color: rgba(255, 255, 255, 1);
+  /* 마지막 1은 투명도에 관한 설정*/
 }
 
 .chat-input input {
@@ -229,8 +245,10 @@ h1 {
   border: 1px solid #ccc;
   border-radius: 20px;
   margin-right: 0.5rem;
-  text-align: left; /* 왼쪽 정렬 */
-  background-color: #fff; /* 기본 배경색 */
+  text-align: left;
+  /* 왼쪽 정렬 */
+  background-color: #fff;
+  /* 기본 배경색 */
 }
 
 .chat-input button {
@@ -263,17 +281,19 @@ h1 {
   flex-direction: column;
 }
 
-.user, .assistant {
-  margin: 5px 0; /* 위아래 간격 */
+.user,
+.assistant {
+  margin: 5px 0;
+  /* 위아래 간격 */
   padding: 10px;
   border-radius: 10px;
   max-width: 100%;
   word-wrap: break-word;
-  
+
 }
 
 .user {
-  text-align: right; 
+  text-align: right;
   background-color: #ffb357;
   align-self: flex-end;
 }
@@ -322,43 +342,56 @@ h1 {
   border-left-color: #09f;
   animation: spin 1s ease infinite;
 }
-.pop-up-dialog{
+
+.pop-up-dialog {
   text-align: center;
   width: 400px;
-  border-radius: 50px; /* 둥글게 만들기 */
+  border-radius: 50px;
+  /* 둥글게 만들기 */
   max-height: 800px;
   height: 300px;
   padding: 20px;
 
 }
+
 .head-icon {
   position: relative;
   top: 5px;
   font-size: 40px;
 }
+
 .head-text {
   position: relative;
   top: -5px;
   font-size: 25px;
   font-weight: bold;
 }
+
 .middle-text {
-  position: relative; /* 상대 위치 설정 */
-  top: -10px; /* 위로 이동 */
+  position: relative;
+  /* 상대 위치 설정 */
+  top: -10px;
+  /* 위로 이동 */
   text-align: center;
   font-size: 15px;
 }
-.dialog-botton{
+
+.dialog-botton {
   align-self: center;
   color: white;
 
 }
-.button-go-page{
-  font-weight:lighter;
-  background-color: rgb(55, 55, 55); /* 버튼 배경색 */
-  text-decoration: white; /* 버튼 텍스트 색 */
-  border-radius: 10px; /* 버튼 모서리 둥글게 */
-  padding: 13px 15px; /* 버튼 패딩 */
+
+.button-go-page {
+  font-weight: lighter;
+  background-color: rgb(55, 55, 55);
+  /* 버튼 배경색 */
+  text-decoration: white;
+  /* 버튼 텍스트 색 */
+  border-radius: 10px;
+  /* 버튼 모서리 둥글게 */
+  padding: 13px 15px;
+  /* 버튼 패딩 */
 }
 
 .close-btn {
@@ -367,13 +400,14 @@ h1 {
   right: 8px;
   background-color: transparent !important;
 }
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
 </style>
-
