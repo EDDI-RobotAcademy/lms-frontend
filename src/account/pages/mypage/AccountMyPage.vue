@@ -61,17 +61,6 @@
             @close="hidePasswordChangePopup" @password-changed="handlePasswordChanged" />
         <choise-profile-popup v-if="isChoiseProfilePopupVisible" :userEmail="UserEmail" @close="hideChoiseProfilePopup"
             @profile-changed="handleProfileChanged" />
-        <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" top rounded="pill">
-            <div class="d-flex align-center">
-                <v-icon left color="white">{{ snackbarIcon }}</v-icon>
-                {{ snackbarText }}
-            </div>
-            <template v-slot:action="{ attrs }">
-                <v-btn text v-bind="attrs" @click="snackbar = false">
-                    닫기
-                </v-btn>
-            </template>
-        </v-snackbar>
         <CherryShopPopup v-if="currentShop === 'cherry'" @close="closeShopPopup" />
         <TicketShopPopup v-if="currentShop === 'ticket'" @close="closeShopPopup" />
     </div>
@@ -84,9 +73,12 @@ import CherryShopPopup from "@/popup/pages/CherryShopPopup.vue";
 import TicketShopPopup from "@/popup/pages/TicketShopPopup.vue";
 import ChoiseProfilePopup from "@/popup/pages/ChoiseProfileImg.vue";
 import router from "@/router";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 const authenticationModule = "authenticationModule";
 const accountModule = "accountModule";
+
 export default {
     components: {
         PasswordChangePopup,
@@ -103,10 +95,6 @@ export default {
             createTime: '',
             isPasswordChangePopupVisible: false,
             isChoiseProfilePopupVisible: false,
-            snackbar: false,
-            snackbarText: '',
-            snackbarColor: 'success',
-            snackbarIcon: 'mdi-check-circle',
             currentShop: null,
             profileNumber: '',
             userToken: localStorage.getItem("userToken")
@@ -121,7 +109,7 @@ export default {
             'requestLogoutToDjango'
         ]),
         ...mapActions(accountModule, [
-            'requestGetProfileImgToDjango','requestAccountCreateTimeToDjango'
+            'requestGetProfileImgToDjango', 'requestAccountCreateTimeToDjango'
         ]),
         toggleShopPopup(shop) {
             this.currentShop = this.currentShop === shop ? null : shop;
@@ -172,24 +160,26 @@ export default {
         },
         handlePasswordChanged() {
             this.hidePasswordChangePopup();
-            this.showSuccessMessage('비밀번호가 성공적으로 변경되었습니다.');
+            this.showSuccessMessage('비밀번호 변경 완료');
         },
-        handleProfileChanged(newProfileIndex) {
-            this.$store.commit('accountModule/SET_PROFILE_IMG', newProfileIndex);
+        handleProfileChanged() {
             this.hideChoiseProfilePopup();
-            this.showSuccessMessage('프로필 이미지가 성공적으로 변경되었습니다.');
+            this.showSuccessMessage('프로필 이미지 변경 완료');
         },
         showSuccessMessage(message) {
-            this.snackbarText = message;
-            this.snackbarColor = 'success';
-            this.snackbarIcon = 'mdi-check-circle';
-            this.snackbar = true;
+            toast.success(message, {
+                position: toast.POSITION.TOP_RIGHT,
+                autoClose: 3000,
+            });
         },
-        signOut () {
-        this.requestLogoutToDjango(this.userToken)
-        alert('로그아웃 성공')
-        router.push('/')
-      },
+        signOut() {
+            this.requestLogoutToDjango(this.userToken)
+            toast.info('로그아웃 성공', {
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 2000,
+            });
+            router.push('/')
+        },
     },
     mounted() {
         if (this.userToken) {
@@ -302,5 +292,25 @@ h4 {
         transform: none;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     }
+}
+
+:global(.Vue-Toastification__toast) {
+  min-width: 0 !important;
+  width: fit-content !important;
+  max-width: none !important;
+  padding: 10px 15px !important;
+  border-radius: 20px !important;
+}
+
+:global(.Vue-Toastification__toast-body) {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+
+:global(.Vue-Toastification__toast-container) {
+  width: auto !important;
+  max-width: 100% !important;
 }
 </style>
