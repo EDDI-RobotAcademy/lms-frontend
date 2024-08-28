@@ -226,12 +226,7 @@ h1 {
   margin: 0 auto;
 }
 
-.chat-messages {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 10px;
-  margin-bottom: 70px;
-}
+
 
 .chat-input {
   display: flex;
@@ -277,33 +272,39 @@ h1 {
   cursor: not-allowed;
 }
 
-.message-container {
-  display: flex;
-  flex-direction: column;
+.chat-messages {
+  flex: 1; /* 남은 공간을 채우도록 설정 */
+  overflow-y: auto; /* 채팅 내용이 넘칠 때 스크롤 */
+  padding-bottom: 0px;
+  z-index: 50;
 }
 
 .user,
 .assistant {
-  margin: 5px 0;
-  /* 위아래 간격 */
+  font-style: Arial;
   padding: 10px;
-  border-radius: 10px;
-  max-width: 100%;
-  word-wrap: break-word;
-
+  border-radius: 15px;
+  margin-top: 5%;
+  margin-left: 3%;
+  margin-right: 3%;
 }
 
 .user {
-  text-align: right;
-  background-color: #ffb357;
+  background-color: #ffb056;
   align-self: flex-end;
+  width:fit-content;
+  margin-left: auto;
+  box-shadow: 3px 2px 3px rgba(0, 0, 0, 0.1);
+  
 }
 
 .assistant {
-  text-align: left;
-  background-color: #fff6ef;
+  background-color: #fcf3ea;
   align-self: flex-start;
+  width:fit-content;
+  box-shadow: -3px 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 
 .info {
   width: 100%;
