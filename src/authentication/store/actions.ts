@@ -43,7 +43,7 @@ export type AuthenticationActions = {
 
 const actions: AuthenticationActions = {
     async requestAddRedisAccessTokenToDjango(
-        { commit, state }: ActionContext<AuthenticationState, any>, email: string
+        context: ActionContext<AuthenticationState, any>, email: string
     ): Promise<any> {
         try {
             const response = await axiosInst.djangoAxiosInst.post(
@@ -52,19 +52,18 @@ const actions: AuthenticationActions = {
             console.log('userToken:', response.data.userToken)
 
             localStorage.setItem("userToken", response.data.userToken)
-            commit('REQUEST_IS_AUTHENTICATED_TO_DJANGO', true);
             return response.data;
         } catch (error) {
             console.error('Error adding redis access token:', error);
             throw error;
         }
     },
-    async requestRedisGetEmailToDjango(context: ActionContext<AuthenticationState, any>, usertoken: string
+    async requestRedisGetEmailToDjango({ commit, state }: ActionContext<AuthenticationState, any>, usertoken: string
     ): Promise<any> {
         try {
             const response = await axiosInst.djangoAxiosInst.post(
                 '/google_oauth/redis-get-email', { usertoken })
-
+            commit('REQUEST_IS_AUTHENTICATED_TO_DJANGO', true);
             return response.data;
         } catch (error) {
             console.error('requestRedisGetValueToDjango() 오류 발생', error);

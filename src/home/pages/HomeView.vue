@@ -138,6 +138,7 @@ export default {
     },
     closeDialog() {
       this.dialogForMember = false; // 다이얼로그 닫기
+      this.dialogForNonMember = false;
     },
     refreshPage() {
       this.refreshFlag = true;
@@ -326,7 +327,7 @@ h1 {
   align-items: center;
   justify-content: center;
   margin-top: -310px;
-  /* top: -20px; 위로 20px 올림 */
+  top: -10px;
 }
 
 .loading-container p {
@@ -342,16 +343,22 @@ h1 {
   border-left-color: #09f;
   animation: spin 1s ease infinite;
 }
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 
 .pop-up-dialog {
   text-align: center;
   width: 400px;
   border-radius: 50px;
-  /* 둥글게 만들기 */
   max-height: 800px;
   height: 300px;
   padding: 20px;
-
 }
 
 .head-icon {
@@ -369,9 +376,9 @@ h1 {
 
 .middle-text {
   position: relative;
-  /* 상대 위치 설정 */
+ 
   top: -10px;
-  /* 위로 이동 */
+ 
   text-align: center;
   font-size: 15px;
 }
@@ -381,17 +388,12 @@ h1 {
   color: white;
 
 }
-
-.button-go-page {
-  font-weight: lighter;
-  background-color: rgb(55, 55, 55);
-  /* 버튼 배경색 */
-  text-decoration: white;
-  /* 버튼 텍스트 색 */
-  border-radius: 10px;
-  /* 버튼 모서리 둥글게 */
-  padding: 13px 15px;
-  /* 버튼 패딩 */
+.button-go-page{
+  font-weight:lighter;
+  background-color: rgb(55, 55, 55); /* 버튼 배경색 */
+  text-decoration: white; /* 버튼 텍스트 색 */
+  border-radius: 10px; /* 버튼 모서리 둥글게 */
+  padding: 13px 15px; /* 버튼 패딩 */
 }
 
 .close-btn {

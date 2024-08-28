@@ -22,7 +22,7 @@
         <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
         <div id="nav-content-highlight"></div>
       </div>
-      <div v-if="this.isLoggedIn">
+      <div v-if="this.isAuthenticated">
         <div id="nav-footer">
           <div id="nav-footer-heading">
             <div id="nav-footer-avatar">
@@ -56,7 +56,7 @@
           </div>
         </div>
       </div>
-      <div v-if="!this.isLoggedIn">
+      <div v-if="!this.isAuthenticated">
         <button @click="goToLogin" class="nav-button goto-login">
           <i class="fas fa-magic"></i>
           <span>로그인하러 가기</span>    
@@ -94,12 +94,15 @@ export default ({
       currentShop: null,
       ProfileImg: '',
       userToken: localStorage.getItem("userToken"),
-      isLoggedIn: false,
     }
+  },
+  computed: {
+    ...mapState(authenticationModule, ["isAuthenticated"]),
   },
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango', 'requestLogoutToDjango']),
     ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango', 'requestRedisGetTicketToDjango', 'requestRedisGetCherryToDjango', 'requestRedisGetNicknameToDjango']),
+    
     goToLogin() {
       router.push('/account/login')
     },
@@ -107,7 +110,7 @@ export default ({
       router.push('/account/mypage')
     },
     goToChatbot() {
-      if (this.isLoggedIn){
+      if (this.isAuthenticated){
         router.push('/chatbot/page')
       } else {
         this.goToLogin()
@@ -136,7 +139,6 @@ export default ({
           this.nickname = nickname.nickname;
           const cherry = await this.requestRedisGetCherryToDjango(userToken.trim());
           this.cherry = cherry.cherry;
-          this.isLoggedIn = true;
         } catch (error) {
           console.error("Error requestUserToken:", error);
         }

@@ -1,30 +1,29 @@
 import { ActionContext } from "vuex"
-import { AccountState } from "./states"
 import axiosInst from "@/utility/axiosInstance"
 
 export type AccountActions = {
-    requestEmailDuplicationCheckToDjango(context: ActionContext<AccountState, any>, email: string): Promise<boolean>
-    requestCreateNewAccountToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string, nickname: string }): Promise<void>
-    requestNormalLoginToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<void>
-    requestGoogleLoginToDjango(context: ActionContext<AccountState, any>, googleInfo: { credential: string, clientId: string }): Promise<any>
-    requestCreateNewSocialAccountToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
-    requestEmailLoginTypeToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
-    requestNickNameDuplicationCheckToDjango(context: ActionContext<AccountState, any>, nickname: string): Promise<boolean>
-    requestChangePasswordToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, password: string }): Promise<boolean>
-    requestGetProfileImgToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
-    requestSetProfileImgToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, img_id: string }): Promise<void>
-    requestAccountCreateTimeToDjango(context: ActionContext<AccountState, any>, email: string): Promise<void>
+    requestEmailDuplicationCheckToDjango(context: ActionContext<any, any>, email: string): Promise<boolean>
+    requestCreateNewAccountToDjango(context: ActionContext<any, any>, accountInfo: { email: string, password: string, nickname: string }): Promise<void>
+    requestNormalLoginToDjango(context: ActionContext<any, any>, accountInfo: { email: string, password: string }): Promise<void>
+    requestGoogleLoginToDjango(context: ActionContext<any, any>, googleInfo: { credential: string, clientId: string }): Promise<any>
+    requestCreateNewSocialAccountToDjango(context: ActionContext<any, any>, email: string): Promise<void>
+    requestEmailLoginTypeToDjango(context: ActionContext<any, any>, email: string): Promise<void>
+    requestNickNameDuplicationCheckToDjango(context: ActionContext<any, any>, nickname: string): Promise<boolean>
+    requestChangePasswordToDjango(context: ActionContext<any, any>, accountInfo: { email: string, password: string }): Promise<boolean>
+    requestGetProfileImgToDjango(context: ActionContext<any, any>, email: string): Promise<void>
+    requestSetProfileImgToDjango(context: ActionContext<any, any>, accountInfo: { email: string, img_id: string }): Promise<void>
+    requestAccountCreateTimeToDjango(context: ActionContext<any, any>, email: string): Promise<void>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
-        context: ActionContext<AccountState, any>, email: string
+        context: ActionContext<any, any>, email: string
     ): Promise<boolean> {
 
         const response = await axiosInst.djangoAxiosInst.post(
             '/account/email-duplication-check', { email })
         return response.data.isDuplicate
     },
-    async requestCreateNewAccountToDjango(context: ActionContext<AccountState, any>,
+    async requestCreateNewAccountToDjango(context: ActionContext<any, any>,
         accountInfo: { email: string, password: string, nickname: string }): Promise<void> {
         try {
             alert('신규 계정이 생성되었습니다!')
@@ -34,7 +33,7 @@ const actions: AccountActions = {
             throw error
         }
     },
-    async requestNormalLoginToDjango(context: ActionContext<AccountState, any>,
+    async requestNormalLoginToDjango(context: ActionContext<any, any>,
         accountInfo: { email: string, password: string }): Promise<void> {
         try {
             const response = await axiosInst.djangoAxiosInst.post('/account/login', accountInfo);
@@ -45,7 +44,7 @@ const actions: AccountActions = {
         }
     },
     async requestGoogleLoginToDjango(
-        context: ActionContext<AccountState, any>,
+        context: ActionContext<any, any>,
         googleInfo: { credential: string, clientId: string }
     ): Promise<any> {
         try {
@@ -58,7 +57,7 @@ const actions: AccountActions = {
         }
     },
     async requestCreateNewSocialAccountToDjango(
-        context: ActionContext<AccountState, any>, email: string
+        context: ActionContext<any, any>, email: string
     ): Promise<void> {
 
         const response = await axiosInst.djangoAxiosInst.post(
@@ -66,7 +65,7 @@ const actions: AccountActions = {
         return response.data
     },
     async requestEmailLoginTypeToDjango(
-        context: ActionContext<AccountState, any>, email: string
+        context: ActionContext<any, any>, email: string
     ): Promise<void> {
 
         const response = await axiosInst.djangoAxiosInst.post(
@@ -74,14 +73,14 @@ const actions: AccountActions = {
         return response.data
     },
     async requestNickNameDuplicationCheckToDjango(
-        context: ActionContext<AccountState, any>, nickname: string
+        context: ActionContext<any, any>, nickname: string
     ): Promise<boolean> {
 
         const response = await axiosInst.djangoAxiosInst.post(
             '/account/nickname-duplication-check', { nickname })
         return response.data.isNickNameDuplicate
     },
-    async requestChangePasswordToDjango(context: ActionContext<AccountState, any>,
+    async requestChangePasswordToDjango(context: ActionContext<any, any>,
         accountInfo: { email: string, password: string }): Promise<boolean> {
         try {
             const response = await axiosInst.djangoAxiosInst.post('/account/change-new-password', accountInfo);
@@ -91,7 +90,7 @@ const actions: AccountActions = {
             throw error;
         }
     },
-    async requestGetProfileImgToDjango(context: ActionContext<AccountState, any>,
+    async requestGetProfileImgToDjango(context: ActionContext<any, any>,
         email: string): Promise<void> {
 
         const response = await axiosInst.djangoAxiosInst.post(
@@ -99,7 +98,7 @@ const actions: AccountActions = {
 
         return response.data.getProfileImg
     },
-    async requestSetProfileImgToDjango(context: ActionContext<AccountState, any>, accountInfo: { email: string, img_id: string }): Promise<void> {
+    async requestSetProfileImgToDjango(context: ActionContext<any, any>, accountInfo: { email: string, img_id: string }): Promise<void> {
 
         const response = await axiosInst.djangoAxiosInst.post(
             '/account/set-profile-img', accountInfo)
@@ -107,7 +106,7 @@ const actions: AccountActions = {
         return response.data.setProfileImg
     },
     async requestAccountCreateTimeToDjango(
-        context: ActionContext<AccountState, any>, email: string
+        context: ActionContext<any, any>, email: string
     ): Promise<void> {
 
         const response = await axiosInst.djangoAxiosInst.post(
