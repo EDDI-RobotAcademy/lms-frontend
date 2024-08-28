@@ -37,24 +37,16 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-
-    <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" top rounded="pill">
-      <div class="d-flex align-center">
-        <v-icon left color="white">mdi-check-circle</v-icon>
-        {{ snackbarText }}
-      </div>
-      <template v-slot:action="{ attrs }">
-        <v-btn text v-bind="attrs" @click="snackbar = false">
-          닫기
-        </v-btn>
-      </template>
-    </v-snackbar>
   </div>
 </template>
 
 <script>
-const authenticationModule = "authenticationModule";
 import { mapActions, mapState } from "vuex";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+
+const authenticationModule = "authenticationModule";
+
 export default {
   name: 'TicketShopPopup',
   data() {
@@ -65,9 +57,6 @@ export default {
         { amount: 30, price: 2700, loading: false, icon: 'mdi-ticket-outline' },
         { amount: 50, price: 78000, loading: false, icon: 'mdi-ticket-outline' },
       ],
-      snackbar: false,
-      snackbarText: '',
-      snackbarColor: 'success',
     }
   },
   methods: {
@@ -102,6 +91,7 @@ export default {
             }
           } catch (error) {
             console.error("Error requestUserToken:", error);
+            this.showErrorMessage();
           }
         }
       } catch (error) {
@@ -116,20 +106,23 @@ export default {
       this.$emit('close');
     },
     showSuccessMessage(option) {
-      this.snackbarText = `🎉 ${option.amount}개의 티켓 구매가 완료되었습니다!`;
-      this.snackbarColor = 'success';
-      this.snackbar = true;
+      toast.success(`${option.amount}개의 티켓 구매 완료`, {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+      });
     },
     showFailedMessage(option, userCherry) {
       const cherryNeeded = option.price - userCherry;
-      this.snackbarText = `🍒 ${cherryNeeded}개의 체리가 부족합니다.`;
-      this.snackbarColor = 'warning';
-      this.snackbar = true;
+      toast.warn(`🍒 ${cherryNeeded}개의 체리가 부족합니다.`, {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+      });
     },
     showErrorMessage() {
-      this.snackbarText = '구매 중 오류가 발생했습니다. 다시 시도해 주세요.';
-      this.snackbarColor = 'error';
-      this.snackbar = true;
+      toast.error('구매 중 오류가 발생했습니다. 다시 시도해 주세요.', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 3000,
+      });
     }
   }
 }
@@ -169,5 +162,25 @@ export default {
   background-repeat: no-repeat;
   background-position: center;
   margin-right: 5px;
+}
+
+:global(.Vue-Toastification__toast) {
+  min-width: 0 !important;
+  width: fit-content !important;
+  max-width: none !important;
+  padding: 10px 15px !important;
+  border-radius: 20px !important;
+}
+
+:global(.Vue-Toastification__toast-body) {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+
+:global(.Vue-Toastification__toast-container) {
+  width: auto !important;
+  max-width: 100% !important;
 }
 </style>
