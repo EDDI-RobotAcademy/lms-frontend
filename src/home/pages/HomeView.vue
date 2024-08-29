@@ -67,7 +67,7 @@
 
 <script>
 import OpenAI from 'openai';
-import { mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 import router from "@/router";
 const authenticationModule = "authenticationModule";
 
@@ -88,12 +88,29 @@ export default {
       dialogForMember: false,
       dialogForNonMember: false,
       refreshFlag: false,
+      userToken: localStorage.getItem("userToken"),
     }
   },
   computed: {
-    ...mapState(authenticationModule, ["isAuthenticated"])
+    ...mapState(authenticationModule, ["isAuthenticated"]),
+    
+  },
+  mounted() {
+    if (this.userToken) {
+      this.requestUserToken();
+    }
+    else {
+      console.log("mounted 비회원")
+    }
   },
   methods: {
+    ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango']),
+    async requestUserToken() {
+      if (this.userToken) {
+        await this.requestRedisGetEmailToDjango(this.userToken.trim());
+      }
+    },
+
     async sendMessage() {
       if (!this.userInput.trim()) return;
       const userMessage = { role: 'user', content: this.userInput };

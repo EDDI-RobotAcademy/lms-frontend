@@ -126,18 +126,18 @@ export default ({
       this.currentShop = null;
       location.reload();
     },
-    async requestUserToken(userToken) {
-      if (userToken) {
+    async requestUserToken() {
+      if (this.userToken) {
         try {
-          const email = await this.requestRedisGetEmailToDjango(userToken.trim());
+          const email = await this.requestRedisGetEmailToDjango(this.userToken.trim());
           this.UserEmail = email.EmailInfo;
           const Img = await this.requestGetProfileImgToDjango(email.EmailInfo)
           this.ProfileImg = Img
-          const ticket = await this.requestRedisGetTicketToDjango(userToken.trim());
+          const ticket = await this.requestRedisGetTicketToDjango(this.userToken.trim());
           this.ticket = ticket.ticket;
-          const nickname = await this.requestRedisGetNicknameToDjango(userToken.trim());
+          const nickname = await this.requestRedisGetNicknameToDjango(this.userToken.trim());
           this.nickname = nickname.nickname;
-          const cherry = await this.requestRedisGetCherryToDjango(userToken.trim());
+          const cherry = await this.requestRedisGetCherryToDjango(this.userToken.trim());
           this.cherry = cherry.cherry;
         } catch (error) {
           console.error("Error requestUserToken:", error);
@@ -147,7 +147,7 @@ export default ({
   },
   mounted() {
     if (this.userToken) {
-      this.requestUserToken(this.userToken);
+      this.requestUserToken();
     }
     else {
       console.log("mounted 비회원")
