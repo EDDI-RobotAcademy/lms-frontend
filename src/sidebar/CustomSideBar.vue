@@ -26,14 +26,7 @@
         <div id="nav-footer">
           <div id="nav-footer-heading">
             <div id="nav-footer-avatar">
-              <img v-if="ProfileImg == '0'" class="avatar" :src="require('@/assets/images/fixed/img0.jpg')"
-                alt="Default Avatar">
-              <img v-if="ProfileImg == '1'" class="avatar" :src="require('@/assets/images/fixed/img1.jpg')"
-                alt="Default Avatar">
-              <img v-if="ProfileImg == '2'" class="avatar" :src="require('@/assets/images/fixed/img2.jpg')"
-                alt="Default Avatar">
-              <img v-if="ProfileImg == '3'" class="avatar" :src="require('@/assets/images/fixed/img3.jpg')"
-                alt="Default Avatar">
+              <img class="avatar" :src="imageSrc" alt="Default Avatar">
             </div>
             <div id="nav-footer-titlebox">
               <span id="nav-footer-title">
@@ -92,12 +85,15 @@ export default ({
       ticket: '',
       cherry: '',
       currentShop: null,
-      ProfileImg: '',
+      ProfileImg: '_dummy',
       userToken: localStorage.getItem("userToken"),
     }
   },
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated"]),
+    imageSrc() {
+      return require(`@/assets/images/fixed/img${this.ProfileImg}.jpg`);
+    }
   },
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango', 'requestLogoutToDjango']),
