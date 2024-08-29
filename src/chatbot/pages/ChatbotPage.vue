@@ -2,7 +2,7 @@
   <div id="app">
     <main>
       <v-card-title v-if="nicknameTrigger" class="header-text">
-        Hi {{this.nickname}}! Make Reipes with CORNER-CHEF🧑‍🍳
+        Hi {{this.nickname}}! Make Recipes with CORNER-CHEF🧑‍🍳
       </v-card-title>
       <div class="chat-container">
         <div  ref="chatMessages" class="chat-messages">
@@ -25,7 +25,7 @@
           <v-btn @click="toggleSpeechRecognition" :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
             :color="isListening ? '#F2B8B5' : '#333333'" class="mic-button">
           </v-btn>
-          <audio v-if="generatedVoice" :src="audioSrc" controls></audio>
+          <audio v-if="generated" :src="audioSrc" controls></audio>
           <div v-if="isLoadingResponse" class="loading-container">
             <v-progress-circular indeterminate color="primary"></v-progress-circular>
             <p>답변이 생성되는 중입니다...</p>
@@ -68,9 +68,11 @@ const accountModule = 'accountModule';
       messages: [],
       userInput: '',
       generatedVoice: '',
+      generated: false,
       chatbotMessage: null,
       realAssistanatMessage: '',
       showVoiceOptions: false,
+      selectedActor: null,
       voiceActors: ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'],
       profileNumber: '_dummy',
       userToken: localStorage.getItem("userToken")
@@ -186,8 +188,8 @@ const accountModule = 'accountModule';
     },
     async getMessage() {
       while (this.getMessageResponse) {
-        await this.sleep(10000);
         await this.getMessageFromFastAPI();
+        await this.sleep(9000);
         console.log('while assistantMessage : ', this.assistantMessage)
 
         if (this.assistantMessage !== '큐 비었잖아 뭐함?') {
@@ -201,18 +203,17 @@ const accountModule = 'accountModule';
     },
     async getVoice() {
       while (this.getVoiceResponse) {
-        await this.sleep(10000);
+        await this.sleep(9000);
         await this.getVoiceFromFastAPI();
         console.log('while voice : ', this.voice)
 
         if (this.voice !== '큐 비었잖아 뭐함?') {
           break;
         }
-        this.generatedVoice = this.voice
       }
-      this.chatbotMessage = this.assistantMessage.recipe || 'Sorry, an error occurred.';
-      const botMessage = { role: 'assistant', content: this.chatbotMessage };
-      this.messages.push(botMessage);
+      this.generatedVoice = this.voice.audioData
+      this.generated = true;
+      console.log('generatedVoice : ', this.generatedVoice)
 
     },
     async sendMessage() {
@@ -240,14 +241,19 @@ const accountModule = 'accountModule';
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
       } finally {
         this.isLoadingResponse = false;
+        this.generated = false;
       }
+    },
+    async selectVoiceActor(actor) {
+      this.selectedActor = actor; // 선택된 음성 actor 저장
     },
     async onClickTalk (actor) {
       console.log("음성지원 서비스 버튼누름")
+      await this.selectVoiceActor(actor)
       console.log('목소리: ', this.selectedActor)
       this.isLoadingVoice = true;
       try {
-          const payload = {command: 44, data : [this.chatbotMessage, actor]}
+          const payload = {command: 44, data : [this.chatbotMessage, this.selectedActor]}
           await this.requestVoiceToFastAPI(payload)
           console.log('fast api가 request voice에 true를 보냈나요? ', this.getVoiceResponse)
           await this.getVoice()
@@ -373,7 +379,7 @@ const accountModule = 'accountModule';
   margin-left: auto;
   box-shadow: 3px 2px 3px rgba(0, 0, 0, 0.1);
   position: relative; /* 필요: 자식 요소의 위치를 상대적으로 설정 */
-  padding-right: 20px; /* 프로필 이미지 공간 확보 */
+  padding-right: 15px; /* 프로필 이미지 공간 확보 */
 }
 
 .assistant {
