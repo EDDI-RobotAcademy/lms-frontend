@@ -80,7 +80,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(authenticationModule, ['requestRedisPurchaseItemToDjango', 'requestRedisUpdateCherryToDjango', 'requestRedisGetCherryToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisUpdateCherryToDjango', 'requestRedisGetCherryToDjango']),
     async purchaseItem(item) {
       item.loading = true;
       try {
@@ -89,11 +89,6 @@ export default {
 
         if (this.activeTab === 'mystery') {
           purchasedItem = this.getRandomItem();
-        }
-
-        const itemInfo = {
-          usertoken: userToken,
-          item: purchasedItem.name,
         }
         const cherryInfo = {
           usertoken: userToken,
@@ -107,7 +102,6 @@ export default {
             console.log("보유 체리", checkCherry.cherry)
             if (checkCherry.cherry >= item.price) {
               await this.requestRedisUpdateCherryToDjango(cherryInfo);
-              await this.requestRedisPurchaseItemToDjango(itemInfo);
               if (this.activeTab === 'mystery') {
                 this.showRandomBoxMessage(purchasedItem);
               } else {
@@ -131,6 +125,7 @@ export default {
     },
     getRandomItem() {
       const random = Math.random();
+      console.log("랜덤값", random)
       if (random < 0.01) {
         return { name: '골드바', icon: '🏆' };
       }
