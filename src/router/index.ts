@@ -6,7 +6,7 @@ import AccountRoutes from '@/account/router/AccountRoutes'
 import ContactRoutes from '@/contact/router/ContactRoutes'
 import aiCommandModule from '@/gatherEverything/store/aiCommandModule'
 import GatherEverythingRoutes from '@/gatherEverything/router/GatherEverythingRoutes'
-
+import ReadRecipeRoutes from '@/readRecipe/router/readRecipeRoutes'
 const routes: Array<RouteRecordRaw> = [
   ...HomeRoutes,
   ...BoardRoutes,
@@ -14,6 +14,7 @@ const routes: Array<RouteRecordRaw> = [
   ...AccountRoutes,
   ...ContactRoutes,
   ...GatherEverythingRoutes,
+  ...ReadRecipeRoutes,
 ]
 
 const router = createRouter({
