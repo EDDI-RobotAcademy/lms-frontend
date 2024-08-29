@@ -2,37 +2,58 @@ import { ActionContext } from "vuex";
 import { AxiosResponse } from "axios";
 import axiosInst from "@/utility/axiosInstance";
 import { ChatState } from "./states"
-import { REQUEST_SEND_MESSAGE_TO_FASTAPI, REQUEST_VOICE_TO_FASTAPI } from "./mutation-types";
+import { REQUEST_SEND_MESSAGE_TO_FASTAPI, REQUEST_GET_MESSAGE_FROM_FASTAPI, 
+    REQUEST_VOICE_TO_FASTAPI, REQUEST_GET_VOICE_TO_FASTAPI } from "./mutation-types";
 
 export type ChatActions = {
-    sendMessageToFastAPI(context: ActionContext<ChatState, any>, payload: { userSendMessage: string }):Promise<void>;//socket서버 연결 시 {command: number, data: unknown}
-    requestVoiceToFastAPI(context: ActionContext<ChatState, any>, payload: { chatbotMessage: string }): Promise<void>;
+    sendMessageToFastAPI(context: ActionContext<ChatState, any>, payload: {command: number, data: unknown}):Promise<void>;//socket서버 연결 시 {command: number, data: unknown}
+    getMessageFromFastAPI(context: ActionContext<ChatState, any>):Promise<void>;
+    requestVoiceToFastAPI(context: ActionContext<ChatState, any>, payload: { command: number, data: [] }): Promise<void>;
+    getVoiceFromFastAPI(context: ActionContext<ChatState, any>):Promise<void>;
    
 };
 
 const actions: ChatActions = {
 
-    async sendMessageToFastAPI(context: ActionContext<ChatState, any>, payload: { userSendMessage: string }): Promise<void> {//socket서버 연결 시 {command: number, data: unknown}
-        console.log('payload',payload)
+    async sendMessageToFastAPI(context: ActionContext<ChatState, any>, payload: {command: number, data: unknown}): Promise<void> {//socket서버 연결 시 {command: number, data: unknown}
         try {
-            const res: AxiosResponse<any> = await axiosInst.fastapiAxiosInst.post('/request-generate-recipe-to-openai', payload, {timeout: 50000
-              });
-            console.log('Response received:', res.data);
-            context.commit(REQUEST_SEND_MESSAGE_TO_FASTAPI, res.data);
+            const res: AxiosResponse<any> = await axiosInst.fastapiAxiosInst.post('/request-ai-command', payload);
+            context.commit(REQUEST_SEND_MESSAGE_TO_FASTAPI, res.data); // res.data
+            console.log('aws 응답: ', res.data)
         } catch (error) {
             console.error('Error sending message:', error);
             throw error;
         }
     },
-    async requestVoiceToFastAPI(context: ActionContext<ChatState, any>, payload: { chatbotMessage: string }): Promise<void> {
+    async getMessageFromFastAPI(context: ActionContext<ChatState, any>):Promise<void> {
         try {
-            const res: AxiosResponse<any, any> = await axiosInst.fastapiAxiosInst.post('/lets-speak', payload, {timeout: 50000
+            const res: AxiosResponse<any> = await axiosInst.fastapiAxiosInst.post('/request-generate-recipe-to-openai', {timeout: 500000
+              });
+            context.commit(REQUEST_GET_MESSAGE_FROM_FASTAPI, res.data);
+        } catch (error) {
+            console.error('Error sending message:', error);
+            throw error;
+        }
+    },
+    async requestVoiceToFastAPI(context: ActionContext<ChatState, any>, payload: { command: number, data: [] }): Promise<void> {
+        try {
+            const res: AxiosResponse<any, any> = await axiosInst.fastapiAxiosInst.post('/request-ai-command', payload, {timeout: 50000
             });
-            context.commit(REQUEST_VOICE_TO_FASTAPI, res.data.audio_data);
+            context.commit(REQUEST_VOICE_TO_FASTAPI, res.data); 
         } catch (error) {
             console.error('Error fetching voices:', error);
             throw error;
         }
     },
+    async getVoiceFromFastAPI(context: ActionContext<ChatState, any>):Promise<void>{
+        try {
+            const res: AxiosResponse<any> = await axiosInst.fastapiAxiosInst.post('/lets-speak', {timeout: 50000
+              });
+            context.commit(REQUEST_GET_VOICE_TO_FASTAPI, res.data.audio_data);
+        } catch (error) {
+            console.error('Error sending message:', error);
+            throw error;
+        }
+    },   
 }
 export default actions
