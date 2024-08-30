@@ -2,12 +2,16 @@
   <div id="app">
     <main>
       <v-card-title v-if="nicknameTrigger" class="header-text">
-        Hi {{this.nickname}}! Make Reipes with CORNER-CHEF🧑‍🍳
+        Hi {{this.nickname}}! Make Recipes with CORNER-CHEF🧑‍🍳
       </v-card-title>
       <div class="chat-container">
         <div  ref="chatMessages" class="chat-messages">
-          <div v-for="(message, index) in messages" :key="index" :class="message.role">
-            <div v-html="formatMessage(message.content)"></div>
+          <div v-for="(message, index) in messages" :key="index" class="message-container">
+            <img v-if="message.role === 'user' && isAuthenticated" class="avatar" :src="profileImageSrc">
+            <img v-if="message.role === 'assistant'" class="robot" :src="require('@/assets/images/fixed/chef_bot.png')">
+            <div :class="message.role" class="message-content">
+              <div v-html="formatMessage(message.content)"></div>
+            </div>
           </div>
         </div>
         <div class="chat-input" align="center">
@@ -21,7 +25,7 @@
           <v-btn @click="toggleSpeechRecognition" :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
             :color="isListening ? '#F2B8B5' : '#333333'" class="mic-button">
           </v-btn>
-          <audio v-if="generatedVoice" :src="audioSrc" controls></audio>
+          <audio v-if="generated" :src="audioSrc" controls></audio>
           <div v-if="isLoadingResponse" class="loading-container">
             <v-progress-circular indeterminate color="primary"></v-progress-circular>
             <p>답변이 생성되는 중입니다...</p>
@@ -45,8 +49,10 @@
 import OpenAI from 'openai';
 import { mapActions, mapState } from "vuex";
 import { nextTick, ref } from 'vue'
+
 const authenticationModule = "authenticationModule";
-const chatbotModule = 'chatbotModule'
+const chatbotModule = 'chatbotModule';
+const accountModule = 'accountModule';
 
     export default {
   name: 'Corner-Chefbot',
@@ -62,11 +68,13 @@ const chatbotModule = 'chatbotModule'
       messages: [],
       userInput: '',
       generatedVoice: '',
+      generated: false,
       chatbotMessage: null,
       realAssistanatMessage: '',
       showVoiceOptions: false,
-      voiceActors: ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'],
       selectedActor: null,
+      voiceActors: ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'],
+      profileNumber: '_dummy',
       userToken: localStorage.getItem("userToken")
     };
   },
@@ -77,12 +85,16 @@ const chatbotModule = 'chatbotModule'
 
     audioSrc() {
       return this.generatedVoice ? `data:audio/mpeg;base64,${this.generatedVoice}` : '';
+    },
+    profileImageSrc() {
+      return require(`@/assets/images/fixed/img${this.profileNumber}.jpg`);
     }
   },
   mounted() {
     if (this.userToken) {
-      this.requestUserToken(this.userToken);
-      this.getNicknameFromRedis(this.userToken)
+      this.requestUserToken();
+      this.getNicknameFromDjango()
+      this.getProfileImgFromDjango()
     }
     else {
       console.log("mounted 비회원")
@@ -121,7 +133,8 @@ const chatbotModule = 'chatbotModule'
     });
   },
   methods: {
-    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
+    ...mapActions(accountModule, ['requestGetProfileImgToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango', 'requestRedisGetEmailToDjango','requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
     ...mapActions(chatbotModule, ['sendMessageToFastAPI', 'getMessageFromFastAPI', 'requestVoiceToFastAPI', 'getVoiceFromFastAPI']),
 
     toggleSpeechRecognition() {
@@ -147,8 +160,8 @@ const chatbotModule = 'chatbotModule'
     },
     async requestUserToken() {
       console.log("유저 토큰 확인");
-      this.$store.state.authenticationModule.isAuthenticated = true;
-      
+      // this.$store.state.authenticationModule.isAuthenticated = true;
+
       try {
         const response = await this.requestRedisGetTicketToDjango(this.userToken.trim());
         console.log("requestRedisGetTicketToDjango:", response.ticket)
@@ -159,34 +172,52 @@ const chatbotModule = 'chatbotModule'
         }
     },
     
-    async getNicknameFromRedis() { 
+    async getNicknameFromDjango() { 
       const response = await this.requestRedisGetNicknameToDjango(this.userToken.trim());
       this.nickname = response.nickname
       this.nicknameTrigger = true
 
     },
-    sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+    async getProfileImgFromDjango(){
+      const email = await this.requestRedisGetEmailToDjango(this.userToken.trim());
+      this.UserEmail = email.EmailInfo;
+
+      const profileImg = await this.requestGetProfileImgToDjango(email.EmailInfo)
+      this.profileNumber = profileImg
+
     },
     async getMessage() {
       while (this.getMessageResponse) {
-        await this.sleep(10000);
         await this.getMessageFromFastAPI();
+        await this.sleep(9000);
         console.log('while assistantMessage : ', this.assistantMessage)
 
-        if (this.assistantMessage.recipe !== '큐 비었잖아 뭐함?') {
+        if (this.assistantMessage !== '큐 비었잖아 뭐함?') {
           break;
         }
       }
-      
-      // 메시지를 업데이트하고 채팅에 추가합니다.
       this.chatbotMessage = this.assistantMessage.recipe || 'Sorry, an error occurred.';
       const botMessage = { role: 'assistant', content: this.chatbotMessage };
       this.messages.push(botMessage);
 
     },
+    async getVoice() {
+      while (this.getVoiceResponse) {
+        await this.sleep(9000);
+        await this.getVoiceFromFastAPI();
+        console.log('while voice : ', this.voice)
+
+        if (this.voice !== '큐 비었잖아 뭐함?') {
+          break;
+        }
+      }
+      this.generatedVoice = this.voice.audioData
+      this.generated = true;
+      console.log('generatedVoice : ', this.generatedVoice)
+
+    },
     async sendMessage() {
-      const response = await this.requestRedisUpdateTicketToDjango(this.userToken.trim());
+      await this.requestRedisUpdateTicketToDjango(this.userToken.trim());
 
       if (!this.userInput.trim()) return;
   
@@ -194,12 +225,13 @@ const chatbotModule = 'chatbotModule'
       this.messages.push(userMessage);
 
       try {
-        const payload = {command:43, data :[this.userInput]} //{userSendMessage: this.userInput}// socket서버 연결 시 {command:43, data :this.userInput}
+        const payload = {command:43, data :[this.userInput]}
         this.userInput = '';
         this.isLoadingResponse = true;
         await this.sendMessageToFastAPI(payload)
 
-        console.log('fast api가 send Message에 true를 보냈나요? ', this.getMessageResponse)
+        console.log('send Message에 true? ', this.getMessageResponse)
+
         if (this.getMessageResponse) {
           await this.getMessage()
         }
@@ -208,27 +240,27 @@ const chatbotModule = 'chatbotModule'
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
       } finally {
-        this.isLoadingResponse = false; // 답변 생성 종료
+        this.isLoadingResponse = false;
+        this.generated = false;
       }
     },
     async selectVoiceActor(actor) {
       this.selectedActor = actor; // 선택된 음성 actor 저장
     },
     async onClickTalk (actor) {
-      await this.selectVoiceActor(actor)
       console.log("음성지원 서비스 버튼누름")
+      await this.selectVoiceActor(actor)
       console.log('목소리: ', this.selectedActor)
-      this.isLoadingVoice = true; // 음성 서비스 로딩 시작
+      this.isLoadingVoice = true;
       try {
           const payload = {command: 44, data : [this.chatbotMessage, this.selectedActor]}
           await this.requestVoiceToFastAPI(payload)
           console.log('fast api가 request voice에 true를 보냈나요? ', this.getVoiceResponse)
-          // console.log('tts 서비스 실행하기 누름')
-          this.generatedVoice = this.voice
+          await this.getVoice()
       } catch (error) {
         console.error('Error:', error);
       } finally {
-        this.isLoadingVoice = false; // 음성 서비스 로딩 종료
+        this.isLoadingVoice = false;
       }
     },
     formatMessage(content) {
@@ -239,7 +271,10 @@ const chatbotModule = 'chatbotModule'
       if (chatMessages) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
-    }
+    },
+    sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    },
   }
 };
 </script>
@@ -261,7 +296,7 @@ const chatbotModule = 'chatbotModule'
 }
 
 .header-text{
-  margin-top:0%;
+  margin-top:-2%;
   font-size: 50%;
   font-weight:lighter;
   text-align: center;
@@ -274,7 +309,7 @@ const chatbotModule = 'chatbotModule'
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  height: 68.2vh;
+  height: 68vh;
   position: relative;
   border: 1.5px solid #e0d4c8d7; /* 테두리 두께, 스타일, 색상 */
   border-radius: 16px; /* 테두리 모서리를 둥글게 */
@@ -317,6 +352,16 @@ const chatbotModule = 'chatbotModule'
   z-index: 50;
 }
 
+.message-container {
+  display: flex;
+  margin-bottom: 0px; /* 메시지 간 간격 */
+}
+.message-content {
+  max-width: 80%; /* 메시지의 최대 너비 (프로필 이미지가 있으면 나머지 공간을 차지) */
+  border-radius: 15px;
+  order: 1; /* 메시지 내용을 프로필 이미지의 왼쪽에 위치시키기 */
+}
+
 .user,
 .assistant {
   font-style: Arial;
@@ -333,7 +378,8 @@ const chatbotModule = 'chatbotModule'
   width:fit-content;
   margin-left: auto;
   box-shadow: 3px 2px 3px rgba(0, 0, 0, 0.1);
-  
+  position: relative; /* 필요: 자식 요소의 위치를 상대적으로 설정 */
+  padding-right: 15px; /* 프로필 이미지 공간 확보 */
 }
 
 .assistant {
@@ -342,7 +388,27 @@ const chatbotModule = 'chatbotModule'
   width:fit-content;
   box-shadow: -3px 2px 4px rgba(0, 0, 0, 0.1);
 }
+.avatar,
+.robot {
+  width: 35px; /* 프로필 이미지의 너비 */
+  height: 35px; /* 프로필 이미지의 높이 */
+  border-radius: 50%; /* 프로필 이미지 둥글게 */
+  margin-top: 2%;
+}
 
+.avatar {
+  order: 2; /* 프로필 이미지를 메시지의 오른쪽에 위치시키기 */
+  margin-left: -2%;
+  margin-right:2% ;
+
+}
+.robot {
+  margin-left:2% ;
+  margin-top: 2%;
+  margin-right:-2% ;
+  order: 0; /* 프로필 이미지를 메시지의 오른쪽에 위치시키기 */
+
+}
 .mic-button {
   min-width: 0;
   width: 46px;
@@ -399,7 +465,7 @@ const chatbotModule = 'chatbotModule'
   flex-direction: row; /* 버튼들을 행으로 배치 */
   flex-wrap: wrap; /* 버튼들이 화면 너비에 맞춰 자동으로 줄 바꿈 */
   gap: 10px; /* 버튼들 사이의 간격 */
-  margin-top: 60px; /* 채팅 입력창 위쪽에 배치 */
+  margin-top: 50px; /* 채팅 입력창 위쪽에 배치 */
   position: fixed; /* 화면의 고정된 위치에 배치 */
   bottom: 80px; /* 채팅 입력창 위쪽에 위치 */
   left: 20%;
@@ -425,5 +491,11 @@ const chatbotModule = 'chatbotModule'
 }
 .voice-options button:hover {
   background-color: #ffede1;
+}
+
+.profile-image {
+    max-width: 50px; /* 이미지의 최대 너비 */
+    max-height: 50px; /* 이미지의 최대 높이 */
+    object-fit: contain; /* 이미지의 비율을 유지하면서 컨테이너에 맞춤 */
 }
 </style>

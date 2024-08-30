@@ -26,14 +26,7 @@
         <div id="nav-footer">
           <div id="nav-footer-heading">
             <div id="nav-footer-avatar">
-              <img v-if="ProfileImg == '0'" class="avatar" :src="require('@/assets/images/fixed/img0.jpg')"
-                alt="Default Avatar">
-              <img v-if="ProfileImg == '1'" class="avatar" :src="require('@/assets/images/fixed/img1.jpg')"
-                alt="Default Avatar">
-              <img v-if="ProfileImg == '2'" class="avatar" :src="require('@/assets/images/fixed/img2.jpg')"
-                alt="Default Avatar">
-              <img v-if="ProfileImg == '3'" class="avatar" :src="require('@/assets/images/fixed/img3.jpg')"
-                alt="Default Avatar">
+              <img class="avatar" :src="imageSrc" alt="Default Avatar">
             </div>
             <div id="nav-footer-titlebox">
               <span id="nav-footer-title">
@@ -92,12 +85,15 @@ export default ({
       ticket: '',
       cherry: '',
       currentShop: null,
-      ProfileImg: '',
+      ProfileImg: '_dummy',
       userToken: localStorage.getItem("userToken"),
     }
   },
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated"]),
+    imageSrc() {
+      return require(`@/assets/images/fixed/img${this.ProfileImg}.jpg`);
+    }
   },
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango', 'requestLogoutToDjango']),
@@ -126,18 +122,18 @@ export default ({
       this.currentShop = null;
       location.reload();
     },
-    async requestUserToken(userToken) {
-      if (userToken) {
+    async requestUserToken() {
+      if (this.userToken) {
         try {
-          const email = await this.requestRedisGetEmailToDjango(userToken.trim());
+          const email = await this.requestRedisGetEmailToDjango(this.userToken.trim());
           this.UserEmail = email.EmailInfo;
           const Img = await this.requestGetProfileImgToDjango(email.EmailInfo)
           this.ProfileImg = Img
-          const ticket = await this.requestRedisGetTicketToDjango(userToken.trim());
+          const ticket = await this.requestRedisGetTicketToDjango(this.userToken.trim());
           this.ticket = ticket.ticket;
-          const nickname = await this.requestRedisGetNicknameToDjango(userToken.trim());
+          const nickname = await this.requestRedisGetNicknameToDjango(this.userToken.trim());
           this.nickname = nickname.nickname;
-          const cherry = await this.requestRedisGetCherryToDjango(userToken.trim());
+          const cherry = await this.requestRedisGetCherryToDjango(this.userToken.trim());
           this.cherry = cherry.cherry;
         } catch (error) {
           console.error("Error requestUserToken:", error);
@@ -147,7 +143,7 @@ export default ({
   },
   mounted() {
     if (this.userToken) {
-      this.requestUserToken(this.userToken);
+      this.requestUserToken();
     }
     else {
       console.log("mounted 비회원")

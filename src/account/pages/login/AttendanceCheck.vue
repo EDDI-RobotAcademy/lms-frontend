@@ -29,7 +29,8 @@
                     :key="day.date"
                     :class="{
                       inactive: !day.isCurrentMonth,
-                      active: isToday(day.date)
+                      active: isToday(day.date),
+                      checked: isChecked(day.date)
                     }"
                   >
                     {{ day.date.getDate() }}
@@ -61,6 +62,7 @@ export default {
       currentDate: new Date(),
       weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       direction: 'next',
+      attendance: [], // 출석 체크한 날짜를 저장
     };
   },
   computed: {
@@ -99,6 +101,10 @@ export default {
       return calendarDays;
     },
   },
+  mounted() {
+    // 로컬 스토리지에서 출석 체크한 날짜를 가져옴
+    this.attendance = JSON.parse(localStorage.getItem('attendance')) || [];
+  },
   methods: {
     changeMonth(delta) {
       this.direction = delta > 0 ? 'next' : 'prev';
@@ -116,19 +122,34 @@ export default {
         date.getFullYear() === today.getFullYear()
       );
     },
+    isChecked(date) {
+      // 출석 체크한 날짜인지 확인
+      return this.attendance.includes(this.formatDate(date));
+    },
+    formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    },
+    checkAttendance() {
+      const today = this.formatDate(new Date());
+      if (this.attendance.includes(today)) {
+        alert('이미 오늘 출석 체크를 완료하셨습니다.');
+        return;
+      }
+      this.attendance.push(today);
+      localStorage.setItem('attendance', JSON.stringify(this.attendance));
+      alert('출석 체크가 완료되었습니다!');
+      this.closeDialog();
+    },
     closeDialog() {
       this.dialog = false;
       this.$emit('close');
     },
-    checkAttendance() {
-      console.log('Checking attendance for today');
-      // 여기에 출석체크 로직을 추가할 수 있습니다.
-      this.closeDialog();
-    },
   },
 };
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
@@ -201,6 +222,11 @@ export default {
 
 .days li.active {
   color: #fff;
+}
+
+.days li.checked {
+  background: rgba(252, 118, 134, 0.1); /* 이미 체크한 날의 배경 색상 */
+  border-radius: 50%;
 }
 
 .calendar .days li::before {
