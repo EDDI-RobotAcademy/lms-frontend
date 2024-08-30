@@ -4,14 +4,14 @@
       <div class="top-side-bar"></div>
       <div class="header-text">
         <v-card-title v-if="nicknameTrigger" class="text-align">
-          Hi {{this.nickname}}! Make Recipes with CORNER-CHEF🧑‍🍳
+          Hi {{ this.nickname }}! Make Recipes with CORNER-CHEF🧑‍🍳
         </v-card-title>
       </div>
       <div class="side-bar"></div>
-      <div class="side-bottom-bar" ></div>
+      <div class="side-bottom-bar"></div>
 
       <div class="chat-container">
-        <div  ref="chatMessages" class="chat-messages">
+        <div ref="chatMessages" class="chat-messages">
           <div v-for="(message, index) in messages" :key="index" class="message-container">
             <img v-if="message.role === 'user' && isAuthenticated" class="avatar" :src="profileImageSrc">
             <img v-if="message.role === 'assistant'" class="robot" :src="require('@/assets/images/fixed/chef_bot.png')">
@@ -21,18 +21,19 @@
           </div>
         </div>
         <div v-if="isLoadingResponse" class="loading-container">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-        <p>답변이 생성되는 중입니다...</p>
+          <div class="wrapper">
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="shadow"></div>
+            <div class="shadow"></div>
+            <div class="shadow"></div>
+          </div>
         </div>
       </div>
       <div class="chat-input">
-        <input 
-          type="text" 
-          v-model="userInput" 
-          @keyup.enter="sendMessage" 
-          placeholder="어떤 레시피를 알려드릴까요?" 
-          class="custom-input"
-          />
+        <input type="text" v-model="userInput" @keyup.enter="sendMessage" placeholder="어떤 레시피를 알려드릴까요?"
+          class="custom-input" :disabled="isInputDisabled" />
         <v-btn @click="toggleSpeechRecognition" :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
           :color="isListening ? '#F2B8B5' : '#333333'" class="mic-button">
         </v-btn>
@@ -49,7 +50,7 @@
       </div>
     </main>
   </div>
-</template> 
+</template>
 
 <script>
 import { mapActions, mapState } from "vuex";
@@ -59,13 +60,14 @@ const authenticationModule = "authenticationModule";
 const chatbotModule = 'chatbotModule';
 const accountModule = 'accountModule';
 
-    export default {
+export default {
   name: 'Corner-Chefbot',
   data() {
     return {
       isListening: false,
       isLoadingResponse: false,
       isLoadingVoice: false,
+      isInputDisabled: false,
       recognition: null,
       nicknameTrigger: false,
       nickname: '',
@@ -83,7 +85,7 @@ const accountModule = 'accountModule';
       userToken: localStorage.getItem("userToken")
     };
   },
-  
+
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated"]),
     ...mapState(chatbotModule, ['getMessageResponse', 'assistantMessage', 'getVoiceResponse', 'voice']),
@@ -139,7 +141,7 @@ const accountModule = 'accountModule';
   },
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango']),
-    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango', 'requestRedisGetEmailToDjango','requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango', 'requestRedisGetEmailToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
     ...mapActions(chatbotModule, ['sendMessageToFastAPI', 'getMessageFromFastAPI', 'requestVoiceToFastAPI', 'getVoiceFromFastAPI']),
 
     toggleSpeechRecognition() {
@@ -171,19 +173,19 @@ const accountModule = 'accountModule';
         const response = await this.requestRedisGetTicketToDjango(this.userToken.trim());
         console.log("requestRedisGetTicketToDjango:", response.ticket)
         this.ticket = response.ticket;
-        console.log("유저 티켓 반환",this.ticket)
+        console.log("유저 티켓 반환", this.ticket)
       } catch (error) {
         console.error("Error fetching paid member type:", error);
-        }
+      }
     },
-    
-    async getNicknameFromDjango() { 
+
+    async getNicknameFromDjango() {
       const response = await this.requestRedisGetNicknameToDjango(this.userToken.trim());
       this.nickname = response.nickname
       this.nicknameTrigger = true
 
     },
-    async getProfileImgFromDjango(){
+    async getProfileImgFromDjango() {
       const email = await this.requestRedisGetEmailToDjango(this.userToken.trim());
       this.UserEmail = email.EmailInfo;
 
@@ -222,15 +224,19 @@ const accountModule = 'accountModule';
 
     },
     async sendMessage() {
+      if (this.isInputDisabled) return; // 이미 비활성화된 경우 함수 종료
+
+      this.isInputDisabled = true; // 입력 비활성화
+      this.isLoadingResponse = true; // 로딩 시작
       await this.requestRedisUpdateTicketToDjango(this.userToken.trim());
 
       if (!this.userInput.trim()) return;
-  
+
       const userMessage = { role: 'user', content: this.userInput };
       this.messages.push(userMessage);
 
       try {
-        const payload = {command:43, data :[this.userInput]}
+        const payload = { command: 43, data: [this.userInput] }
         this.userInput = '';
         this.isLoadingResponse = true;
         await this.sendMessageToFastAPI(payload)
@@ -240,28 +246,29 @@ const accountModule = 'accountModule';
         if (this.getMessageResponse) {
           await this.getMessage()
         }
-        
+
       } catch (error) {
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
       } finally {
         this.isLoadingResponse = false;
+        this.isInputDisabled = false;
         this.generated = false;
       }
     },
     async selectVoiceActor(actor) {
       this.selectedActor = actor; // 선택된 음성 actor 저장
     },
-    async onClickTalk (actor) {
+    async onClickTalk(actor) {
       console.log("음성지원 서비스 버튼누름")
       await this.selectVoiceActor(actor)
       console.log('목소리: ', this.selectedActor)
       this.isLoadingVoice = true;
       try {
-          const payload = {command: 44, data : [this.chatbotMessage, this.selectedActor]}
-          await this.requestVoiceToFastAPI(payload)
-          console.log('fast api가 request voice에 true를 보냈나요? ', this.getVoiceResponse)
-          await this.getVoice()
+        const payload = { command: 44, data: [this.chatbotMessage, this.selectedActor] }
+        await this.requestVoiceToFastAPI(payload)
+        console.log('fast api가 request voice에 true를 보냈나요? ', this.getVoiceResponse)
+        await this.getVoice()
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -301,7 +308,7 @@ const accountModule = 'accountModule';
   z-index: -1;
 }
 
-.header-text{
+.header-text {
   background-color: #ffffff;
   position: fixed;
   top: 0;
@@ -312,16 +319,18 @@ const accountModule = 'accountModule';
   text-align: center;
   flex-direction: column;
   /* display: flex; */
-  font-size:200%;
+  font-size: 200%;
   font-weight: bold;
 }
-.text-align{
+
+.text-align {
   margin-top: 0.7%;
   font-size: 30px;
   height: 100%;
   width: 100%;
 
 }
+
 .top-side-bar {
   background-color: #fcf3ea;
   margin-top: -3.5%;
@@ -329,7 +338,8 @@ const accountModule = 'accountModule';
   left: 0;
   height: 9vh;
   width: 18.1%;
-  border-right: 1.5px solid #b3b3b3d7; /* 오른쪽 테두리만 설정 */
+  border-right: 1.5px solid #b3b3b3d7;
+  /* 오른쪽 테두리만 설정 */
   box-sizing: border-box;
 }
 
@@ -341,9 +351,11 @@ const accountModule = 'accountModule';
   max-height: 84vh;
   height: 84vh;
   width: 18.1%;
-  border-right: 1.5px solid #b3b3b3d7; /* 오른쪽 테두리만 설정 */
+  border-right: 1.5px solid #b3b3b3d7;
+  /* 오른쪽 테두리만 설정 */
   box-sizing: border-box;
 }
+
 .side-bottom-bar {
   background-color: #fcf3ea;
   top: 9vh;
@@ -352,7 +364,8 @@ const accountModule = 'accountModule';
   max-height: 7vh;
   height: 7vh;
   width: 18.1%;
-  border-right: 1.5px solid #b3b3b3d7; /* 오른쪽 테두리만 설정 */
+  border-right: 1.5px solid #b3b3b3d7;
+  /* 오른쪽 테두리만 설정 */
   box-sizing: border-box;
 }
 
@@ -362,14 +375,17 @@ const accountModule = 'accountModule';
   max-width: 100%;
   max-height: 84vh;
   background-color: #fffbfaee;
-  top: 9vh; /* 상단에 배치 */
+  top: 9vh;
+  /* 상단에 배치 */
   right: 0;
   width: 81.9%;
   height: 84vh;
   border-top: 1.5px solid #b3b3b3d7;
-  border-bottom: 1.5px solid #b3b3b3d7; /* 오른쪽 테두리만 설정 */
+  border-bottom: 1.5px solid #b3b3b3d7;
+  /* 오른쪽 테두리만 설정 */
   border-radius: 0px;
-  box-sizing: border-box; /* padding과 border를 width에 포함시킴 */
+  box-sizing: border-box;
+  /* padding과 border를 width에 포함시킴 */
 
 }
 
@@ -404,15 +420,25 @@ const accountModule = 'accountModule';
   /* border: 1.5px solid #e0d4c8; */
 
 }
+
 .custom-input::placeholder {
-  color: rgba(0, 0, 0, 0.6); /* Placeholder 텍스트 색상 */
+  color: rgba(0, 0, 0, 0.6);
+  /* Placeholder 텍스트 색상 */
   font-style: Arial;
   padding-left: 1%;
 
 }
+
+.custom-input:disabled {
+  background-color: #e0e0e0;
+  cursor: not-allowed;
+}
+
 .chat-messages {
-  flex: 1; /* 남은 공간을 채우도록 설정 */
-  overflow-y: auto; /* 채팅 내용이 넘칠 때 스크롤 */
+  flex: 1;
+  /* 남은 공간을 채우도록 설정 */
+  overflow-y: auto;
+  /* 채팅 내용이 넘칠 때 스크롤 */
   padding-bottom: 0px;
   z-index: 50;
 }
@@ -420,10 +446,13 @@ const accountModule = 'accountModule';
 .message-container {
   display: flex;
 }
+
 .message-content {
-  max-width: 80%; /* 메시지의 최대 너비 (프로필 이미지가 있으면 나머지 공간을 차지) */
+  max-width: 80%;
+  /* 메시지의 최대 너비 (프로필 이미지가 있으면 나머지 공간을 차지) */
   border-radius: 15px;
-  order: 1; /* 메시지 내용을 프로필 이미지의 왼쪽에 위치시키기 */
+  order: 1;
+  /* 메시지 내용을 프로필 이미지의 왼쪽에 위치시키기 */
 }
 
 .user,
@@ -440,10 +469,11 @@ const accountModule = 'accountModule';
 .user {
   background-color: #ffb99b;
   align-self: flex-end;
-  width:fit-content;
+  width: fit-content;
   margin-left: auto;
   box-shadow: 3px 2px 3px rgba(0, 0, 0, 0.1);
-  position: relative; /* 필요: 자식 요소의 위치를 상대적으로 설정 */
+  position: relative;
+  /* 필요: 자식 요소의 위치를 상대적으로 설정 */
   padding-right: 15px;
 }
 
@@ -451,30 +481,38 @@ const accountModule = 'accountModule';
   background-color: #fcf3ea;
   align-self: flex-start;
   margin-bottom: 1.5%;
-  width:fit-content;
+  width: fit-content;
   box-shadow: -3px 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .avatar,
 .robot {
-  width: 35px; /* 프로필 이미지의 너비 */
-  height: 35px; /* 프로필 이미지의 높이 */
-  border-radius: 50%; /* 프로필 이미지 둥글게 */
+  width: 35px;
+  /* 프로필 이미지의 너비 */
+  height: 35px;
+  /* 프로필 이미지의 높이 */
+  border-radius: 50%;
+  /* 프로필 이미지 둥글게 */
   margin-top: 2%;
 }
 
 .avatar {
-  order: 2; /* 프로필 이미지를 메시지의 오른쪽에 위치시키기 */
+  order: 2;
+  /* 프로필 이미지를 메시지의 오른쪽에 위치시키기 */
   margin-left: -2%;
-  margin-right:2% ;
+  margin-right: 2%;
 
 }
+
 .robot {
-  margin-left:2% ;
+  margin-left: 2%;
   margin-top: 2%;
-  margin-right:-2% ;
-  order: 0; /* 프로필 이미지를 메시지의 오른쪽에 위치시키기 */
+  margin-right: -2%;
+  order: 0;
+  /* 프로필 이미지를 메시지의 오른쪽에 위치시키기 */
 
 }
+
 .mic-button {
   left: 0;
   position: fixed;
@@ -485,6 +523,7 @@ const accountModule = 'accountModule';
   height: 39px;
   padding: 0;
 }
+
 .loading-container {
   margin-left: 50%;
   margin-bottom: 23%;
@@ -496,6 +535,95 @@ const accountModule = 'accountModule';
 .loading-container p {
   margin-left: 10px;
   color: #555;
+}
+
+.wrapper {
+  width: 200px;
+  height: 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.circle {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  border-radius: 50%;
+  background-color: #444;
+  left: 15%;
+  transform-origin: 50%;
+  animation: circle7124 .5s alternate infinite ease;
+}
+
+@keyframes circle7124 {
+  0% {
+    top: 60px;
+    height: 5px;
+    border-radius: 50px 50px 25px 25px;
+    transform: scaleX(1.7);
+  }
+
+  40% {
+    height: 20px;
+    border-radius: 50%;
+    transform: scaleX(1);
+  }
+
+  100% {
+    top: 0%;
+  }
+}
+
+.circle:nth-child(2) {
+  left: 45%;
+  animation-delay: .2s;
+}
+
+.circle:nth-child(3) {
+  left: auto;
+  right: 15%;
+  animation-delay: .3s;
+}
+
+.shadow {
+  width: 20px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.9);
+  position: absolute;
+  top: 62px;
+  transform-origin: 50%;
+  z-index: -1;
+  left: 15%;
+  filter: blur(1px);
+  animation: shadow046 .5s alternate infinite ease;
+}
+
+@keyframes shadow046 {
+  0% {
+    transform: scaleX(1.5);
+  }
+
+  40% {
+    transform: scaleX(1);
+    opacity: .7;
+  }
+
+  100% {
+    transform: scaleX(.2);
+    opacity: .4;
+  }
+}
+
+.shadow:nth-child(4) {
+  left: 45%;
+  animation-delay: .2s
+}
+
+.shadow:nth-child(5) {
+  left: auto;
+  right: 15%;
+  animation-delay: .3s;
 }
 
 .spinner {
@@ -511,6 +639,7 @@ const accountModule = 'accountModule';
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -530,12 +659,18 @@ const accountModule = 'accountModule';
 
 .voice-options {
   display: flex;
-  flex-direction: row; /* 버튼들을 행으로 배치 */
-  flex-wrap: wrap; /* 버튼들이 화면 너비에 맞춰 자동으로 줄 바꿈 */
-  gap: 10px; /* 버튼들 사이의 간격 */
-  margin-top: 50px; /* 채팅 입력창 위쪽에 배치 */
-  position: fixed; /* 화면의 고정된 위치에 배치 */
-  bottom: 80px; /* 채팅 입력창 위쪽에 위치 */
+  flex-direction: row;
+  /* 버튼들을 행으로 배치 */
+  flex-wrap: wrap;
+  /* 버튼들이 화면 너비에 맞춰 자동으로 줄 바꿈 */
+  gap: 10px;
+  /* 버튼들 사이의 간격 */
+  margin-top: 50px;
+  /* 채팅 입력창 위쪽에 배치 */
+  position: fixed;
+  /* 화면의 고정된 위치에 배치 */
+  bottom: 80px;
+  /* 채팅 입력창 위쪽에 위치 */
   left: 20%;
   right: 20%;
   justify-content: center;
@@ -543,27 +678,35 @@ const accountModule = 'accountModule';
 }
 
 .voice-options button {
-  width: 70px; /* 버튼 너비 */
-  height: 36px; /* 버튼 높이 */
+  width: 70px;
+  /* 버튼 너비 */
+  height: 36px;
+  /* 버튼 높이 */
   border: none;
-  border-radius: 15px; /* 네모난 모양 */
+  border-radius: 15px;
+  /* 네모난 모양 */
   background-color: #f0f0f0;
   cursor: pointer;
-  font-size: 14px; /* 글자 크기 조정 */
+  font-size: 14px;
+  /* 글자 크기 조정 */
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #ff7e5a;
-  font-family:Arial;
+  font-family: Arial;
   color: white;
 }
+
 .voice-options button:hover {
   background-color: #ffede1;
 }
 
 .profile-image {
-    max-width: 50px; /* 이미지의 최대 너비 */
-    max-height: 50px; /* 이미지의 최대 높이 */
-    object-fit: contain; /* 이미지의 비율을 유지하면서 컨테이너에 맞춤 */
+  max-width: 50px;
+  /* 이미지의 최대 너비 */
+  max-height: 50px;
+  /* 이미지의 최대 높이 */
+  object-fit: contain;
+  /* 이미지의 비율을 유지하면서 컨테이너에 맞춤 */
 }
 </style>
