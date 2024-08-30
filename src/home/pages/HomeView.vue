@@ -66,16 +66,11 @@
 </template>
 
 <script>
-import OpenAI from 'openai';
 import { mapActions, mapState } from "vuex";
 import router from "@/router";
 import chatbotModule from '@/chatbot/store/chatbotModule';
 const authenticationModule = "authenticationModule";
 
-const openai = new OpenAI({
-  apiKey: process.env.VUE_APP_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
 
 export default {
   name: 'App',
