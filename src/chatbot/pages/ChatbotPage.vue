@@ -1,9 +1,15 @@
 <template>
   <div id="app">
     <main>
-      <v-card-title v-if="nicknameTrigger" class="header-text">
-        Hi {{this.nickname}}! Make Recipes with CORNER-CHEF🧑‍🍳
-      </v-card-title>
+      <div class="top-side-bar"></div>
+      <div class="header-text">
+        <v-card-title v-if="nicknameTrigger" class="text-align">
+          Hi {{this.nickname}}! Make Recipes with CORNER-CHEF🧑‍🍳
+        </v-card-title>
+      </div>
+      <div class="side-bar"></div>
+      <div class="side-bottom-bar" ></div>
+
       <div class="chat-container">
         <div  ref="chatMessages" class="chat-messages">
           <div v-for="(message, index) in messages" :key="index" class="message-container">
@@ -14,39 +20,38 @@
             </div>
           </div>
         </div>
-        <div class="chat-input" align="center">
-          <input 
-            type="text" 
-            v-model="userInput" 
-            @keyup.enter="sendMessage" 
-            placeholder="어떤 레시피를 알려드릴까요?" 
-            class="custom-input"
-            />
-          <v-btn @click="toggleSpeechRecognition" :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
-            :color="isListening ? '#F2B8B5' : '#333333'" class="mic-button">
-          </v-btn>
-          <audio v-if="generated" :src="audioSrc" controls></audio>
-          <div v-if="isLoadingResponse" class="loading-container">
-            <v-progress-circular indeterminate color="primary"></v-progress-circular>
-            <p>답변이 생성되는 중입니다...</p>
-          </div>
-          <div v-if="isLoadingVoice" class="loading-voice-container">
-            <v-progress-circular indeterminate color="primary"></v-progress-circular>
-            <p>음성 서비스를 실행합니다...</p>
-          </div>
+        <div v-if="isLoadingResponse" class="loading-container">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        <p>답변이 생성되는 중입니다...</p>
         </div>
-        <div v-if="chatbotMessage !== null" class="voice-options">
-          <button v-for="actor in voiceActors" :key="actor" @click="onClickTalk(actor)">
-            {{ actor }}
-          </button>
-        </div>
+      </div>
+      <div class="chat-input">
+        <input 
+          type="text" 
+          v-model="userInput" 
+          @keyup.enter="sendMessage" 
+          placeholder="어떤 레시피를 알려드릴까요?" 
+          class="custom-input"
+          />
+        <v-btn @click="toggleSpeechRecognition" :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
+          :color="isListening ? '#F2B8B5' : '#333333'" class="mic-button">
+        </v-btn>
+      </div>
+      <audio v-if="generated" :src="audioSrc" controls></audio>
+      <div v-if="isLoadingVoice" class="loading-voice-container">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        <p>음성 서비스를 실행합니다...</p>
+      </div>
+      <div v-if="chatbotMessage !== null" class="voice-options">
+        <button v-for="actor in voiceActors" :key="actor" @click="onClickTalk(actor)">
+          {{ actor }}
+        </button>
       </div>
     </main>
   </div>
 </template> 
 
 <script>
-import OpenAI from 'openai';
 import { mapActions, mapState } from "vuex";
 import { nextTick, ref } from 'vue'
 
@@ -287,7 +292,8 @@ const accountModule = 'accountModule';
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('@/assets/images/fixed/chatpage_background.jpg');
+  background-color: #fcf3ea;
+  /* background-image: url('@/assets/images/fixed/chatpage_background.jpg'); */
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -296,47 +302,105 @@ const accountModule = 'accountModule';
 }
 
 .header-text{
-  margin-top:-2%;
-  font-size: 50%;
-  font-weight:lighter;
+  background-color: #ffffff;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 81.9%;
+  max-width: 100%;
+  height: 9vh;
   text-align: center;
+  flex-direction: column;
+  /* display: flex; */
   font-size:200%;
   font-weight: bold;
 }
+.text-align{
+  margin-top: 0.7%;
+  font-size: 30px;
+  height: 100%;
+  width: 100%;
+
+}
+.top-side-bar {
+  background-color: #fcf3ea;
+  margin-top: -3.5%;
+  top: 0;
+  left: 0;
+  height: 9vh;
+  width: 18.1%;
+  border-right: 1.5px solid #b3b3b3d7; /* 오른쪽 테두리만 설정 */
+  box-sizing: border-box;
+}
+
+.side-bar {
+  background-color: #fcf3ea;
+  top: 9vh;
+  left: 0;
+  bottom: 0;
+  max-height: 84vh;
+  height: 84vh;
+  width: 18.1%;
+  border-right: 1.5px solid #b3b3b3d7; /* 오른쪽 테두리만 설정 */
+  box-sizing: border-box;
+}
+.side-bottom-bar {
+  background-color: #fcf3ea;
+  top: 9vh;
+  left: 0;
+  bottom: 0;
+  max-height: 7vh;
+  height: 7vh;
+  width: 18.1%;
+  border-right: 1.5px solid #b3b3b3d7; /* 오른쪽 테두리만 설정 */
+  box-sizing: border-box;
+}
+
 .chat-container {
-  max-width: 900px;
-  background-color: #fffbfac5;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  height: 68vh;
-  position: relative;
-  border: 1.5px solid #e0d4c8d7; /* 테두리 두께, 스타일, 색상 */
-  border-radius: 16px; /* 테두리 모서리를 둥글게 */
+  flex: 1;
+  position: fixed;
+  max-width: 100%;
+  max-height: 84vh;
+  background-color: #fffbfaee;
+  top: 9vh; /* 상단에 배치 */
+  right: 0;
+  width: 81.9%;
+  height: 84vh;
+  border-top: 1.5px solid #b3b3b3d7;
+  border-bottom: 1.5px solid #b3b3b3d7; /* 오른쪽 테두리만 설정 */
+  border-radius: 0px;
+  box-sizing: border-box; /* padding과 border를 width에 포함시킴 */
+
 }
 
 .chat-input {
+  flex: 1;
   position: fixed;
   bottom: 0;
-  left: 25%;
-  right: 25%;
-  display: flex;
-  align-items: center;
-  margin-bottom: 1%;
-  background-color: #ffffff00;
+  max-height: 7vh;
+  height: 7vh;
+  right: 0;
+  width: 81.9%;
+  max-width: 100%;
+  background-color: #ffffff;
   padding: 10px;
-  /* gap: 10px; 마이크랑 프롬프트 사이의 간격 */ 
+  gap: 100px;
 }
-.with-shadow {
-  box-shadow: 3px 2px 3px rgba(0, 0, 0, 0.1);
-}
+
 .custom-input {
+  left: 0;
+  margin-left: 18.5%;
   flex-grow: 1;
-  padding: 12px;
-  background-color: #f6eade;
+  width: 76%;
+  align-self: center;
+  position: fixed;
+  max-height: 5.2vh;
+  height: 5.2vh;
+  padding: 10px;
+  background-color: #f0e8e8;
   border: 1px solid #ffffff00;
-  font-size: 15px;
-  border-radius: 13px;
+  font-size: 13px;
+  border-radius: 5px;
   /* border: 1.5px solid #e0d4c8; */
 
 }
@@ -344,6 +408,7 @@ const accountModule = 'accountModule';
   color: rgba(0, 0, 0, 0.6); /* Placeholder 텍스트 색상 */
   font-style: Arial;
   padding-left: 1%;
+
 }
 .chat-messages {
   flex: 1; /* 남은 공간을 채우도록 설정 */
@@ -354,7 +419,6 @@ const accountModule = 'accountModule';
 
 .message-container {
   display: flex;
-  margin-bottom: 0px; /* 메시지 간 간격 */
 }
 .message-content {
   max-width: 80%; /* 메시지의 최대 너비 (프로필 이미지가 있으면 나머지 공간을 차지) */
@@ -365,7 +429,8 @@ const accountModule = 'accountModule';
 .user,
 .assistant {
   font-style: Arial;
-  padding: 13px;
+  font-size: 12px;
+  padding: 10px;
   border-radius: 15px;
   margin-top: 2%;
   margin-left: 4%;
@@ -379,12 +444,13 @@ const accountModule = 'accountModule';
   margin-left: auto;
   box-shadow: 3px 2px 3px rgba(0, 0, 0, 0.1);
   position: relative; /* 필요: 자식 요소의 위치를 상대적으로 설정 */
-  padding-right: 15px; /* 프로필 이미지 공간 확보 */
+  padding-right: 15px;
 }
 
 .assistant {
   background-color: #fcf3ea;
   align-self: flex-start;
+  margin-bottom: 1.5%;
   width:fit-content;
   box-shadow: -3px 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -410,19 +476,21 @@ const accountModule = 'accountModule';
 
 }
 .mic-button {
+  left: 0;
+  position: fixed;
+  margin-left: 95%;
+  align-self: center;
   min-width: 0;
-  width: 46px;
-  height: 46px;
+  width: 37px;
+  height: 39px;
   padding: 0;
 }
 .loading-container {
-  display: flex;
-  align-items: center;
+  margin-left: 50%;
+  margin-bottom: 23%;
   justify-content: center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
   transform: translate(-50%, -50%);
+  font-size: 12px;
 }
 
 .loading-container p {
@@ -432,8 +500,8 @@ const accountModule = 'accountModule';
 
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
-  width: 36px;
-  height: 36px;
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
   border-left-color: rgb(255, 140, 0);
   animation: spin 1s ease infinite;
