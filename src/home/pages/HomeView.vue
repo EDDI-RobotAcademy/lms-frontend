@@ -19,7 +19,7 @@
         <p>서울시 금천구 가산동 670 18층 | PaikJongWon@theborn.com | Tel. 0507-1353-7302</p>
       </div>
       <!-- 답변 생성 로딩 표시 -->
-      <div v-if="isLoadingMessage" class="loading-container">
+      <div v-if="isLoadingResponse" class="loading-container">
         <div class="spinner"></div>
         <p>답변이 생성되는 중입니다...</p>
       </div>
@@ -69,6 +69,7 @@
 import OpenAI from 'openai';
 import { mapActions, mapState } from "vuex";
 import router from "@/router";
+import chatbotModule from '@/chatbot/store/chatbotModule';
 const authenticationModule = "authenticationModule";
 
 const openai = new OpenAI({
@@ -84,7 +85,7 @@ export default {
       userInput: '',
       isChatUsed: false,
       assistantMessage: '',
-      isLoadingMessage: false,
+      isLoadingResponse: false,
       dialogForMember: false,
       dialogForNonMember: false,
       refreshFlag: false,
@@ -105,43 +106,54 @@ export default {
   },
   methods: {
     ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango']),
+    ...mapActions(chatbotModule, ['getMessageFromFastAPI', 'sendMessageToFastAPI']),
+
     async requestUserToken() {
       if (this.userToken) {
         await this.requestRedisGetEmailToDjango(this.userToken.trim());
       }
     },
+    async getMessage() {
+      while (this.getMessageResponse) {
+        await this.getMessageFromFastAPI();
+        await this.sleep(9000);
+        console.log('while assistantMessage : ', this.assistantMessage)
 
+        if (this.assistantMessage !== '큐 비었잖아 뭐함?') {
+          break;
+        }
+      }
+      this.chatbotMessage = this.assistantMessage.recipe || 'Sorry, an error occurred.';
+      const botMessage = { role: 'assistant', content: this.chatbotMessage };
+      this.messages.push(botMessage);
+
+    },
     async sendMessage() {
+      this.isLoadingResponse = true; // 로딩 시작
+
       if (!this.userInput.trim()) return;
+
       const userMessage = { role: 'user', content: this.userInput };
       this.messages.push(userMessage);
-      this.userInput = '';
-      try {
-        this.isLoadingMessage = true;
-        const response = await openai.chat.completions.create({
-          model: 'gpt-3.5-turbo',
-          messages: [...this.messages, userMessage],
-        });
 
-        this.assistantMessage = response.choices[0]?.message?.content || 'Sorry, an error occurred.';
-        this.messages.push({ role: 'assistant', content: this.assistantMessage });
-        this.isChatUsed = true; // 채팅 기능 사용 후 비활성화
+      try {
+        const payload = { command: 43, data: [this.userInput] }
+        this.userInput = '';
+        this.isChatUsed = true;
+        this.isLoadingResponse = true;
+        await this.sendMessageToFastAPI(payload)
+
+        console.log('send Message에 true? ', this.getMessageResponse)
+
+        if (this.getMessageResponse) {
+          await this.getMessage()
+        }
 
       } catch (error) {
         console.error('Error:', error);
         this.messages.push({ role: 'assistant', content: 'Sorry, an error occurred.' });
       } finally {
-        this.isLoadingMessage = false;
-        console.log('authentication:', this.isAuthenticated)
-        if (this.isAuthenticated) {
-          setTimeout(() => {
-            this.dialogForMember = true;
-          }, 3000);
-        } else if (!this.isAuthenticated) {
-          setTimeout(() => {
-            this.dialogForNonMember = true;
-          }, 3000);
-        }
+        this.isLoadingResponse = false;
       }
     },
     formatMessage(content) {
