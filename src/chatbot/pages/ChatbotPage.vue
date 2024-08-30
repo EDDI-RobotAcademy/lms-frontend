@@ -231,17 +231,16 @@ export default {
 
     },
     async getMessage() {
-      // while (this.getMessageResponse) {
-      //   await this.getMessageFromFastAPI();
-      //   await this.sleep(9000);
-      //   console.log('while assistantMessage : ', this.assistantMessage)
+      while (this.getMessageResponse) {
+        await this.getMessageFromFastAPI();
+        await this.sleep(9000);
+        console.log('while assistantMessage : ', this.assistantMessage)
 
-      //   if (this.assistantMessage !== '큐 비었잖아 뭐함?') {
-      //     break;
-      //   }
-      // }
-      this.chatbotMessage = 'test 중입니다.sdfgdsfsasxfdfacfghjkujyhtgrfedswwertyuikujyhgtrfe test testtt  twse aeasfafdsfaa \n test teat s test e a \n sdfsetasfds fasf \n tafadsfsafasdf \nasdfafdsafa\nasdfaff a'
-       //this.assistantMessage.recipe || 'Sorry, an error occurred.';
+        if (this.assistantMessage !== '큐 비었잖아 뭐함?') {
+          break;
+        }
+      }
+      this.chatbotMessage = this.assistantMessage.recipe || 'Sorry, an error occurred.';
       const botMessage = { role: 'assistant', content: this.chatbotMessage };
       this.messages.push(botMessage);
       this.showActorOption = true;
@@ -249,16 +248,16 @@ export default {
     },
     async getVoice() {
       this.showActorOption = false;
-      // while (this.getVoiceResponse) {
-      //   await this.sleep(9000);
-      //   await this.getVoiceFromFastAPI();
-      //   console.log('while voice : ', this.voice)
+      while (this.getVoiceResponse) {
+        await this.sleep(9000);
+        await this.getVoiceFromFastAPI();
+        console.log('while voice : ', this.voice)
 
-      //   if (this.voice !== '큐 비었잖아 뭐함?') {
-      //     break;
-      //   }
-      // }
-      this.generatedVoice = '제네레이티드 목소리' // this.voice.audioData
+        if (this.voice !== '큐 비었잖아 뭐함?') {
+          break;
+        }
+      }
+      this.generatedVoice = this.voice.audioData
       this.generated = true;
       console.log('generatedVoice : ', this.generatedVoice)
 
@@ -279,12 +278,12 @@ export default {
         const payload = { command: 43, data: [this.userInput] }
         this.userInput = '';
         this.isLoadingResponse = true;
-        // await this.sendMessageToFastAPI(payload)
+        await this.sendMessageToFastAPI(payload)
         console.log('send Message에 true? ', this.getMessageResponse)
 
-        // if (this.getMessageResponse) {
+        if (this.getMessageResponse) {
           await this.getMessage()
-        // }
+        }
 
       } catch (error) {
         console.error('Error:', error);
@@ -306,12 +305,12 @@ export default {
 
       try {
         const payload = { command: 44, data: [this.chatbotMessage, this.selectedActor] }
-        // await this.requestVoiceToFastAPI(payload)
+        await this.requestVoiceToFastAPI(payload)
         console.log('request voice에 true? ', this.getVoiceResponse)
 
-        // if (this.getVoiceResponse) {
+        if (this.getVoiceResponse) {
           await this.getVoice()
-        // }
+        }
       } catch (error) {
         console.error('Error:', error);
       } finally {
