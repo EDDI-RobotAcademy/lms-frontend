@@ -1,7 +1,7 @@
 import AccountLoginPage from "@/account/pages/login/AccountLoginPage.vue"
 import AccountRegisterPage from "@/account/pages/register/AccountRegisterPage.vue"
 import AccountMyPage from "@/account/pages/mypage/AccountMyPage.vue"
-import AttendanceCheck from "@/account/pages/login/AttendanceCheck.vue"
+import AttendanceCheck from "@/account/pages/attendanceCheck/AttendanceCheck.vue"
 
 const AccountRoutes = [
     {
