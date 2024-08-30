@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <nav id="nav-bar">
+    <nav id="nav-bar" :class="{ 'expanded': isExpanded || isChatbotPage }">
       <div id="nav-header">
         <a id="nav-title" target="_blank" @click="goToHome()">
           <i class="fab fa-codepen"></i>CORNER-CHEF
@@ -93,6 +93,14 @@ export default ({
     ...mapState(authenticationModule, ["isAuthenticated"]),
     imageSrc() {
       return require(`@/assets/images/fixed/img${this.ProfileImg}.jpg`);
+    },
+    isChatbotPage() {
+      return this.$route.path === '/chatbot/page';
+    }
+  },
+  watch: {
+    $route(to) {
+      this.isExpanded = to.path === '/chatbot/page';
     }
   },
   methods: {
@@ -148,6 +156,7 @@ export default ({
     else {
       console.log("mounted 비회원")
     }
+    this.isExpanded = this.$route.path === '/chatbot/page';
   },
 });
 
@@ -206,9 +215,14 @@ body {
   border-radius: 10px;
 }
 
-#nav-bar:hover {
+#nav-bar:hover, #nav-bar.expanded {
   width: var(--navbar-width);
   opacity: 0.9;
+}
+
+#nav-bar.chatbot-page {
+  opacity: 0.9;
+  width: var(--navbar-width);
 }
 
 #nav-header {
@@ -220,9 +234,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 추가: 중앙 정렬을 위해 */
   padding: 0 16px;
-  /* 변경: 왼쪽 패딩 제거 및 오른쪽 패딩 추가 */
 }
 
 #nav-title {
@@ -233,7 +245,9 @@ body {
   color: var(--text-color);
 }
 
-#nav-bar:hover #nav-title {
+#nav-bar:hover #nav-title,
+#nav-bar.expanded #nav-title,
+#nav-bar.chatbot-page #nav-title {
   opacity: 1;
   cursor: pointer;
 }
@@ -271,7 +285,9 @@ body {
   transition: opacity 0.3s ease;
 }
 
-#nav-bar:hover .nav-button span {
+#nav-bar:hover .nav-button span,
+#nav-bar.expanded .nav-button span,
+#nav-bar.chatbot-page .nav-button span {
   opacity: 1;
 }
 
@@ -325,7 +341,9 @@ body {
   transition: opacity 0.3s ease;
 }
 
-#nav-bar:hover #nav-footer-titlebox {
+#nav-bar:hover #nav-footer-titlebox,
+#nav-bar.expanded #nav-footer-titlebox,
+#nav-bar.chatbot-page #nav-footer-titlebox {
   opacity: 1;
 }
 
@@ -356,7 +374,6 @@ body {
   align-items: center;
 }
 
-
 .stat-icon {
   display: inline-flex;
   align-items: center;
@@ -374,7 +391,6 @@ body {
   background-position: center;
   top: -2px;
 }
-
 
 .mdi-ticket {
   width: 24px;
@@ -414,6 +430,7 @@ body {
   color: #EF6F2D;
   font-weight: bold;
 }
+
 .nav-button.goto-login {
   color: #681600;
   font-weight: bold;
@@ -429,6 +446,18 @@ body {
 }
 
 @media (max-width: 768px) {
+  #nav-bar,
+  #nav-bar.expanded,
+  #nav-bar.chatbot-page {
+    width: var(--navbar-width-min);
+  }
+
+  #nav-bar:hover,
+  #nav-bar.expanded:hover,
+  #nav-bar.chatbot-page:hover {
+    width: var(--navbar-width);
+  }
+
   .mypage-button {
     padding: 12px;
   }
