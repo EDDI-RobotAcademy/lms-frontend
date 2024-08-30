@@ -2,11 +2,13 @@
   <div id="app">
     <main>
       <div class="top-side-bar"></div>
+
       <div class="header-text">
         <v-card-title v-if="nicknameTrigger" class="text-align">
-          Hi {{ this.nickname }}!  Make Recipes with CORNER-CHEF🧑‍🍳
+          Hi {{ this.nickname }}! Make Recipes with CORNER-CHEF🧑‍🍳
         </v-card-title>
       </div>
+
       <div class="side-bar"></div>
       <div class="side-bottom-bar"></div>
 
@@ -15,12 +17,20 @@
           <div v-for="(message, index) in messages" :key="index" class="message-container">
             <img v-if="message.role === 'user' && isAuthenticated" class="avatar" :src="profileImageSrc">
             <img v-if="message.role === 'assistant'" class="robot" :src="require('@/assets/images/fixed/chef_bot.png')">
+            
+  
+            <button v-if="message.role === 'assistant'" @click="openSaveDialog(message.content)" class="save-recipe-button">
+              <i class="mdi mdi-content-save icon-align"></i>
+            </button>
+
             <div :class="message.role" class="message-content">
               <div v-html="formatMessage(message.content)"></div>
             </div>
           </div>
         </div>
+
         <audio v-if="generated" :src="audioSrc" controls class="audio"></audio>
+
         <div v-if="isLoadingResponse" class="loading-container">
           <div class="wrapper">
             <div class="circle"></div>
@@ -31,14 +41,42 @@
             <div class="shadow"></div>
           </div>
         </div>
+
+        <!-- Dialog -->
+        <v-dialog v-model="isclickSaveRecipe" class="pop-up-dialog">
+          <v-card>
+            <v-card-title>
+              <v-text></v-text><br>
+              <v-text>레시피를 저장하시겠습니까?</v-text>
+            </v-card-title>
+            <v-card-actions class="dialog-botton">
+              <v-spacer></v-spacer>
+              <v-btn text @click="saveRecipe()" class="button-go-page">확인</v-btn>
+              <v-btn icon @click="closeDialog" class="close-btn" text>
+                <v-icon color="#444444">mdi-close</v-icon>
+              </v-btn>
+            </v-card-actions>
+        </v-card>
+        </v-dialog>
       </div>
+
       <div class="chat-input">
-        <input type="text" v-model="userInput" @keyup.enter="sendMessage" placeholder="어떤 레시피를 알려드릴까요?"
-          class="custom-input" :disabled="isInputDisabled" />
-        <v-btn @click="toggleSpeechRecognition" :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
-          :color="isListening ? '#F2B8B5' : '#333333'" class="mic-button">
-        </v-btn>
+        <input
+          type="text"
+          v-model="userInput"
+          @keyup.enter="sendMessage"
+          placeholder="어떤 레시피를 알려드릴까요?"
+          class="custom-input"
+          :disabled="isInputDisabled"
+        />
+        <v-btn
+          @click="toggleSpeechRecognition"
+          :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
+          :color="isListening ? '#F2B8B5' : '#333333'"
+          class="mic-button"
+        />
       </div>
+
       <div v-if="showActorOption" class="voice-options">
         <button v-for="actor in voiceActors" :key="actor" @click="onClickTalk(actor)">
           {{ actor }}
@@ -50,7 +88,7 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import { nextTick, ref } from 'vue'
+import { nextTick } from 'vue'
 
 const authenticationModule = "authenticationModule";
 const chatbotModule = 'chatbotModule';
@@ -78,13 +116,17 @@ export default {
       showActorOption: false,
       voiceActors: ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'],
       profileNumber: '_dummy',
-      userToken: localStorage.getItem("userToken")
+      userToken: localStorage.getItem("userToken"),
+      isclickSaveRecipe: false,
+      saveComplete: false,
+      generatedRecipe: ''
     };
   },
 
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated"]),
-    ...mapState(chatbotModule, ['getMessageResponse', 'assistantMessage', 'getVoiceResponse', 'voice']),
+    ...mapState(chatbotModule, ['getMessageResponse', 'assistantMessage', 
+    'getVoiceResponse', 'voice', 'isRecipeSaved']),
 
     audioSrc() {
       return this.generatedVoice ? `data:audio/mpeg;base64,${this.generatedVoice}` : '';
@@ -138,7 +180,7 @@ export default {
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango']),
     ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango', 'requestRedisGetEmailToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
-    ...mapActions(chatbotModule, ['sendMessageToFastAPI', 'getMessageFromFastAPI', 'requestVoiceToFastAPI', 'getVoiceFromFastAPI']),
+    ...mapActions(chatbotModule, ['sendMessageToFastAPI', 'getMessageFromFastAPI', 'requestVoiceToFastAPI', 'getVoiceFromFastAPI', 'requestSaveRecipeToDjango']),
 
     toggleSpeechRecognition() {
       if (this.recognition) {
@@ -189,16 +231,17 @@ export default {
 
     },
     async getMessage() {
-      while (this.getMessageResponse) {
-        await this.getMessageFromFastAPI();
-        await this.sleep(9000);
-        console.log('while assistantMessage : ', this.assistantMessage)
+      // while (this.getMessageResponse) {
+      //   await this.getMessageFromFastAPI();
+      //   await this.sleep(9000);
+      //   console.log('while assistantMessage : ', this.assistantMessage)
 
-        if (this.assistantMessage !== '큐 비었잖아 뭐함?') {
-          break;
-        }
-      }
-      this.chatbotMessage = this.assistantMessage.recipe || 'Sorry, an error occurred.';
+      //   if (this.assistantMessage !== '큐 비었잖아 뭐함?') {
+      //     break;
+      //   }
+      // }
+      this.chatbotMessage = 'test 중입니다.sdfgdsfsasxfdfacfghjkujyhtgrfedswwertyuikujyhgtrfe test testtt  twse aeasfafdsfaa \n test teat s test e a \n sdfsetasfds fasf \n tafadsfsafasdf \nasdfafdsafa\nasdfaff a'
+       //this.assistantMessage.recipe || 'Sorry, an error occurred.';
       const botMessage = { role: 'assistant', content: this.chatbotMessage };
       this.messages.push(botMessage);
       this.showActorOption = true;
@@ -206,16 +249,16 @@ export default {
     },
     async getVoice() {
       this.showActorOption = false;
-      while (this.getVoiceResponse) {
-        await this.sleep(9000);
-        await this.getVoiceFromFastAPI();
-        console.log('while voice : ', this.voice)
+      // while (this.getVoiceResponse) {
+      //   await this.sleep(9000);
+      //   await this.getVoiceFromFastAPI();
+      //   console.log('while voice : ', this.voice)
 
-        if (this.voice !== '큐 비었잖아 뭐함?') {
-          break;
-        }
-      }
-      this.generatedVoice = this.voice.audioData
+      //   if (this.voice !== '큐 비었잖아 뭐함?') {
+      //     break;
+      //   }
+      // }
+      this.generatedVoice = '제네레이티드 목소리' // this.voice.audioData
       this.generated = true;
       console.log('generatedVoice : ', this.generatedVoice)
 
@@ -236,13 +279,12 @@ export default {
         const payload = { command: 43, data: [this.userInput] }
         this.userInput = '';
         this.isLoadingResponse = true;
-        await this.sendMessageToFastAPI(payload)
-
+        // await this.sendMessageToFastAPI(payload)
         console.log('send Message에 true? ', this.getMessageResponse)
 
-        if (this.getMessageResponse) {
+        // if (this.getMessageResponse) {
           await this.getMessage()
-        }
+        // }
 
       } catch (error) {
         console.error('Error:', error);
@@ -264,12 +306,12 @@ export default {
 
       try {
         const payload = { command: 44, data: [this.chatbotMessage, this.selectedActor] }
-        await this.requestVoiceToFastAPI(payload)
+        // await this.requestVoiceToFastAPI(payload)
         console.log('request voice에 true? ', this.getVoiceResponse)
 
-        if (this.getVoiceResponse) {
+        // if (this.getVoiceResponse) {
           await this.getVoice()
-        }
+        // }
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -287,6 +329,22 @@ export default {
     },
     sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
+    },
+    openSaveDialog(generatedRecipe) {
+      this.isclickSaveRecipe = true;
+      this.generatedRecipe = generatedRecipe
+    },
+    saveRecipe() {
+      console.log('레시피 저장하기: ', this.generatedRecipe)
+      const payload = {recipe: this.generatedRecipe}
+      this.requestSaveRecipeToDjango(payload)
+      if (this.isRecipeSaved) {
+        this.saveComplete = true;
+        this.generatedRecipe = '';
+      }
+    },
+    closeDialog() {
+      this.isclickSaveRecipe = false;
     },
   }
 };
@@ -379,7 +437,6 @@ export default {
   border-radius: 0px;
   box-sizing: border-box;
   /* padding과 border를 width에 포함시킴 */
-
 }
 
 .chat-input {
@@ -437,6 +494,7 @@ export default {
 }
 
 .message-content {
+  position: relative;
   max-width: 80%;
   border-radius: 15px;
   order: 1;
@@ -594,7 +652,6 @@ export default {
   animation-delay: .3s;
 }
 
-
 .voice-options {
   display: flex;
   flex-direction: row;
@@ -639,5 +696,41 @@ export default {
   max-width: 50px;
   max-height: 50px;
   object-fit: contain;
+}
+.save-recipe-button {
+  z-index: 40;
+  cursor: pointer;
+  color: #ffa70f;
+  margin-top: -1.5%;
+}
+
+.save-recipe-button:hover {
+  color: #fff8f7;
+}
+.pop-up-dialog {
+  text-align: center;
+  width: 400px;
+  /* border-radius: 50px; */
+  max-height: 800px;
+  height: 300px;
+  padding: 20px;
+}
+.dialog-botton {
+  align-self: center;
+  color: white;
+
+}
+.button-go-page{
+  font-weight:lighter;
+  background-color: rgb(55, 55, 55); /* 버튼 배경색 */
+  text-decoration: white; /* 버튼 텍스트 색 */
+  border-radius: 10px; /* 버튼 모서리 둥글게 */
+  padding: 13px 15px; /* 버튼 패딩 */
+}
+.close-btn {
+  position: absolute !important;
+  top: 8px;
+  right: 8px;
+  background-color: transparent !important;
 }
 </style>
