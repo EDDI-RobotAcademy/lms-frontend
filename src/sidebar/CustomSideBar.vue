@@ -17,7 +17,11 @@
         <div class="nav-button"><i class="fas fa-heart"></i><span>구현 예정</span></div>
         <div class="nav-button"><i class="fas fa-chart-line"></i><span>구현 예정</span></div>
         <div class="nav-button"><i class="fas fa-fire"></i><span>구현 예정</span></div>
-        <div class="nav-button"><i class="fas fa-magic"></i><span>출석체크</span></div>
+        
+        <div class="nav-button" @click="goToAttendanceCheck()">
+          <i class="fas fa-magic" ></i>
+          <span>출석체크</span>
+        </div>
         <hr>
         <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
         <div id="nav-content-highlight"></div>
@@ -114,6 +118,9 @@ export default ({
     },
     goToHome() {
       router.push('/')
+    },
+    goToAttendanceCheck() {
+      router.push('/account/attendanceCheck')
     },
     toggleShopPopup(shop) {
       this.currentShop = this.currentShop === shop ? null : shop;
