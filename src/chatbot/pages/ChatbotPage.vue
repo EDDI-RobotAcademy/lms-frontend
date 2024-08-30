@@ -4,7 +4,7 @@
       <div class="top-side-bar"></div>
       <div class="header-text">
         <v-card-title v-if="nicknameTrigger" class="text-align">
-          Hi {{ this.nickname }}! Make Recipes with CORNER-CHEF🧑‍🍳
+          Hi {{ this.nickname }}!  Make Recipes with CORNER-CHEF🧑‍🍳
         </v-card-title>
       </div>
       <div class="side-bar"></div>
@@ -20,6 +20,7 @@
             </div>
           </div>
         </div>
+        <audio v-if="generated" :src="audioSrc" controls class="audio"></audio>
         <div v-if="isLoadingResponse" class="loading-container">
           <div class="wrapper">
             <div class="circle"></div>
@@ -38,12 +39,7 @@
           :color="isListening ? '#F2B8B5' : '#333333'" class="mic-button">
         </v-btn>
       </div>
-      <audio v-if="generated" :src="audioSrc" controls></audio>
-      <div v-if="isLoadingVoice" class="loading-voice-container">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-        <p>음성 서비스를 실행합니다...</p>
-      </div>
-      <div v-if="chatbotMessage !== null" class="voice-options">
+      <div v-if="showActorOption" class="voice-options">
         <button v-for="actor in voiceActors" :key="actor" @click="onClickTalk(actor)">
           {{ actor }}
         </button>
@@ -66,7 +62,6 @@ export default {
     return {
       isListening: false,
       isLoadingResponse: false,
-      isLoadingVoice: false,
       isInputDisabled: false,
       recognition: null,
       nicknameTrigger: false,
@@ -80,6 +75,7 @@ export default {
       realAssistanatMessage: '',
       showVoiceOptions: false,
       selectedActor: null,
+      showActorOption: false,
       voiceActors: ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'],
       profileNumber: '_dummy',
       userToken: localStorage.getItem("userToken")
@@ -167,7 +163,6 @@ export default {
     },
     async requestUserToken() {
       console.log("유저 토큰 확인");
-      // this.$store.state.authenticationModule.isAuthenticated = true;
 
       try {
         const response = await this.requestRedisGetTicketToDjango(this.userToken.trim());
@@ -206,9 +201,11 @@ export default {
       this.chatbotMessage = this.assistantMessage.recipe || 'Sorry, an error occurred.';
       const botMessage = { role: 'assistant', content: this.chatbotMessage };
       this.messages.push(botMessage);
+      this.showActorOption = true;
 
     },
     async getVoice() {
+      this.showActorOption = false;
       while (this.getVoiceResponse) {
         await this.sleep(9000);
         await this.getVoiceFromFastAPI();
@@ -226,8 +223,8 @@ export default {
     async sendMessage() {
       if (this.isInputDisabled) return; // 이미 비활성화된 경우 함수 종료
 
-      this.isInputDisabled = true; // 입력 비활성화
-      this.isLoadingResponse = true; // 로딩 시작
+      this.isInputDisabled = true;
+      this.isLoadingResponse = true;
       await this.requestRedisUpdateTicketToDjango(this.userToken.trim());
 
       if (!this.userInput.trim()) return;
@@ -257,22 +254,26 @@ export default {
       }
     },
     async selectVoiceActor(actor) {
-      this.selectedActor = actor; // 선택된 음성 actor 저장
+      this.selectedActor = actor;
     },
     async onClickTalk(actor) {
       console.log("음성지원 서비스 버튼누름")
       await this.selectVoiceActor(actor)
       console.log('목소리: ', this.selectedActor)
-      this.isLoadingVoice = true;
+      this.isLoadingResponse = true;
+
       try {
         const payload = { command: 44, data: [this.chatbotMessage, this.selectedActor] }
         await this.requestVoiceToFastAPI(payload)
-        console.log('fast api가 request voice에 true를 보냈나요? ', this.getVoiceResponse)
-        await this.getVoice()
+        console.log('request voice에 true? ', this.getVoiceResponse)
+
+        if (this.getVoiceResponse) {
+          await this.getVoice()
+        }
       } catch (error) {
         console.error('Error:', error);
       } finally {
-        this.isLoadingVoice = false;
+        this.isLoadingResponse = false;
       }
     },
     formatMessage(content) {
@@ -299,8 +300,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #fcf3ea;
-  /* background-image: url('@/assets/images/fixed/chatpage_background.jpg'); */
+  background-color: #fffbfa;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -309,7 +309,7 @@ export default {
 }
 
 .header-text {
-  background-color: #ffffff;
+  background-color: #fffbfa;
   position: fixed;
   top: 0;
   right: 0;
@@ -318,17 +318,15 @@ export default {
   height: 9vh;
   text-align: center;
   flex-direction: column;
-  /* display: flex; */
-  font-size: 200%;
-  font-weight: bold;
 }
 
 .text-align {
   margin-top: 0.7%;
-  font-size: 30px;
+  font-size: 20px;
+  font-family: sans-serif;
   height: 100%;
   width: 100%;
-
+  font-weight: lighter;
 }
 
 .top-side-bar {
@@ -338,8 +336,7 @@ export default {
   left: 0;
   height: 9vh;
   width: 18.1%;
-  border-right: 1.5px solid #b3b3b3d7;
-  /* 오른쪽 테두리만 설정 */
+  border-right: 0.7px solid #c3c3c3d7;
   box-sizing: border-box;
 }
 
@@ -351,8 +348,7 @@ export default {
   max-height: 84vh;
   height: 84vh;
   width: 18.1%;
-  border-right: 1.5px solid #b3b3b3d7;
-  /* 오른쪽 테두리만 설정 */
+  border-right: 0.7px solid #c3c3c3d7;
   box-sizing: border-box;
 }
 
@@ -364,8 +360,7 @@ export default {
   max-height: 7vh;
   height: 7vh;
   width: 18.1%;
-  border-right: 1.5px solid #b3b3b3d7;
-  /* 오른쪽 테두리만 설정 */
+  border-right: 0.7px solid #c3c3c3d7;
   box-sizing: border-box;
 }
 
@@ -374,15 +369,13 @@ export default {
   position: fixed;
   max-width: 100%;
   max-height: 84vh;
-  background-color: #fffbfaee;
+  background-color: #fef7f5f5;
   top: 9vh;
-  /* 상단에 배치 */
   right: 0;
   width: 81.9%;
   height: 84vh;
-  border-top: 1.5px solid #b3b3b3d7;
-  border-bottom: 1.5px solid #b3b3b3d7;
-  /* 오른쪽 테두리만 설정 */
+  border-top: 0.7px solid #c3c3c3d7;
+  border-bottom: 0.7px solid #c3c3c3d7;
   border-radius: 0px;
   box-sizing: border-box;
   /* padding과 border를 width에 포함시킴 */
@@ -393,19 +386,19 @@ export default {
   flex: 1;
   position: fixed;
   bottom: 0;
-  max-height: 7vh;
-  height: 7vh;
+  max-height: 7.9vh;
+  height: 7.9vh;
   right: 0;
   width: 81.9%;
   max-width: 100%;
-  background-color: #ffffff;
+  background-color: #fffbfa;
   padding: 10px;
   gap: 100px;
 }
 
 .custom-input {
   left: 0;
-  margin-left: 18.5%;
+  margin-left: 18.8%;
   flex-grow: 1;
   width: 76%;
   align-self: center;
@@ -413,33 +406,29 @@ export default {
   max-height: 5.2vh;
   height: 5.2vh;
   padding: 10px;
-  background-color: #f0e8e8;
+  background-color: #F6F1EB;
   border: 1px solid #ffffff00;
   font-size: 13px;
   border-radius: 5px;
-  /* border: 1.5px solid #e0d4c8; */
 
 }
 
 .custom-input::placeholder {
   color: rgba(0, 0, 0, 0.6);
-  /* Placeholder 텍스트 색상 */
   font-style: Arial;
   padding-left: 1%;
 
 }
 
 .custom-input:disabled {
-  background-color: #e0e0e0;
+  background-color: #ece4e2;
   cursor: not-allowed;
 }
 
 .chat-messages {
   flex: 1;
-  /* 남은 공간을 채우도록 설정 */
   overflow-y: auto;
-  /* 채팅 내용이 넘칠 때 스크롤 */
-  padding-bottom: 0px;
+  padding-bottom: 50px;
   z-index: 50;
 }
 
@@ -449,10 +438,8 @@ export default {
 
 .message-content {
   max-width: 80%;
-  /* 메시지의 최대 너비 (프로필 이미지가 있으면 나머지 공간을 차지) */
   border-radius: 15px;
   order: 1;
-  /* 메시지 내용을 프로필 이미지의 왼쪽에 위치시키기 */
 }
 
 .user,
@@ -473,7 +460,6 @@ export default {
   margin-left: auto;
   box-shadow: 3px 2px 3px rgba(0, 0, 0, 0.1);
   position: relative;
-  /* 필요: 자식 요소의 위치를 상대적으로 설정 */
   padding-right: 15px;
 }
 
@@ -488,17 +474,13 @@ export default {
 .avatar,
 .robot {
   width: 35px;
-  /* 프로필 이미지의 너비 */
   height: 35px;
-  /* 프로필 이미지의 높이 */
   border-radius: 50%;
-  /* 프로필 이미지 둥글게 */
   margin-top: 2%;
 }
 
 .avatar {
   order: 2;
-  /* 프로필 이미지를 메시지의 오른쪽에 위치시키기 */
   margin-left: -2%;
   margin-right: 2%;
 
@@ -509,14 +491,12 @@ export default {
   margin-top: 2%;
   margin-right: -2%;
   order: 0;
-  /* 프로필 이미지를 메시지의 오른쪽에 위치시키기 */
-
 }
 
 .mic-button {
   left: 0;
   position: fixed;
-  margin-left: 95%;
+  margin-left: 95.5%;
   align-self: center;
   min-width: 0;
   width: 37px;
@@ -524,32 +504,20 @@ export default {
   padding: 0;
 }
 
-.loading-container {
-  margin-left: 50%;
-  margin-bottom: 23%;
-  justify-content: center;
-  transform: translate(-50%, -50%);
-  font-size: 12px;
-}
-
-.loading-container p {
-  margin-left: 10px;
-  color: #555;
-}
-
 .wrapper {
-  width: 200px;
+  margin-bottom: 25%;
+  width: 100px;
   height: 60px;
   position: relative;
   z-index: 1;
 }
 
 .circle {
-  width: 20px;
-  height: 20px;
+  width: 10%;
+  height: 10px;
   position: absolute;
   border-radius: 50%;
-  background-color: #444;
+  background-color: hsl(25, 100%, 62%);
   left: 15%;
   transform-origin: 50%;
   animation: circle7124 .5s alternate infinite ease;
@@ -586,10 +554,10 @@ export default {
 }
 
 .shadow {
-  width: 20px;
+  width: 11px;
   height: 4px;
   border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(165, 158, 154, 0.9);
   position: absolute;
   top: 62px;
   transform-origin: 50%;
@@ -626,36 +594,6 @@ export default {
   animation-delay: .3s;
 }
 
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  border-left-color: rgb(255, 140, 0);
-  animation: spin 1s ease infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-voice-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.loading-voice-container p {
-  margin-left: 10px;
-  color: #555;
-}
 
 .voice-options {
   display: flex;
@@ -665,30 +603,22 @@ export default {
   /* 버튼들이 화면 너비에 맞춰 자동으로 줄 바꿈 */
   gap: 10px;
   /* 버튼들 사이의 간격 */
-  margin-top: 50px;
-  /* 채팅 입력창 위쪽에 배치 */
   position: fixed;
   /* 화면의 고정된 위치에 배치 */
-  bottom: 80px;
+  bottom: 70px;
   /* 채팅 입력창 위쪽에 위치 */
-  left: 20%;
-  right: 20%;
-  justify-content: center;
+  left: 19.2%;
 
 }
 
 .voice-options button {
   width: 70px;
-  /* 버튼 너비 */
   height: 36px;
-  /* 버튼 높이 */
   border: none;
   border-radius: 15px;
-  /* 네모난 모양 */
   background-color: #f0f0f0;
   cursor: pointer;
   font-size: 14px;
-  /* 글자 크기 조정 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -701,12 +631,13 @@ export default {
   background-color: #ffede1;
 }
 
+.audio {
+  margin-bottom: 1%;
+  margin-left: 0.5%;
+}
 .profile-image {
   max-width: 50px;
-  /* 이미지의 최대 너비 */
   max-height: 50px;
-  /* 이미지의 최대 높이 */
   object-fit: contain;
-  /* 이미지의 비율을 유지하면서 컨테이너에 맞춤 */
 }
 </style>
