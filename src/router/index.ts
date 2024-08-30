@@ -6,6 +6,7 @@ import AccountRoutes from '@/account/router/AccountRoutes'
 import ContactRoutes from '@/contact/router/ContactRoutes'
 import aiCommandModule from '@/gatherEverything/store/aiCommandModule'
 import GatherEverythingRoutes from '@/gatherEverything/router/GatherEverythingRoutes'
+import AuthenticationRoutes from '@/authentication/router/AuthenticationRoutes'
 import ReadRecipeRoutes from '@/readRecipe/router/readRecipeRoutes'
 const routes: Array<RouteRecordRaw> = [
   ...HomeRoutes,
@@ -14,6 +15,7 @@ const routes: Array<RouteRecordRaw> = [
   ...AccountRoutes,
   ...ContactRoutes,
   ...GatherEverythingRoutes,
+  ...AuthenticationRoutes,
   ...ReadRecipeRoutes,
 ]
 

@@ -39,6 +39,12 @@ export type AuthenticationActions = {
         context: ActionContext<AuthenticationState, any>,
         userToken: string
     ): Promise<void>
+    requestReadyKakaoPayRedirection(
+        context: ActionContext<AuthenticationState, any>, readyInfo: { amount: string, approval_url: string }
+    ): Promise<void>
+    requestApproveKakaoPayRedirection(
+        context: ActionContext<AuthenticationState, any>, approveInfo: { tid: string, pg_todken: string }
+    ): Promise<void>
 }
 
 const actions: AuthenticationActions = {
@@ -169,7 +175,7 @@ const actions: AuthenticationActions = {
     async requestLogoutToDjango(
         context: ActionContext<AuthenticationState, any>, userToken: string): Promise<void> {
         try {
-            const res = await axiosInst.djangoAxiosInst.post('/google_oauth/logout', {userToken: userToken})
+            const res = await axiosInst.djangoAxiosInst.post('/google_oauth/logout', { userToken: userToken })
 
             console.log('res:', res.data.isSuccess)
             if (res.data.isSuccess === true) {
@@ -180,7 +186,25 @@ const actions: AuthenticationActions = {
             throw error
         }
         localStorage.removeItem("userToken")
-    }
+    },
+    async requestReadyKakaoPayRedirection(context: ActionContext<AuthenticationState, any>, readyInfo: { amount: string, approval_url: string }): Promise<any> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post('/google_oauth/readyKakaoPay', readyInfo)
+            return response;
+        } catch (error) {
+            console.error('requestReadyKakaoPayRedirection() 오류 발생', error);
+            throw error;
+        }
+    },
+    async requestApproveKakaoPayRedirection(context: ActionContext<AuthenticationState, any>, approveInfo: { tid: string, pg_todken: string }): Promise<any> {
+        try {
+            const response = axiosInst.djangoAxiosInst.post('/google_oauth/approveKakaoPay', approveInfo)
+            return response;
+        } catch (error) {
+            console.error('requestApproveKakaoPayRedirection() 오류 발생', error);
+            throw error;
+        }
+    },
 };
 
 export default actions;
