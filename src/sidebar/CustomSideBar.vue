@@ -157,7 +157,7 @@ export default ({
     },
   },
   mounted() {
-    if (this.userToken) {
+    if (this.isAuthenticated) {
       this.requestUserToken();
     }
     else {
