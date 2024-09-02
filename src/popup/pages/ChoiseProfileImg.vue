@@ -31,18 +31,6 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-
-    <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="3000" top rounded="pill">
-      <div class="d-flex align-center">
-        <v-icon left color="white">mdi-check-circle</v-icon>
-        {{ snackbarText }}
-      </div>
-      <template v-slot:action="{ attrs }">
-        <v-btn text v-bind="attrs" @click="snackbar = false">
-          닫기
-        </v-btn>
-      </template>
-    </v-snackbar>
   </div>
 </template>
 
@@ -67,9 +55,6 @@ export default {
         require('@/assets/images/fixed/img2.jpg'),
         require('@/assets/images/fixed/img3.jpg'),
       ],
-      snackbar: false,
-      snackbarText: '',
-      snackbarColor: 'success',
       email: this.userEmail,
     }
   },
@@ -82,17 +67,12 @@ export default {
       }
       const response = await this.requestSetProfileImgToDjango(accountInfo)
       console.log("프로필 이미지 선택 완료", response)
-      this.showSuccessMessage(index);
+      this.$emit('profile-changed', index);
       this.closeDialog();
     },
     closeDialog() {
       this.dialog = false;
       this.$emit('close');
-    },
-    showSuccessMessage(index) {
-      this.snackbarText = `프로필 이미지가 성공적으로 변경되었습니다!`;
-      this.snackbarColor = 'success';
-      this.snackbar = true;
     },
   }
 }
