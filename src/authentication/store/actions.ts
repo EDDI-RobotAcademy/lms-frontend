@@ -45,6 +45,9 @@ export type AuthenticationActions = {
     requestApproveKakaoPayRedirection(
         context: ActionContext<AuthenticationState, any>, approveInfo: { tid: string, pg_todken: string }
     ): Promise<void>
+    requestRedisAddAttendanceCherryToDjango(
+        context: ActionContext<AuthenticationState, any>, attendancecherryIfo: { usertoken: string, attendancecherry: string }
+    ): Promise<any>
 }
 
 const actions: AuthenticationActions = {
@@ -202,6 +205,17 @@ const actions: AuthenticationActions = {
             return response;
         } catch (error) {
             console.error('requestApproveKakaoPayRedirection() 오류 발생', error);
+            throw error;
+        }
+    },
+    async requestRedisAddAttendanceCherryToDjango(context: ActionContext<AuthenticationState, any>, attendancecherryIfo: { usertoken: string, attendancecherry: string }): Promise<any> {
+        try {
+            const response = await axiosInst.djangoAxiosInst.post(
+                '/google_oauth/redis-add-attendancecherry', attendancecherryIfo)
+
+            return response.data;
+        } catch (error) {
+            console.error('requestRedisAddAttendanceCherryToDjango() 오류 발생', error);
             throw error;
         }
     },
