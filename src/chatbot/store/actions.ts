@@ -55,9 +55,23 @@ const actions: ChatActions = {
             throw error;
         }
     },
-    async requestSaveRecipeToDjango(context: ActionContext<ChatState, any>, payload: {recipe: string}):Promise<void>{
-        const res :  AxiosResponse<any> = await axiosInst.djangoAxiosInst.post('/recipe/save', payload)
-        context.commit(REQUEST_SAVE_RECIPE_TO_DJANGO, res.data);
-    }   
+    async requestSaveRecipeToDjango(context: ActionContext<ChatState, any>, payload: { userToken: string, recipe: string }): Promise<void> {
+        try {
+            // 1. Redis에서 account_id 요청
+            const accountIdResponse = await axiosInst.djangoAxiosInst.post('/google_oauth/redis-get-account-id', { userToken: payload.userToken });
+            const account_id = accountIdResponse.data.account_id;
+    
+            // 2. Django로 user_recipe 저장 요청
+            const res: AxiosResponse<any> = await axiosInst.djangoAxiosInst.post('/user_recipe/create-recipe', {
+                accountId: account_id
+            });
+    
+            // 상태 업데이트
+            context.commit(REQUEST_SAVE_RECIPE_TO_DJANGO, res.data);
+        } catch (error) {
+            console.error('Error saving recipe:', error);
+            throw error;
+        }
+    } 
 }
 export default actions
