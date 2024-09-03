@@ -46,8 +46,7 @@ export type AuthenticationActions = {
         context: ActionContext<AuthenticationState, any>, approveInfo: { tid: string, pg_todken: string }
     ): Promise<void>
     requestRedisAddAttendanceCherryToDjango(
-        context: ActionContext<AuthenticationState, any>, attendancecherryIfo: { usertoken: string, attendancecherry: string }
-    ): Promise<any>
+        context: ActionContext<AuthenticationState, any>, usertoken: string): Promise<any>
 }
 
 const actions: AuthenticationActions = {
@@ -208,10 +207,10 @@ const actions: AuthenticationActions = {
             throw error;
         }
     },
-    async requestRedisAddAttendanceCherryToDjango(context: ActionContext<AuthenticationState, any>, attendancecherryIfo: { usertoken: string, attendancecherry: string }): Promise<any> {
+    async requestRedisAddAttendanceCherryToDjango(context: ActionContext<AuthenticationState, any>, usertoken: string): Promise<any> {
         try {
             const response = await axiosInst.djangoAxiosInst.post(
-                '/google_oauth/redis-add-attendancecherry', attendancecherryIfo)
+                '/google_oauth/redis-add-attendancecherry', { usertoken })
 
             return response.data;
         } catch (error) {

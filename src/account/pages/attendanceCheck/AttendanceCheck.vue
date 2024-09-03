@@ -55,17 +55,20 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import axios from 'axios';
 const authenticationModule = 'authenticationModule'
 
 export default {
   data() {
     return {
+      attendancecherry: 50,
       dialog: true,
       currentDate: new Date(),
       weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       direction: 'next',
       attendance: [], // 출석 체크한 날짜를 저장
+      userToken: localStorage.getItem("userToken")
     };
   },
   computed: {
@@ -110,6 +113,7 @@ export default {
     this.attendance = JSON.parse(localStorage.getItem('attendance')) || [];
   },
   methods: {
+    ...mapActions(authenticationModule, ['requestRedisAddAttendanceCherryToDjango']),
     changeMonth(delta) {
       this.direction = delta > 0 ? 'next' : 'prev';
       this.currentDate = new Date(
@@ -137,7 +141,7 @@ export default {
       return `${year}-${month}-${day}`;
     },
     checkAttendance() {
-      this.requestRedisAddAttendanceCherryToDjango(this.userToken, this.attendancecherry)
+      this.requestRedisAddAttendanceCherryToDjango(this.userToken)
     },
     // checkAttendance() {
     //   const today = this.formatDate(new Date());
