@@ -24,15 +24,11 @@
                   <li v-for="day in weekDays" :key="day">{{ day }}</li>
                 </ul>
                 <ul class="days">
-                  <li
-                    v-for="day in calendarDays"
-                    :key="day.date"
-                    :class="{
-                      inactive: !day.isCurrentMonth,
-                      active: isToday(day.date),
-                      checked: isChecked(day.date)
-                    }"
-                  >
+                  <li v-for="day in calendarDays" :key="day.date" :class="{
+                    inactive: !day.isCurrentMonth,
+                    active: isToday(day.date),
+                    checked: isChecked(day.date)
+                  }">
                     {{ day.date.getDate() }}
                   </li>
                 </ul>
@@ -57,6 +53,7 @@
 <script>
 import { mapActions } from 'vuex'
 import axios from 'axios';
+const accountModule = 'accountModule'
 const authenticationModule = 'authenticationModule'
 
 export default {
@@ -110,10 +107,20 @@ export default {
   mounted() {
     // 로컬 스토리지에서 출석 체크한 날짜를 가져옴
     // TODO: 로컬 스토리지가 아닌 DB에서 꺼내올 것.
-    this.attendance = JSON.parse(localStorage.getItem('attendance')) || [];
+    this.fetchAttendanceDateList()
   },
   methods: {
     ...mapActions(authenticationModule, ['requestRedisAddAttendanceCherryToDjango']),
+    ...mapActions(accountModule, ['requestRedisGetAttendanceDateListToDjango']),
+    // mounted에서 호출하기 위한 함수 정의
+    async fetchAttendanceDateList() {
+      console.log("요청 가기 전:", this.userToken)
+      const request = {usertoken: this.userToken}
+      const data = await this.requestRedisGetAttendanceDateListToDjango(request)
+      console.log('반환값:', data)
+      this.attendance = data
+      console.log('적용되었는지 확인:', this.attendance)
+    },
     changeMonth(delta) {
       this.direction = delta > 0 ? 'next' : 'prev';
       this.currentDate = new Date(
@@ -132,7 +139,7 @@ export default {
     },
     isChecked(date) {
       // 출석 체크한 날짜인지 확인
-      return this.attendance.includes(this.formatDate(date));
+      return [0]==this.formatDate(date);
     },
     formatDate(date) {
       const year = date.getFullYear();
@@ -142,14 +149,22 @@ export default {
     },
     checkAttendance() {
       //TODO: 당일 출석 여부 확인 로직 필요
-      //출석체크 버튼 클릭시 DB 업데이트 로직
-      //TODO: 출석 일자 attInfo에 추가 필요.
-      //TODO: 출석 시 과거 출석 List 업데이트 필요.
-      const attInfo = {
-        usertoken: this.userToken,
+      const today = this.formatDate(new Date())
+      console.log('today:', today.getDate)
+      if (this.attendance[today.getDate - 1] > 0) {
+        alert('이미 오늘 출석 체크를 완료하였습니다.')
+        this.closeDialog()
       }
-      console.log(attInfo)
-      this.requestRedisAddAttendanceCherryToDjango(attInfo)
+      else {
+        //출석체크 버튼 클릭시 DB 업데이트 로직
+        //TODO: 출석 일자 attInfo에 추가 필요.
+        const attInfo = {
+          usertoken: this.userToken,
+        }
+        console.log(attInfo)
+        this.requestRedisAddAttendanceCherryToDjango(attInfo)
+        //TODO: 출석 시 과거 출석 List 업데이트 필요.
+      }
     },
     // checkAttendance() {
     //   const today = this.formatDate(new Date());
@@ -166,7 +181,7 @@ export default {
       this.dialog = false;
       this.$emit('close');
     },
-  },
+  }
 };
 </script>
 
@@ -201,7 +216,8 @@ export default {
 .calendar-container {
   position: relative;
   overflow: hidden;
-  height: 320px; /* Adjust this value based on your calendar's height */
+  height: 320px;
+  /* Adjust this value based on your calendar's height */
 }
 
 .calendar {
@@ -244,7 +260,8 @@ export default {
 }
 
 .days li.checked {
-  background: rgba(252, 118, 134, 0.1); /* 이미 체크한 날의 배경 색상 */
+  background: rgba(252, 118, 134, 0.1);
+  /* 이미 체크한 날의 배경 색상 */
   border-radius: 50%;
 }
 
