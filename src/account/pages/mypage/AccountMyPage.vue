@@ -172,13 +172,11 @@ export default {
                 autoClose: 3000,
             });
         },
-        signOut() {
-            this.requestLogoutToDjango(this.userToken)
-            toast.info('로그아웃 성공', {
-                position: toast.POSITION.TOP_CENTER,
-                autoClose: 2000,
-            });
-            router.push('/')
+        async signOut() {
+            const response = await this.requestLogoutToDjango(this.userToken)
+            if (response) {
+                localStorage.removeItem("userToken")
+            }
         },
     },
     mounted() {
@@ -295,22 +293,22 @@ h4 {
 }
 
 :global(.Vue-Toastification__toast) {
-  min-width: 0 !important;
-  width: fit-content !important;
-  max-width: none !important;
-  padding: 10px 15px !important;
-  border-radius: 20px !important;
+    min-width: 0 !important;
+    width: fit-content !important;
+    max-width: none !important;
+    padding: 10px 15px !important;
+    border-radius: 20px !important;
 }
 
 :global(.Vue-Toastification__toast-body) {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: auto !important;
-  flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
 }
 
 :global(.Vue-Toastification__toast-container) {
-  width: auto !important;
-  max-width: 100% !important;
+    width: auto !important;
+    max-width: 100% !important;
 }
 </style>

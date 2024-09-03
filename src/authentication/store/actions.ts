@@ -240,11 +240,11 @@ const actions: AuthenticationActions = {
       if (res.data.isSuccess === true) {
         context.commit(REQUEST_IS_AUTHENTICATED_TO_DJANGO, false);
       }
+      return res.data.isSuccess
     } catch (error) {
       console.error("requestLogoutToDjango() 중 에러 발생:", error);
       throw error;
     }
-    localStorage.removeItem("userToken");
   },
   async requestReadyKakaoPayRedirection(
     context: ActionContext<AuthenticationState, any>,
