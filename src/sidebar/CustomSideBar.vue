@@ -162,9 +162,6 @@ export default ({
       if (this.isAuthenticated) {
         this.requestUserToken();
       }
-      else {
-        console.log("mounted 비회원")
-      }
       this.isExpanded = this.$route.path === '/chatbot/page';
     }
   },

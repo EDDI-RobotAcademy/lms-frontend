@@ -242,7 +242,7 @@ const actions: AuthenticationActions = {
       }
       return res.data.isSuccess
     } catch (error) {
-      console.error("requestLogoutToDjango() 중 에러 발생:", error);
+      console.error("requestLogoutToDjango() 중 에러 발생: ", error);
       throw error;
     }
   },

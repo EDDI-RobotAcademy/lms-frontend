@@ -182,8 +182,6 @@ export default {
     mounted() {
         if (this.userToken) {
             this.requestUserToken(this.userToken);
-        } else {
-            console.log("mounted 비회원")
         }
     },
 };
