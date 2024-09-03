@@ -141,7 +141,11 @@ export default {
       return `${year}-${month}-${day}`;
     },
     checkAttendance() {
-      this.requestRedisAddAttendanceCherryToDjango(this.userToken)
+      const attInfo = {
+        usertoken: this.userToken,
+      }
+      console.log(attInfo)
+      this.requestRedisAddAttendanceCherryToDjango(attInfo)
     },
     // checkAttendance() {
     //   const today = this.formatDate(new Date());
