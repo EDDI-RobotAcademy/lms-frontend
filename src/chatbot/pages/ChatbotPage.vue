@@ -335,12 +335,17 @@ export default {
     },
     saveRecipe() {
       console.log('레시피 저장하기: ', this.generatedRecipe)
-      const payload = {recipe: this.generatedRecipe}
+      const payload = {recipe: this.generatedRecipe, userToken: this.userToken}
       this.requestSaveRecipeToDjango(payload)
-      if (this.isRecipeSaved) {
-        this.saveComplete = true;
-        this.generatedRecipe = '';
-      }
+      .then(() => {
+            if (this.isRecipeSaved) {
+                this.saveComplete = true;
+                this.generatedRecipe = '';
+            }
+        })
+        .catch(error => {
+            console.error('레시피 저장 실패:', error);
+      })
     },
     closeDialog() {
       this.isclickSaveRecipe = false;
