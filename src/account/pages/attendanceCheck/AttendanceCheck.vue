@@ -141,6 +141,10 @@ export default {
       return `${year}-${month}-${day}`;
     },
     checkAttendance() {
+      //TODO: 당일 출석 여부 확인 로직 필요
+      //출석체크 버튼 클릭시 DB 업데이트 로직
+      //TODO: 출석 일자 attInfo에 추가 필요.
+      //TODO: 출석 시 과거 출석 List 업데이트 필요.
       const attInfo = {
         usertoken: this.userToken,
       }
