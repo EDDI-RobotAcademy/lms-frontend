@@ -106,6 +106,7 @@ export default {
   },
   mounted() {
     // 로컬 스토리지에서 출석 체크한 날짜를 가져옴
+    // TODO: 로컬 스토리지가 아닌 DB에서 꺼내올 것.
     this.attendance = JSON.parse(localStorage.getItem('attendance')) || [];
   },
   methods: {
