@@ -157,13 +157,13 @@ export default ({
     },
   },
   mounted() {
-    if (this.isAuthenticated) {
-      this.requestUserToken();
+    if (this.userToken) {
+      this.$store.state.authenticationModule.isAuthenticated = true;
+      if (this.isAuthenticated) {
+        this.requestUserToken();
+      }
+      this.isExpanded = this.$route.path === '/chatbot/page';
     }
-    else {
-      console.log("mounted 비회원")
-    }
-    this.isExpanded = this.$route.path === '/chatbot/page';
   },
 });
 

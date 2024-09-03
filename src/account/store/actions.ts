@@ -37,7 +37,11 @@ const actions: AccountActions = {
         accountInfo: { email: string, password: string }): Promise<void> {
         try {
             const response = await axiosInst.djangoAxiosInst.post('/account/login', accountInfo);
-            return response.data
+            if (response.data.access_token) {
+                console.log("response.data.access_token 출력",response.data.access_token)
+                context.commit('REQUEST_IS_LOGIN_TO_DJANGO', true);
+            }
+            return response.data;
         } catch (error) {
             console.error('로그인 실패:', error);
             throw error;

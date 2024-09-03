@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapMutations } from 'vuex'
 import router from "@/router";
 const authenticationModule = 'authenticationModule'
 const accountModule = 'accountModule'
@@ -131,7 +131,8 @@ export default {
                         const responseRedis = await this.requestAddRedisAccessTokenToDjango(this.email.trim())
                         console.log("response 답")
                         if (responseRedis) {
-                            alert('첫 화면으로 이동합니다!')
+                            this.$store.state.accountModule.isLoggedIn = true;
+                            alert('로그인 성공!')
                             router.push('/')
                         }
                         else {
