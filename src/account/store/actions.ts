@@ -14,6 +14,7 @@ export type AccountActions = {
     requestSetProfileImgToDjango(context: ActionContext<any, any>, accountInfo: { email: string, img_id: string }): Promise<void>
     requestAccountCreateTimeToDjango(context: ActionContext<any, any>, email: string): Promise<void>
     requestRedisGetAttendanceDateListToDjango(context: ActionContext<any, any>, usertoken: string):Promise<void>
+    requestRedisUpdateAttendanceDateListToDjango(context: ActionContext<any, any>, updateInfo:{usertoken:string; today:number}):Promise<void>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
@@ -124,7 +125,13 @@ const actions: AccountActions = {
         const response = await axiosInst.djangoAxiosInst.post(
             '/account/get-account-date-list', usertoken)
         return response.data.attendanceDateList
-    }
+    },
+    async requestRedisUpdateAttendanceDateListToDjango(
+        context: ActionContext<any, any>, updateInfo:{usertoken: string; today: number}):Promise<void>{
+        const response = await axiosInst.djangoAxiosInst.post(
+            '/account/update-attendance-date-list', updateInfo)
+            return response.data.attendance_status
+    },
 };
 
-export default actions;
+export default actions; 

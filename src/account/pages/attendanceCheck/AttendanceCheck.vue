@@ -59,7 +59,7 @@ const authenticationModule = 'authenticationModule'
 export default {
   data() {
     return {
-      attendancecherry: 50,
+      attendancecherry: 0,
       dialog: true,
       currentDate: new Date(),
       weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -95,7 +95,7 @@ export default {
       }
 
       // Next month's days
-      const remainingDays = 42 - calendarDays.length;
+      const remainingDays = 31 - calendarDays.length;
       for (let i = 1; i <= remainingDays; i++) {
         const date = new Date(year, month + 1, i);
         calendarDays.push({ date, isCurrentMonth: false });
@@ -106,20 +106,16 @@ export default {
   },
   mounted() {
     // 로컬 스토리지에서 출석 체크한 날짜를 가져옴
-    // TODO: 로컬 스토리지가 아닌 DB에서 꺼내올 것.
     this.fetchAttendanceDateList()
   },
   methods: {
     ...mapActions(authenticationModule, ['requestRedisAddAttendanceCherryToDjango']),
-    ...mapActions(accountModule, ['requestRedisGetAttendanceDateListToDjango']),
+    ...mapActions(accountModule, ['requestRedisGetAttendanceDateListToDjango', 'requestRedisUpdateAttendanceDateListToDjango']),
     // mounted에서 호출하기 위한 함수 정의
     async fetchAttendanceDateList() {
-      console.log("요청 가기 전:", this.userToken)
-      const request = {usertoken: this.userToken}
+      const request = { usertoken: this.userToken }
       const data = await this.requestRedisGetAttendanceDateListToDjango(request)
-      console.log('반환값:', data)
       this.attendance = data
-      console.log('적용되었는지 확인:', this.attendance)
     },
     changeMonth(delta) {
       this.direction = delta > 0 ? 'next' : 'prev';
@@ -138,8 +134,14 @@ export default {
       );
     },
     isChecked(date) {
-      // 출석 체크한 날짜인지 확인
-      return [0]==this.formatDate(date);
+      date = date.getDate()
+      // 모든 날짜 출석 여부 확인 로직
+      if(this.attendance[date - 1] > 0){
+        return true
+      } else {
+        return false
+      }
+
     },
     formatDate(date) {
       const year = date.getFullYear();
@@ -148,22 +150,31 @@ export default {
       return `${year}-${month}-${day}`;
     },
     checkAttendance() {
-      //TODO: 당일 출석 여부 확인 로직 필요
-      const today = this.formatDate(new Date())
-      console.log('today:', today.getDate)
-      if (this.attendance[today.getDate - 1] > 0) {
+      console.log('today:', this.currentDate.getDate())
+      if (this.attendance[this.currentDate.getDate() - 1] > 0) {
         alert('이미 오늘 출석 체크를 완료하였습니다.')
         this.closeDialog()
       }
       else {
         //출석체크 버튼 클릭시 DB 업데이트 로직
-        //TODO: 출석 일자 attInfo에 추가 필요.
+
+        //출석체크 클릭시 해당 날짜 체크
+        this.attendance[this.currentDate.getDate() - 1]++
+        console.log('전달 전 출석부:', this.attendance)
+        //django로 전달하기 전의 데이터 정의 부분
         const attInfo = {
-          usertoken: this.userToken,
+          usertoken: this.userToken
         }
-        console.log(attInfo)
         this.requestRedisAddAttendanceCherryToDjango(attInfo)
+
         //TODO: 출석 시 과거 출석 List 업데이트 필요.
+        const updateInfo = {
+          usertoken: this.userToken,
+          today: this.currentDate.getDate()
+        }
+        console.log('2차 정보 업데이트용 데이터', updateInfo)
+        const data = this.requestRedisUpdateAttendanceDateListToDjango(updateInfo)
+        console.log(data)
       }
     },
     // checkAttendance() {
