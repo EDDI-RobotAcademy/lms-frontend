@@ -81,6 +81,7 @@ export default {
     methods: {
         ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango', 'requestNormalLoginToDjango', 'requestGoogleLoginToDjango', 'requestCreateNewSocialAccountToDjango', 'requestEmailLoginTypeToDjango']),
         ...mapActions(authenticationModule, ['requestAddRedisAccessTokenToDjango']),
+
         checkEmail() {
             if (this.$refs.form.validate()) {
                 this.checkEmailDuplication();
@@ -216,12 +217,12 @@ export default {
 }
 
 .v-card {
-    background-color: v-bind(colors.cardBackground) !important;
+    background-color: v-bind('colors.cardBackground') !important;
     height: 490px;
 }
 
 .submit-button {
-    background-color: v-bind(colors.buttonBackground) !important;
+    background-color: v-bind('colors.buttonBackground') !important;
     color: white !important;
     font-size: 16px !important;
     font-weight: normal !important;
@@ -232,7 +233,7 @@ export default {
 }
 
 .submit-button:hover {
-    background-color: v-bind(colors.buttonHoverBackground) !important;
+    background-color: v-bind('colors.buttonHoverBackground') !important;
 }
 
 .google-login-btn {
@@ -245,7 +246,7 @@ export default {
 }
 
 .security {
-    color: v-bind(colors.errorText) !important;
+    color: v-bind('colors.errorText') !important;
     font-size: 12px !important;
 }
 </style>
