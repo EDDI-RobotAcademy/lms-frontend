@@ -133,10 +133,16 @@ const actions: AccountActions = {
             '/attendance/attendance-list', usertoken)
         return response.data.attendanceDateList
     },
+    // async requestRedisUpdateAttendanceDateListToDjango(
+    //     context: ActionContext<any, any>, updateInfo:{usertoken: string; today: number}):Promise<void>{
+    //     const response = await axiosInst.djangoAxiosInst.post(
+    //         '/account/update-attendance-date-list', updateInfo)
+    //         return response.data.attendance_status
+    // },
     async requestRedisUpdateAttendanceDateListToDjango(
         context: ActionContext<any, any>, updateInfo:{usertoken: string; today: number}):Promise<void>{
         const response = await axiosInst.djangoAxiosInst.post(
-            '/account/update-attendance-date-list', updateInfo)
+            '/attendance/mark-attendance', updateInfo)
             return response.data.attendance_status
     },
 };
