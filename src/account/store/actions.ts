@@ -119,17 +119,30 @@ const actions: AccountActions = {
             '/account/account-create-time', { email })
         return response.data.getCreateTime
     },
+    // async requestRedisGetAttendanceDateListToDjango(
+    //     context: ActionContext<any, any>, usertoken: string
+    // ): Promise<void> {
+    //     const response = await axiosInst.djangoAxiosInst.post(
+    //         '/account/get-account-date-list', usertoken)
+    //     return response.data.attendanceDateList
+    // }
     async requestRedisGetAttendanceDateListToDjango(
         context: ActionContext<any, any>, usertoken: string
     ): Promise<void> {
         const response = await axiosInst.djangoAxiosInst.post(
-            '/account/get-account-date-list', usertoken)
+            '/attendance/attendance-list', usertoken)
         return response.data.attendanceDateList
     },
+    // async requestRedisUpdateAttendanceDateListToDjango(
+    //     context: ActionContext<any, any>, updateInfo:{usertoken: string; today: number}):Promise<void>{
+    //     const response = await axiosInst.djangoAxiosInst.post(
+    //         '/account/update-attendance-date-list', updateInfo)
+    //         return response.data.attendance_status
+    // },
     async requestRedisUpdateAttendanceDateListToDjango(
         context: ActionContext<any, any>, updateInfo:{usertoken: string; today: number}):Promise<void>{
         const response = await axiosInst.djangoAxiosInst.post(
-            '/account/update-attendance-date-list', updateInfo)
+            '/attendance/mark-attendance', updateInfo)
             return response.data.attendance_status
     },
 };

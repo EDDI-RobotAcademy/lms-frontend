@@ -14,7 +14,7 @@
     "axios": "^1.7.4",
     "core-js": "^3.8.3",
     "file-loader": "^6.2.0",
-    "openai": "^4.55.5",
+    "openai": "^4.57.1",
     "roboto-fontface": "*",
     "three": "^0.167.1",
     "vue": "^3.2.13",
