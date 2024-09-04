@@ -65,6 +65,14 @@ const actions: ChatActions = {
             const res: AxiosResponse<any> = await axiosInst.djangoAxiosInst.post('/user_recipe/create-recipe', {
                 accountId: account_id
             });
+            // 3. user_recipe_id를 사용하여 Redis에 저장
+            const user_recipe_id = res.data.userRecipeId;
+            await axiosInst.djangoAxiosInst.post('/google_oauth/save-recipe-to-redis', {
+                accountId: account_id,
+                userRecipeId: user_recipe_id,
+                recipe: payload.recipe
+            });
+
     
             // 상태 업데이트
             context.commit(REQUEST_SAVE_RECIPE_TO_DJANGO, res.data);
