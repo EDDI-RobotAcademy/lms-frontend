@@ -177,17 +177,6 @@ export default {
         console.log(data)
       }
     },
-    // checkAttendance() {
-    //   const today = this.formatDate(new Date());
-    //   if (this.attendance.includes(today)) {
-    //     alert('이미 오늘 출석 체크를 완료하셨습니다.');
-    //     return;
-    //   }
-    //   this.attendance.push(today);
-    //   localStorage.setItem('attendance', JSON.stringify(this.attendance));
-    //   alert('출석 체크가 완료되었습니다!');
-    //   this.closeDialog();
-    // },
     closeDialog() {
       this.dialog = false;
       this.$emit('close');
