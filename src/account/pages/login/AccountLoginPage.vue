@@ -2,7 +2,7 @@
     <v-container class="fill-height" fluid>
         <v-row align="center" justify="center">
             <v-col cols="12" sm="8" md="6">
-                <v-card elevation="0" class="pa-6" color="transparent">
+                <v-card elevation="0" class="pa-6" :color="colors.cardBackground">
                     <v-card-title class="text-h5 mb-2">계정</v-card-title>
                     <v-divider class="mb-9"></v-divider>
                     <v-card-text align="center">
@@ -10,14 +10,17 @@
                         <v-form ref="form">
                             <v-text-field v-if="isShowEmail" @keydown.enter.prevent="checkEmail" max-width="300"
                                 v-model="email" label="이메일" outlined required
-                                :rules="[v => !!v || '필수 항목']"></v-text-field>
+                                :rules="[v => !!v || '필수 항목', v => emailRegex.test(v) || '유효한 이메일 주소를 입력해 주세요']"
+                                aria-label="이메일 입력"></v-text-field>
                             <span v-if="!emailRulesCheck" class="security text-medium-emphasis text-caption">
-                                죄송합니다. 표기가 잘못되었습니다. name@domain.com과 같은 형식의 유효한 이메일을 입력해 주세요.</span>
+                                죄송합니다. 표기가 잘못되었습니다. name@domain.com과 같은 형식의 유효한 이메일을 입력해 주세요.
+                            </span>
                             <v-text-field v-if="!isShowEmail" @keydown.enter.prevent="loginUser" type="password"
-                                password="@" max-width="300" v-model="password" label="비밀번호" outlined required
-                                :rules="[v => !!v || '필수 항목']"></v-text-field>
+                                autocomplete="current-password" max-width="300" v-model="password" label="비밀번호" outlined
+                                required :rules="passwordRules" aria-label="비밀번호 입력" ref="passwordInput"></v-text-field>
                             <span v-if="!passwordCheck" class="security text-medium-emphasis text-caption">
-                                비밀번호가 잘 못 입력되었습니다.</span>
+                                비밀번호가 잘못 입력되었습니다.
+                            </span>
                             <div class="d-flex justify-center">
                                 <v-btn v-if="isShowEmail" class="submit-button mt-4" max-width="150"
                                     @click="checkEmail">
@@ -29,7 +32,7 @@
                                 </v-btn>
                             </div>
                             <v-divider width="400" class="mt-9 mb-9"></v-divider>
-                            <v-img class="google-login-btn" block @click="goToGoogleLogin"></v-img>
+                            <v-img class="google-login-btn" block @click="goToGoogleLogin" aria-label="구글 로그인"></v-img>
                         </v-form>
                     </v-card-text>
                 </v-card>
@@ -39,8 +42,9 @@
 </template>
 
 <script>
-import { mapActions, mapMutations } from 'vuex'
+import { mapActions } from 'vuex'
 import router from "@/router";
+
 const authenticationModule = 'authenticationModule'
 const accountModule = 'accountModule'
 
@@ -53,62 +57,54 @@ export default {
             isShowEmail: true,
             clientId: '',
             emailRulesCheck: true,
-            emailRules: [
-                { met: false },
-                { met: false },
-                { met: false },
-                { met: false },
-            ],
+            emailRegex: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
             passwordCheck: true,
+            passwordRules: [
+                v => !!v || '비밀번호는 필수 항목입니다.',
+                v => v.length >= 8 || '비밀번호는 최소 8자 이상이어야 합니다.',
+                v => /[A-Z]/.test(v) || '대문자를 포함해야 합니다.',
+                v => /[a-z]/.test(v) || '소문자를 포함해야 합니다.',
+                v => /[0-9]/.test(v) || '숫자를 포함해야 합니다.',
+                v => /[!@#$%^&*]/.test(v) || '특수문자를 포함해야 합니다.',
+            ],
+            colors: {
+                cardBackground: '#fffcf7',
+                buttonBackground: '#616161',
+                buttonHoverBackground: '#424242',
+                errorText: '#9d2a1e',
+            },
         }
     },
     created() {
         this.clientId = process.env.VUE_APP_GOOGLE_CLIENT_ID;
-        console.log('Client ID:', this.clientId);
     },
     methods: {
         ...mapActions(accountModule, ['requestEmailDuplicationCheckToDjango', 'requestNormalLoginToDjango', 'requestGoogleLoginToDjango', 'requestCreateNewSocialAccountToDjango', 'requestEmailLoginTypeToDjango']),
         ...mapActions(authenticationModule, ['requestAddRedisAccessTokenToDjango']),
-        checkEmailRules() {
-            const email = this.email;
-            this.emailRules[0].met = /[@]/.test(email);
-            this.emailRules[1].met = /[a-z]/.test(email);
-            this.emailRules[2].met = /\.com$/.test(email);
-            this.emailRules[3].met = /@.+\.com$/.test(email);
-        },
         checkEmail() {
-            this.checkEmailRules();
-            let allRulesMet = true;
-            this.emailRules.forEach(rule => {
-                if (!rule.met) {
-                    allRulesMet = false;
-                    this.emailRulesCheck = false;
-                    console.log("조건 충족 안됨")
-                }
-            });
-            if (allRulesMet) {
-                this.emailRulesCheck = true;
-                this.checkEmailDuplication()
+            if (this.$refs.form.validate()) {
+                this.checkEmailDuplication();
             }
         },
         async checkEmailDuplication() {
-            console.log('이메일 중복 검사')
             try {
-                console.log("이메일 중복 검사 이메일:", this.email.trim())
                 const isDuplicate = await this.requestEmailDuplicationCheckToDjango(this.email.trim())
                 if (isDuplicate) {
                     const response = await this.requestEmailLoginTypeToDjango(this.email.trim())
-                    console.log("로그인 타입 출력", response.isLoginType)
                     const LoginType = response.isLoginType
-                    if (LoginType == "NORMAL") {
+                    if (LoginType === "NORMAL") {
                         this.isShowEmail = false;
-                    } else if (LoginType == "GOOGLE") {
-                        alert('구글 회원 입니다.');
+                        this.$nextTick(() => {
+                            if (this.$refs.passwordInput) {
+                                this.$refs.passwordInput.focus();
+                            }
+                        });
+                    } else if (LoginType === "GOOGLE") {
+                        alert('구글 회원입니다.');
                     } else {
                         alert('관리자');
                     }
                 } else {
-                    console.log('email 미사용중')
                     router.push({ path: "/account/register", query: { email: this.email.trim() } });
                 }
             } catch (error) {
@@ -117,33 +113,27 @@ export default {
             }
         },
         async loginUser() {
-            console.log('로그인 하기 누름')
             if (this.$refs.form.validate()) {
                 const accountInfo = {
                     email: this.email,
                     password: this.password,
                 }
                 try {
-                    console.log('로그인 요청');
                     const response = await this.requestNormalLoginToDjango(accountInfo);
-                    console.log('response 응답', response);
                     if (response.access_token != null) {
                         const responseRedis = await this.requestAddRedisAccessTokenToDjango(this.email.trim())
-                        console.log("response 답")
                         if (responseRedis) {
                             this.$store.state.accountModule.isLoggedIn = true;
                             alert('로그인 성공!')
                             router.push('/')
+                        } else {
+                            alert('로그인 처리 중 오류가 발생했습니다.')
                         }
-                        else {
-                            console.log("일반 로그인 responseRedis 오류")
-                        }
-                    }
-                    else {
+                    } else {
                         this.passwordCheck = false;
                     }
                 } catch (error) {
-                    console.log('로그인 요청 실패', error);
+                    alert('로그인 요청 실패')
                 }
             }
         },
@@ -226,12 +216,12 @@ export default {
 }
 
 .v-card {
-    background-color: #fffcf7 !important;
+    background-color: v-bind(colors.cardBackground) !important;
     height: 490px;
 }
 
 .submit-button {
-    background-color: #616161 !important;
+    background-color: v-bind(colors.buttonBackground) !important;
     color: white !important;
     font-size: 16px !important;
     font-weight: normal !important;
@@ -242,7 +232,7 @@ export default {
 }
 
 .submit-button:hover {
-    background-color: #424242 !important;
+    background-color: v-bind(colors.buttonHoverBackground) !important;
 }
 
 .google-login-btn {
@@ -255,7 +245,7 @@ export default {
 }
 
 .security {
-    color: #9d2a1e !important;
+    color: v-bind(colors.errorText) !important;
     font-size: 12px !important;
 }
 </style>
