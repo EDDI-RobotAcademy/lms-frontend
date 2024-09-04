@@ -162,10 +162,10 @@ export default {
         this.attendance[this.currentDate.getDate() - 1]++
         console.log('전달 전 출석부:', this.attendance)
         //django로 전달하기 전의 데이터 정의 부분
-        const attInfo = {
-          usertoken: this.userToken
-        }
-        this.requestRedisAddAttendanceCherryToDjango(attInfo)
+        //const attInfo = {
+        //  usertoken: this.userToken
+        //}
+        //this.requestRedisAddAttendanceCherryToDjango(attInfo)
 
         //TODO: 출석 시 과거 출석 List 업데이트 필요.
         const updateInfo = {

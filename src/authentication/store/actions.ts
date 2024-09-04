@@ -276,13 +276,32 @@ const actions: AuthenticationActions = {
       throw error;
     }
   },
+  // async requestRedisAddAttendanceCherryToDjango(
+  //   context: ActionContext<AuthenticationState, any>,
+  //   attInfo: { usertoken: string}
+  // ): Promise<any> {
+  //   try {
+  //     const response = await axiosInst.djangoAxiosInst.post(
+  //       "/google_oauth/redis-add-attendancecherry",
+  //       attInfo
+  //     );
+
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error(
+  //       "requestRedisAddAttendanceCherryToDjango() 오류 발생",
+  //       error
+  //     );
+  //     throw error;
+  //   }
+  // },
   async requestRedisAddAttendanceCherryToDjango(
     context: ActionContext<AuthenticationState, any>,
     attInfo: { usertoken: string}
   ): Promise<any> {
     try {
       const response = await axiosInst.djangoAxiosInst.post(
-        "/google_oauth/redis-add-attendancecherry",
+        "/attendance/acquire-attendance-cherry",
         attInfo
       );
 
