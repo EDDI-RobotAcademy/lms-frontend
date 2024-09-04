@@ -176,6 +176,7 @@ export default {
             const response = await this.requestLogoutToDjango(this.userToken)
             if (response) {
                 localStorage.removeItem("userToken")
+                router.push('/')
             }
         },
     },
