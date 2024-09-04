@@ -59,7 +59,7 @@ export type AuthenticationActions = {
   ): Promise<void>;
   requestRedisAddAttendanceCherryToDjango(
     context: ActionContext<AuthenticationState, any>,
-    attInfo: { usertoken: string }
+    attInfo: { usertoken: string}
   ): Promise<any>;
 };
 
@@ -278,7 +278,7 @@ const actions: AuthenticationActions = {
   },
   async requestRedisAddAttendanceCherryToDjango(
     context: ActionContext<AuthenticationState, any>,
-    attInfo: { usertoken: string }
+    attInfo: { usertoken: string}
   ): Promise<any> {
     try {
       const response = await axiosInst.djangoAxiosInst.post(
