@@ -71,7 +71,7 @@ const actions: ChatActions = {
             const recipeHash = CryptoJS.SHA256(recipe).toString(CryptoJS.enc.Hex);
     
             // 3. Django로 account_id, recipeHash 저장 요청 (MySQL 저장)
-            const res = await axiosInst.djangoAxiosInst.post('/user_recipe/create-recipe', {
+            const res = await axiosInst.djangoAxiosInst.post('/user_recipe/create', {
                 accountId: account_id,
                 recipeHash: recipeHash
             });
