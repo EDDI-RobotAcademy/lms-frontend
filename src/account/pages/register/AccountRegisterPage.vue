@@ -81,7 +81,9 @@ export default {
           if (response) {
             const responseRedis = await this.requestAddRedisAccessTokenToDjango(this.email.trim())
             if (responseRedis) {
-              router.push('/')
+              router.push('/').then(() => {
+              window.location.reload();
+            });
             }
             else {
               console.log("일반 로그인 responseRedis 오류")
