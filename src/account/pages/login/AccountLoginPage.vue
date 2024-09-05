@@ -83,8 +83,10 @@ export default {
         ...mapActions(authenticationModule, ['requestAddRedisAccessTokenToDjango']),
 
         checkEmail() {
-            if (this.$refs.form.validate()) {
+            if (this.$refs.form.validate() && this.emailRegex.test(this.email)) {
                 this.checkEmailDuplication();
+            } else {
+                this.emailRulesCheck = false;
             }
         },
         async checkEmailDuplication() {
