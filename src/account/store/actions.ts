@@ -13,7 +13,7 @@ export type AccountActions = {
     requestGetProfileImgToDjango(context: ActionContext<any, any>, email: string): Promise<void>
     requestSetProfileImgToDjango(context: ActionContext<any, any>, accountInfo: { email: string, img_id: string }): Promise<void>
     requestAccountCreateTimeToDjango(context: ActionContext<any, any>, email: string): Promise<void>
-    requestRedisGetAttendanceDateListToDjango(context: ActionContext<any, any>, usertoken: string):Promise<void>
+    requestRedisGetAttendanceDateListToDjango(context: ActionContext<any, any>, request:{usertoken: string, month: number}):Promise<void>
     requestRedisUpdateAttendanceDateListToDjango(context: ActionContext<any, any>, updateInfo:{usertoken:string; today:number}):Promise<void>
 }
 const actions: AccountActions = {
@@ -127,10 +127,10 @@ const actions: AccountActions = {
     //     return response.data.attendanceDateList
     // }
     async requestRedisGetAttendanceDateListToDjango(
-        context: ActionContext<any, any>, usertoken: string
+        context: ActionContext<any, any>, request:{usertoken: string, month: number}
     ): Promise<void> {
         const response = await axiosInst.djangoAxiosInst.post(
-            '/attendance/attendance-list', usertoken)
+            '/attendance/attendance-list', request)
         return response.data.attendanceDateList
     },
     // async requestRedisUpdateAttendanceDateListToDjango(
