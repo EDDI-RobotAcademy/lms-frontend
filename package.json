@@ -15,7 +15,7 @@
     "core-js": "^3.8.3",
     "crypto-js": "^4.2.0",
     "file-loader": "^6.2.0",
-    "openai": "^4.55.5",
+    "openai": "^4.57.1",
     "roboto-fontface": "*",
     "sweetalert2": "^11.13.2",
     "three": "^0.167.1",

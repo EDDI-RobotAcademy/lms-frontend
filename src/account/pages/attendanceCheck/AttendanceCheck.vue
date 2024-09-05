@@ -113,7 +113,7 @@ export default {
     ...mapActions(accountModule, ['requestRedisGetAttendanceDateListToDjango', 'requestRedisUpdateAttendanceDateListToDjango']),
     // mounted에서 호출하기 위한 함수 정의
     async fetchAttendanceDateList() {
-      const request = { usertoken: this.userToken }
+      const request = { usertoken: this.userToken , month: this.currentDate.getMonth()+1}
       const data = await this.requestRedisGetAttendanceDateListToDjango(request)
       this.attendance = data
     },
@@ -156,18 +156,8 @@ export default {
         this.closeDialog()
       }
       else {
-        //출석체크 버튼 클릭시 DB 업데이트 로직
-
-        //출석체크 클릭시 해당 날짜 체크
         this.attendance[this.currentDate.getDate() - 1]++
         console.log('전달 전 출석부:', this.attendance)
-        //django로 전달하기 전의 데이터 정의 부분
-        const attInfo = {
-          usertoken: this.userToken
-        }
-        this.requestRedisAddAttendanceCherryToDjango(attInfo)
-
-        //TODO: 출석 시 과거 출석 List 업데이트 필요.
         const updateInfo = {
           usertoken: this.userToken,
           today: this.currentDate.getDate()
@@ -177,17 +167,6 @@ export default {
         console.log(data)
       }
     },
-    // checkAttendance() {
-    //   const today = this.formatDate(new Date());
-    //   if (this.attendance.includes(today)) {
-    //     alert('이미 오늘 출석 체크를 완료하셨습니다.');
-    //     return;
-    //   }
-    //   this.attendance.push(today);
-    //   localStorage.setItem('attendance', JSON.stringify(this.attendance));
-    //   alert('출석 체크가 완료되었습니다!');
-    //   this.closeDialog();
-    // },
     closeDialog() {
       this.dialog = false;
       this.$emit('close');

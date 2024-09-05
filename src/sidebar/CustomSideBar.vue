@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <nav id="nav-bar" :class="{ 'expanded': isExpanded || isChatbotPage }">
+    <nav id="nav-bar" :class="{ 'expanded': isExpanded || isChatbotPage }" @mouseenter="expandSidebar" @mouseleave="collapseSidebar">
       <div id="nav-header">
         <a id="nav-title" target="_blank" @click="goToHome()">
           <i class="fab fa-codepen"></i>CORNER-CHEF
@@ -60,6 +60,10 @@
         </button>
       </div>
     </nav>
+    <div class="sidebar-indicator" v-if="!isExpanded && !isChatbotPage" @mouseenter="expandSidebar" title="메뉴를 보려면 마우스를 올리세요">
+      <i class="fas fa-chevron-right"></i>
+      <span>MORE</span>
+    </div>
     <ShopPopup v-if="currentShop === 'main'" @close="closeShopPopup" />
     <CherryShopPopup v-if="currentShop === 'cherry'" @close="closeShopPopup" />
     <TicketShopPopup v-if="currentShop === 'ticket'" @close="closeShopPopup" />
@@ -153,6 +157,14 @@ export default ({
         } catch (error) {
           console.error("Error requestUserToken:", error);
         }
+      }
+    },
+    expandSidebar() {
+      this.isExpanded = true;
+    },
+    collapseSidebar() {
+      if (!this.isChatbotPage) {
+        this.isExpanded = false;
       }
     },
   },
@@ -306,28 +318,28 @@ body {
 #nav-footer {
   position: relative;
   width: 100%;
-  height: 54px;
+  height: 70px;
   background: var(--navbar-dark-secondary);
   display: flex;
   flex-direction: column;
   z-index: 2;
   overflow: hidden;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 #nav-footer-heading {
   position: relative;
   width: 100%;
-  height: 54px;
+  height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 12px;
-  box-sizing: border-box;
 }
 
 #nav-footer-avatar {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   overflow: hidden;
   margin-right: 12px;
@@ -344,19 +356,11 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-#nav-bar:hover #nav-footer-titlebox,
-#nav-bar.expanded #nav-footer-titlebox,
-#nav-bar.chatbot-page #nav-footer-titlebox {
-  opacity: 1;
 }
 
 #nav-footer-title {
   font-weight: bold;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   color: var(--text-color);
 }
 
@@ -372,8 +376,7 @@ body {
 .user-stats {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: -2px;
+  gap: 12px;
 }
 
 .stat-container {
@@ -390,27 +393,25 @@ body {
 }
 
 .cherry {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   background-image: url('~@/assets/images/fixed/cherry.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  top: -2px;
 }
 
 .mdi-ticket {
-  width: 24px;
-  height: 24px;
-  font-size: 16px;
+  width: 20px;
+  height: 20px;
+  font-size: 18px;
   color: var(--text-color);
-  top: -2px;
 }
 
 .stat-count {
   color: var(--text-color);
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
 }
 
@@ -424,9 +425,11 @@ body {
   border: none;
   cursor: pointer;
   padding: 8px;
-  margin-left: 8px;
   border-radius: 50%;
   transition: background-color 0.2s;
+  position: absolute;
+  right: 8px;
+  top: 8px;
 }
 
 .mypage-button:hover {
@@ -472,5 +475,40 @@ body {
   .mypage-button .mdi-cog {
     font-size: 24px;
   }
+}
+
+.sidebar-indicator {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px 15px;
+  border-radius: 0 10px 10px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar-indicator i {
+  color: var(--text-color);
+  font-size: 20px;
+  margin-right: 8px;
+}
+.sidebar-indicator span {
+  color: var(--text-color);
+  font-weight: bold;
+  font-size: 16px;
+  font-family: var(--font-family);
+}
+
+#nav-bar:hover + .sidebar-indicator,
+#nav-bar.expanded + .sidebar-indicator {
+  opacity: 0;
+  pointer-events: none;
+  left: -100px;
 }
 </style>
