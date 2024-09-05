@@ -47,9 +47,6 @@
                 </span>
               </div>
             </div>
-            <button @click="goToMyPage" class="mypage-button">
-              <i class="mdi mdi-cog"></i>
-            </button>
           </div>
         </div>
       </div>
