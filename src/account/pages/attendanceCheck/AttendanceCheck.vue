@@ -169,7 +169,7 @@ export default {
     },
     closeDialog() {
       this.dialog = false;
-      this.$emit('close');
+      this.$emit('sendClose');
     },
   }
 };
