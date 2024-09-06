@@ -12,12 +12,17 @@
           <span>Start New Chat</span>
         </div>
         <hr>
-        <div class="nav-button"><i class="fas fa-images"></i><span>Recents</span></div>
-        <div class="nav-button"><i class="fas fa-thumbtack"></i><span>토글 구현 예정</span></div>
-        <div class="nav-button"><i class="fas fa-heart"></i><span>구현 예정</span></div>
-        <div class="nav-button"><i class="fas fa-chart-line"></i><span>구현 예정</span></div>
-        <div class="nav-button"><i class="fas fa-fire"></i><span>구현 예정</span></div>
-        
+        <div>
+          <button @click="toggleText" class="nav-toggle">
+            <span v-if="showText">▼ Recents</span>
+            <span v-else>▲ My Recipes</span>
+          </button>
+          <div v-show="showText">
+            <div class="nav-button chat" ><span>채팅 기록 구현 예정</span></div>
+          </div>
+        </div>
+        <br>
+        <hr>
         <div class="nav-button" @click="goToAttendanceCheck()">
           <i class="fas fa-magic" ></i>
           <span>출석체크</span>
@@ -92,6 +97,7 @@ export default ({
       currentShop: null,
       ProfileImg: '_dummy',
       userToken: localStorage.getItem("userToken"),
+      showText: true,
     }
   },
   computed: {
@@ -163,6 +169,9 @@ export default ({
       if (!this.isChatbotPage) {
         this.isExpanded = false;
       }
+    },
+    toggleText() {
+      this.showText = !this.showText; // 토글 동작
     },
   },
   mounted() {
@@ -279,6 +288,12 @@ body {
   overflow-x: hidden;
   transition: width 0.3s ease;
 }
+.nav-toggle { 
+  text-align: start;
+  margin-left: 19%;
+  margin-top: 7%;
+  margin-bottom: 2%;
+}
 
 .nav-button {
   position: relative;
@@ -290,6 +305,13 @@ body {
   cursor: pointer;
   z-index: 1;
   transition: color 0.2s, background-color 0.2s;
+}
+
+.chat {
+  font-size: 14px;
+  height: 40px;
+  font-family: Arial, Helvetica, sans-serif;
+  margin-left: 26%;
 }
 
 .nav-button:hover {
@@ -507,5 +529,8 @@ body {
   opacity: 0;
   pointer-events: none;
   left: -100px;
+}
+hr {
+  border: 0.6px solid rgba(214, 214, 214, 0.596); /* 연한 회색 */
 }
 </style>
