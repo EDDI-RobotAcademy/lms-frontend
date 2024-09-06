@@ -15,6 +15,7 @@ export type AccountActions = {
     requestAccountCreateTimeToDjango(context: ActionContext<any, any>, email: string): Promise<void>
     requestRedisGetAttendanceDateListToDjango(context: ActionContext<any, any>, request:{usertoken: string, month: number}):Promise<void>
     requestRedisUpdateAttendanceDateListToDjango(context: ActionContext<any, any>, updateInfo:{usertoken:string; today:number}):Promise<void>
+    requestSendPasswordResetEmailToDjango(context: ActionContext<any, any>, email: string): Promise<void>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
@@ -144,6 +145,14 @@ const actions: AccountActions = {
         const response = await axiosInst.djangoAxiosInst.post(
             '/attendance/mark-attendance', updateInfo)
             return response.data.attendance_status
+    },
+    async requestSendPasswordResetEmailToDjango(context: ActionContext<any, any>, email: string): Promise<void> {
+        try {
+            await axiosInst.djangoAxiosInst.post('/account/send-password-reset-email', { email });
+        } catch (error) {
+            console.error('Failed to send password reset email:', error);
+            throw error;
+        }
     },
 };
 
