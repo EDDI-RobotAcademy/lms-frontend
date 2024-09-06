@@ -19,7 +19,9 @@
             <span v-else>▲ My Recipes</span>
           </button>
           <div v-show="showText">
-            <div class="nav-button chat" ><span>채팅 기록 구현 예정</span></div>
+            <div class="nav-button chat" ><i class="fas fa-palette"></i>
+              <span>채팅 기록 구현 예정</span>
+            </div>
           </div>
         </div>
         <br>
@@ -27,6 +29,7 @@
         <div class="nav-button" @click="goToAttendanceCheck()">
           <i class="fas fa-magic"></i>
           <span>출석체크</span>
+          <AttendanceCheck v-if="showStateAttendanceCheckPop" @sendClose="closeAttendanceCheckPop"/>
         </div>
         <hr>
         <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
@@ -82,12 +85,14 @@ import router from "@/router";
 import ShopPopup from "@/popup/pages/ShopPopup.vue";
 import CherryShopPopup from "@/popup/pages/CherryShopPopup.vue";
 import TicketShopPopup from "@/popup/pages/TicketShopPopup.vue";
+import AttendanceCheck from "@/account/pages/attendanceCheck/AttendanceCheck.vue";
 
 export default ({
   components: {
     ShopPopup,
     CherryShopPopup,
     TicketShopPopup,
+    AttendanceCheck,
   },
   data() {
     return {
@@ -99,6 +104,7 @@ export default ({
       ProfileImg: '_dummy',
       userToken: localStorage.getItem("userToken"),
       showText: false,
+      showStateAttendanceCheckPop: false,
     }
   },
   computed: {
@@ -136,7 +142,10 @@ export default ({
       router.push('/')
     },
     goToAttendanceCheck() {
-      router.push('/account/attendanceCheck')
+      this.showStateAttendanceCheckPop = !this.showStateAttendanceCheckPop
+    },
+    closeAttendanceCheckPop() {
+      this.showStateAttendanceCheckPop =!this.showStateAttendanceCheckPop
     },
     toggleShopPopup(shop) {
       this.currentShop = this.currentShop === shop ? null : shop;
@@ -313,7 +322,7 @@ body {
   font-size: 14px;
   height: 40px;
   font-family: Arial, Helvetica, sans-serif;
-  margin-left: 26%;
+
 }
 
 .nav-button:hover {
