@@ -17,6 +17,8 @@
     "file-loader": "^6.2.0",
     "openai": "^4.57.1",
     "roboto-fontface": "*",
+    "sass": "^1.78.0",
+    "sass-loader": "^16.0.1",
     "sweetalert2": "^11.13.2",
     "three": "^0.167.1",
     "vue": "^3.2.13",
