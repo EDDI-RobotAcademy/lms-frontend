@@ -179,7 +179,7 @@ export default {
   },
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango']),
-    ...mapActions(authenticationModule, ['requestRedisGetTicketToDjango', 'requestRedisGetEmailToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisUpdateTicketToDjango','requestRedisGetTicketToDjango', 'requestRedisGetEmailToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
     ...mapActions(chatbotModule, ['sendMessageToFastAPI', 'getMessageFromFastAPI', 'requestVoiceToFastAPI', 'getVoiceFromFastAPI', 'requestSaveRecipeToDjango']),
 
     toggleSpeechRecognition() {
@@ -263,19 +263,24 @@ export default {
 
     },
     async sendMessage() {
-      if (this.isInputDisabled) return; // 이미 비활성화된 경우 함수 종료
+      if (this.isInputDisabled) return;
 
       this.isInputDisabled = true;
       this.isLoadingResponse = true;
-      await this.requestRedisUpdateTicketToDjango(this.userToken.trim());
-
-      if (!this.userInput.trim()) return;
-
-      const userMessage = { role: 'user', content: this.userInput };
-      this.messages.push(userMessage);
-
+      
       try {
-        const payload = { command: 45, data: [this.userInput] } // 43: openAI API 45: langchain RAG
+        // 티켓 업데이트
+        await this.requestRedisUpdateTicketToDjango(this.userToken.trim());
+        // 티켓 정보 가져오기
+        const ticketResponse = await this.requestRedisGetTicketToDjango(this.userToken.trim());
+        this.$store.commit(`${authenticationModule}/SET_TICKET`, ticketResponse.ticket);
+
+        if (!this.userInput.trim()) return;
+
+        const userMessage = { role: 'user', content: this.userInput };
+        this.messages.push(userMessage);
+
+        const payload = { command: 45, data: [this.userInput] };
         this.userInput = '';
         this.isLoadingResponse = true;
         await this.sendMessageToFastAPI(payload)

@@ -22,7 +22,7 @@ export type AuthenticationActions = {
     usertoken: string
   ): Promise<any>;
   requestRedisUpdateTicketToDjango(
-    context: ActionContext<AuthenticationState, any>,
+    { commit }: ActionContext<AuthenticationState, any>,
     usertoken: string
   ): Promise<any>;
   requestRedisGetNicknameToDjango(
@@ -59,7 +59,7 @@ export type AuthenticationActions = {
   ): Promise<void>;
   requestRedisAddAttendanceCherryToDjango(
     context: ActionContext<AuthenticationState, any>,
-    attInfo: { usertoken: string}
+    attInfo: { usertoken: string }
   ): Promise<any>;
 };
 
@@ -116,7 +116,7 @@ const actions: AuthenticationActions = {
     }
   },
   async requestRedisGetTicketToDjango(
-    context: ActionContext<AuthenticationState, any>,
+    { commit },
     usertoken: string
   ): Promise<any> {
     try {
@@ -125,14 +125,16 @@ const actions: AuthenticationActions = {
         { usertoken }
       );
 
+      commit("SET_TICKET", response.data.ticket);
       return response.data;
     } catch (error) {
       console.error("requestRedisGetTicketToDjango() 오류 발생", error);
       throw error;
     }
   },
+
   async requestRedisUpdateTicketToDjango(
-    context: ActionContext<AuthenticationState, any>,
+    { commit },
     usertoken: string
   ): Promise<any> {
     try {
@@ -140,6 +142,9 @@ const actions: AuthenticationActions = {
         "/google_oauth/redis-update-ticket",
         { usertoken }
       );
+
+      // 티켓 정보 업데이트
+      commit("SET_TICKET", response.data.ticket);
 
       return response.data;
     } catch (error) {
@@ -297,7 +302,7 @@ const actions: AuthenticationActions = {
   // },
   async requestRedisAddAttendanceCherryToDjango(
     context: ActionContext<AuthenticationState, any>,
-    attInfo: { usertoken: string}
+    attInfo: { usertoken: string }
   ): Promise<any> {
     try {
       const response = await axiosInst.djangoAxiosInst.post(
