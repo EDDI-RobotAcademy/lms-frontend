@@ -18,13 +18,11 @@
             <img v-if="message.role === 'user' && isAuthenticated" class="avatar" :src="profileImageSrc">
             <img v-if="message.role === 'assistant'" class="robot" :src="require('@/assets/images/fixed/chef_bot.png')">
             
-  
-            <button v-if="message.role === 'assistant'" @click="openSaveDialog(message.content)" class="save-recipe-button">
-              <i class="mdi mdi-content-save icon-align"></i>
-            </button>
-
-            <div :class="message.role" class="message-content">
+            <div :class="['message-content', message.role]">
               <div v-html="formatMessage(message.content)"></div>
+              <button v-if="message.role === 'assistant'" @click="openSaveDialog(message.content)" class="save-recipe-button">
+                <i class="mdi mdi-content-save icon-align"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -56,7 +54,7 @@
                 <v-icon color="#444444">mdi-close</v-icon>
               </v-btn>
             </v-card-actions>
-        </v-card>
+          </v-card>
         </v-dialog>
       </div>
 
@@ -507,13 +505,41 @@ export default {
   max-width: 80%;
   border-radius: 15px;
   order: 1;
+  padding-bottom: 40px;
+  padding-right: 40px;
 }
+
+.assistant {
+  background-color: #fcf3ea;
+  align-self: flex-start;
+  margin-bottom: 1.5%;
+  width: fit-content;
+  box-shadow: -3px 2px 4px rgba(0, 0, 0, 0.1);
+  padding-right: 40px;
+}
+
+.save-recipe-button {
+  position: absolute;
+  bottom: 0.5px;
+  right: 1px; 
+  z-index: 40;
+  cursor: pointer;
+  color: #ffa70f;
+  background: none;
+  border: none;
+  padding: 5px;
+}
+
+
 
 .user,
 .assistant {
   font-style: Arial;
   font-size: 12px;
-  padding: 10px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-left: 12px;
+  padding-right: 25px;
   border-radius: 15px;
   margin-top: 2%;
   margin-left: 4%;
