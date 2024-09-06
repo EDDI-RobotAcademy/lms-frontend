@@ -19,7 +19,9 @@
             <span v-else>▲ My Recipes</span>
           </button>
           <div v-show="showText">
-            <div class="nav-button chat" ><span>채팅 기록 구현 예정</span></div>
+            <div class="nav-button chat" ><i class="fas fa-palette"></i>
+              <span>채팅 기록 구현 예정</span>
+            </div>
           </div>
         </div>
         <br>
@@ -313,7 +315,7 @@ body {
   font-size: 14px;
   height: 40px;
   font-family: Arial, Helvetica, sans-serif;
-  margin-left: 26%;
+
 }
 
 .nav-button:hover {
