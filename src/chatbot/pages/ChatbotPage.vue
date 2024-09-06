@@ -275,7 +275,7 @@ export default {
       this.messages.push(userMessage);
 
       try {
-        const payload = { command: 43, data: [this.userInput] }
+        const payload = { command: 45, data: [this.userInput] } // 43: openAI API 45: langchain RAG
         this.userInput = '';
         this.isLoadingResponse = true;
         await this.sendMessageToFastAPI(payload)
@@ -705,7 +705,7 @@ export default {
   z-index: 40;
   cursor: pointer;
   color: #ffa70f;
-  margin-top: -1.5%;
+  margin-top: 4.8%;
 }
 
 .save-recipe-button:hover {
