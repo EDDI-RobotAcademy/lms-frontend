@@ -15,7 +15,7 @@
         <hr>
         <div>
           <button @click="toggleText" class="nav-toggle">
-            <span v-if="showText">▼ Recents</span>
+            <span v-if="showText">▼ My Recipes</span>
             <span v-else>▲ My Recipes</span>
           </button>
           <div v-show="showText">
@@ -98,7 +98,7 @@ export default ({
       currentShop: null,
       ProfileImg: '_dummy',
       userToken: localStorage.getItem("userToken"),
-      showText: true,
+      showText: false,
     }
   },
   computed: {
