@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <nav id="nav-bar" :class="{ 'expanded': isExpanded || isChatbotPage }" @mouseenter="expandSidebar" @mouseleave="collapseSidebar">
+    <nav id="nav-bar" :class="{ 'expanded': isExpanded || isChatbotPage }" @mouseenter="expandSidebar"
+      @mouseleave="collapseSidebar">
       <div id="nav-header">
         <a id="nav-title" target="_blank" @click="goToHome()">
           <i class="fab fa-codepen"></i>CORNER-CHEF
@@ -24,7 +25,7 @@
         <br>
         <hr>
         <div class="nav-button" @click="goToAttendanceCheck()">
-          <i class="fas fa-magic" ></i>
+          <i class="fas fa-magic"></i>
           <span>출석체크</span>
         </div>
         <hr>
@@ -58,11 +59,12 @@
       <div v-if="!this.isAuthenticated">
         <button @click="goToLogin" class="nav-button goto-login">
           <i class="fas fa-magic"></i>
-          <span>로그인하러 가기</span>    
+          <span>로그인하러 가기</span>
         </button>
       </div>
     </nav>
-    <div class="sidebar-indicator" v-if="!isExpanded && !isChatbotPage" @mouseenter="expandSidebar" title="메뉴를 보려면 마우스를 올리세요">
+    <div class="sidebar-indicator" v-if="!isExpanded && !isChatbotPage" @mouseenter="expandSidebar"
+      title="메뉴를 보려면 마우스를 올리세요">
       <i class="fas fa-chevron-right"></i>
       <span>MORE</span>
     </div>
@@ -75,7 +77,7 @@
 <script>
 const authenticationModule = "authenticationModule";
 const accountModule = "accountModule";
-import { mapActions, mapState} from "vuex";
+import { mapActions, mapState } from "vuex";
 import router from "@/router";
 import ShopPopup from "@/popup/pages/ShopPopup.vue";
 import CherryShopPopup from "@/popup/pages/CherryShopPopup.vue";
@@ -92,7 +94,6 @@ export default ({
       isExpanded: false,
       UserEmail: '',
       nickname: '',
-      ticket: '',
       cherry: '',
       currentShop: null,
       ProfileImg: '_dummy',
@@ -101,7 +102,7 @@ export default ({
     }
   },
   computed: {
-    ...mapState(authenticationModule, ["isAuthenticated"]),
+    ...mapState(authenticationModule, ["isAuthenticated", "ticket"]),
     imageSrc() {
       return require(`@/assets/images/fixed/img${this.ProfileImg}.jpg`);
     },
@@ -117,7 +118,7 @@ export default ({
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango', 'requestLogoutToDjango']),
     ...mapActions(authenticationModule, ['requestRedisGetEmailToDjango', 'requestRedisGetTicketToDjango', 'requestRedisGetCherryToDjango', 'requestRedisGetNicknameToDjango']),
-    
+
     goToLogin() {
       router.push('/account/login')
     },
@@ -125,7 +126,7 @@ export default ({
       router.push('/account/mypage')
     },
     goToChatbot() {
-      if (this.isAuthenticated){
+      if (this.isAuthenticated) {
         router.push('/chatbot/page')
       } else {
         this.goToLogin()
@@ -151,8 +152,7 @@ export default ({
           this.UserEmail = email.EmailInfo;
           const Img = await this.requestGetProfileImgToDjango(email.EmailInfo)
           this.ProfileImg = Img
-          const ticket = await this.requestRedisGetTicketToDjango(this.userToken.trim());
-          this.ticket = ticket.ticket;
+          // ticket은 이제 store에서 가져오므로 여기서 설정하지 않습니다.
           const nickname = await this.requestRedisGetNicknameToDjango(this.userToken.trim());
           this.nickname = nickname.nickname;
           const cherry = await this.requestRedisGetCherryToDjango(this.userToken.trim());
@@ -179,6 +179,7 @@ export default ({
       this.$store.state.authenticationModule.isAuthenticated = true;
       if (this.isAuthenticated) {
         this.requestUserToken();
+        this.$store.dispatch(`${authenticationModule}/requestRedisGetTicketToDjango`, this.userToken.trim());
       }
       this.isExpanded = this.$route.path === '/chatbot/page';
     }
@@ -240,7 +241,8 @@ body {
   border-radius: 10px;
 }
 
-#nav-bar:hover, #nav-bar.expanded {
+#nav-bar:hover,
+#nav-bar.expanded {
   width: var(--navbar-width);
   opacity: 0.9;
 }
@@ -475,6 +477,7 @@ body {
 }
 
 @media (max-width: 768px) {
+
   #nav-bar,
   #nav-bar.expanded,
   #nav-bar.chatbot-page {
@@ -509,7 +512,7 @@ body {
   z-index: 4;
   display: flex;
   align-items: center;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-indicator i {
@@ -517,6 +520,7 @@ body {
   font-size: 20px;
   margin-right: 8px;
 }
+
 .sidebar-indicator span {
   color: var(--text-color);
   font-weight: bold;
@@ -524,8 +528,8 @@ body {
   font-family: var(--font-family);
 }
 
-#nav-bar:hover + .sidebar-indicator,
-#nav-bar.expanded + .sidebar-indicator {
+#nav-bar:hover+.sidebar-indicator,
+#nav-bar.expanded+.sidebar-indicator {
   opacity: 0;
   pointer-events: none;
   left: -100px;
