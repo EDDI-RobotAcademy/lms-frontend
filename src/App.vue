@@ -2,7 +2,7 @@
   <v-app>
     <custom-side-bar />
     <v-main>
-      <ContactButton></ContactButton>
+      <ContactButton v-if="!isChatBotPage"></ContactButton>
       <router-view />
     </v-main>
   </v-app>
@@ -23,6 +23,11 @@ export default defineComponent({
   data() {
     return {
       //
+    }
+  },
+  computed: {
+    isChatBotPage() {
+      return this.$route.path.includes('/chatbot');
     }
   },
   methods: {
