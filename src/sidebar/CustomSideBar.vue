@@ -29,6 +29,7 @@
         <div class="nav-button" @click="goToAttendanceCheck()">
           <i class="fas fa-magic"></i>
           <span>출석체크</span>
+          <AttendanceCheck v-if="showStateAttendanceCheckPop"/>
         </div>
         <hr>
         <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
@@ -84,12 +85,14 @@ import router from "@/router";
 import ShopPopup from "@/popup/pages/ShopPopup.vue";
 import CherryShopPopup from "@/popup/pages/CherryShopPopup.vue";
 import TicketShopPopup from "@/popup/pages/TicketShopPopup.vue";
+import AttendanceCheck from "@/account/pages/attendanceCheck/AttendanceCheck.vue";
 
 export default ({
   components: {
     ShopPopup,
     CherryShopPopup,
     TicketShopPopup,
+    AttendanceCheck,
   },
   data() {
     return {
@@ -101,6 +104,7 @@ export default ({
       ProfileImg: '_dummy',
       userToken: localStorage.getItem("userToken"),
       showText: false,
+      showStateAttendanceCheckPop: false,
     }
   },
   computed: {
@@ -138,7 +142,8 @@ export default ({
       router.push('/')
     },
     goToAttendanceCheck() {
-      router.push('/account/attendanceCheck')
+      //TODO 팝업처리 필요
+      this.showStateAttendanceCheckPop = !this.showStateAttendanceCheckPop
     },
     toggleShopPopup(shop) {
       this.currentShop = this.currentShop === shop ? null : shop;
