@@ -29,7 +29,7 @@
         <div class="nav-button" @click="goToAttendanceCheck()">
           <i class="fas fa-magic"></i>
           <span>출석체크</span>
-          <AttendanceCheck v-if="showStateAttendanceCheckPop"/>
+          <AttendanceCheck v-if="showStateAttendanceCheckPop" @sendClose="closeAttendanceCheckPop"/>
         </div>
         <hr>
         <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
@@ -142,8 +142,10 @@ export default ({
       router.push('/')
     },
     goToAttendanceCheck() {
-      //TODO 팝업처리 필요
       this.showStateAttendanceCheckPop = !this.showStateAttendanceCheckPop
+    },
+    closeAttendanceCheckPop() {
+      this.showStateAttendanceCheckPop =!this.showStateAttendanceCheckPop
     },
     toggleShopPopup(shop) {
       this.currentShop = this.currentShop === shop ? null : shop;
