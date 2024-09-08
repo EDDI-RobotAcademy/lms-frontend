@@ -19,6 +19,9 @@
 
 <script>
 import { mapActions } from 'vuex'
+import router from "@/router";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 const accountModule = 'accountModule'
 
@@ -41,12 +44,36 @@ export default {
         async sendResetEmail() {
             try {
                 console.log("이메일 확인", this.email)
-                const response = await this.requestSendPasswordResetEmailToDjango(this.email.trim())
-                console.log('비밀번호 재설정 이메일 전송:', response);
-                this.isEmailSent = true;
+                const response = await this.requestSendPasswordResetEmailToDjango(this.email)
+                console.log("response", response.success)
+                if (response.success) {
+                    toast.success('비밀번호 재설정 이메일 전송 완료.', {
+                        position: "top-center",
+                        timeout: 3000,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        draggablePercent: 0.6,
+                        showCloseButtonOnHover: false,
+                        hideProgressBar: false,
+                        closeButton: "button",
+                        icon: true,
+                        rtl: false
+                    });
+                    this.dialog = false;
+                }
+                else{
+                    toast.error('비밀번호 재설정 이메일 전송 실패:', {
+                        position: "top-center",
+                        timeout: 3000,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        draggablePercent: 0.6,
+                    });
+                }
             } catch (error) {
                 console.error('비밀번호 재설정 이메일 전송 실패:', error);
-                alert('비밀번호 재설정 이메일 전송에 실패했습니다. 다시 시도해주세요.');
             }
         },
         closeDialog() {
