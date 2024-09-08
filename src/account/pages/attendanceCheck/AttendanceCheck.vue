@@ -2,24 +2,15 @@
   <div>
     <v-dialog class="Attendance-check-dialog" v-model="dialog" max-width="600px" max-height="1000px" persistent>
       <v-card>
-        <v-card-title class="headline">
-          출석현황
-        </v-card-title>
         <v-card-text>
           <div class="wrapper">
             <header>
               <div class="nav">
-                <v-btn icon @click="changeMonth(-1)">
-                  <v-icon>mdi-chevron-left</v-icon>
-                </v-btn>
                 <p class="current-date">{{ currentMonthYear }}</p>
-                <v-btn icon @click="changeMonth(1)">
-                  <v-icon>mdi-chevron-right</v-icon>
-                </v-btn>
               </div>
             </header>
-            <transition-group name="calendar" tag="div" class="calendar-container">
-              <div :key="currentMonthYear" class="calendar" :data-direction="direction">
+            <div class="calendar-container">
+              <div class="calendar">
                 <ul class="weeks">
                   <li v-for="day in weekDays" :key="day">{{ day }}</li>
                 </ul>
@@ -33,7 +24,7 @@
                   </li>
                 </ul>
               </div>
-            </transition-group>
+            </div>
           </div>
         </v-card-text>
         <v-card-actions>
@@ -134,14 +125,8 @@ export default {
       );
     },
     isChecked(date) {
-      date = date.getDate()
-      // 모든 날짜 출석 여부 확인 로직
-      if(this.attendance[date - 1] > 0){
-        return true
-      } else {
-        return false
-      }
-
+      const index = date.getDate() - 1;
+      return this.currentDate.getMonth() === date.getMonth() && this.attendance[index] > 0;
     },
     formatDate(date) {
       const year = date.getFullYear();
@@ -150,22 +135,24 @@ export default {
       return `${year}-${month}-${day}`;
     },
     checkAttendance() {
-      console.log('today:', this.currentDate.getDate())
-      if (this.attendance[this.currentDate.getDate() - 1] > 0) {
-        alert('이미 오늘 출석 체크를 완료하였습니다.')
-        this.closeDialog()
-      }
-      else {
-        this.attendance[this.currentDate.getDate() - 1]++
-        console.log('전달 전 출석부:', this.attendance)
-        const updateInfo = {
-          usertoken: this.userToken,
-          today: this.currentDate.getDate()
+      const today = new Date();
+      if (this.currentDate.getMonth() === today.getMonth() && 
+          this.currentDate.getFullYear() === today.getFullYear()) {
+        const todayIndex = today.getDate() - 1;
+        if (this.attendance[todayIndex] > 0) {
+          alert('이미 오늘 출석 체크를 완료하였습니다.');
+        } else {
+          this.attendance[todayIndex]++;
+          const updateInfo = {
+            usertoken: this.userToken,
+            today: today.getDate()
+          };
+          this.requestRedisUpdateAttendanceDateListToDjango(updateInfo);
         }
-        console.log('2차 정보 업데이트용 데이터', updateInfo)
-        const data = this.requestRedisUpdateAttendanceDateListToDjango(updateInfo)
-        console.log(data)
+      } else {
+        alert('현재 달의 출석만 가능합니다.');
       }
+      this.closeDialog();
     },
     closeDialog() {
       this.dialog = false;
@@ -194,7 +181,7 @@ export default {
 .wrapper .nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 20px;
 }
 
@@ -206,7 +193,7 @@ export default {
 .calendar-container {
   position: relative;
   overflow: hidden;
-  height: 320px;
+  height: 210px;
   /* Adjust this value based on your calendar's height */
 }
 
