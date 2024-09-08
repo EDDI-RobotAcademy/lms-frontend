@@ -25,11 +25,6 @@ const AccountRoutes = [
         name: 'AccountMyPage',
         component: AccountMyPage
     },
-    {
-        path: '/account/findPassword',
-        name: 'AccountFindPage',
-        component: AccountFindPage
-    },
 ]
 
 export default AccountRoutes
