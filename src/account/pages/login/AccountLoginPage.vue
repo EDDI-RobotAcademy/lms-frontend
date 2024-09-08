@@ -21,6 +21,8 @@
                             <span v-if="!passwordCheck" class="security text-medium-emphasis text-caption">
                                 비밀번호가 잘못 입력되었습니다.
                             </span>
+                            <p v-if="!isShowEmail" class="forgotPassword text-medium-emphasis text-caption"
+                                @click="toggleShopPopup('forgotPassword')">비밀번호 재설정</p>
                             <div class="d-flex justify-center">
                                 <v-btn v-if="isShowEmail" class="submit-button mt-4" max-width="150"
                                     @click="checkEmail">
@@ -38,6 +40,7 @@
                 </v-card>
             </v-col>
         </v-row>
+        <ForgotPasswordPopup v-if="currentShop === 'forgotPassword'" :email="email" @close="closeShopPopup" />
     </v-container>
 </template>
 
@@ -45,10 +48,14 @@
 import { mapActions } from 'vuex'
 import router from "@/router";
 
+import ForgotPasswordPopup from "@/popup/pages/ForgotPassword.vue";
 const authenticationModule = 'authenticationModule'
 const accountModule = 'accountModule'
 
 export default {
+    components: {
+        ForgotPasswordPopup
+    },
     data() {
         return {
             email: '',
@@ -67,6 +74,7 @@ export default {
                 v => /[0-9]/.test(v) || '숫자를 포함해야 합니다.',
                 v => /[!@#$%^&*]/.test(v) || '특수문자를 포함해야 합니다.',
             ],
+            currentShop: null,
             colors: {
                 cardBackground: '#fffcf7',
                 buttonBackground: '#616161',
@@ -200,6 +208,20 @@ export default {
                 console.error('구글 API 설정 누락');
             }
         },
+        forgotPassword() {
+            console.log('비밀번호 찾기 기능 구현 예정');
+        },
+        toggleShopPopup(shop) {
+            if (shop === 'forgotPassword' && !this.email) {
+                alert('이메일을 먼저 입력해주세요.');
+                return;
+            }
+            this.currentShop = this.currentShop === shop ? null : shop;
+        },
+        closeShopPopup() {
+            this.currentShop = null;
+            location.reload();
+        },
     },
     mounted() {
         if (typeof window.google !== 'undefined') {
@@ -250,5 +272,9 @@ export default {
 .security {
     color: v-bind('colors.errorText') !important;
     font-size: 12px !important;
+}
+
+.forgotPassword {
+    cursor: pointer;
 }
 </style>
