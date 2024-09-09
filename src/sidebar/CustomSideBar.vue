@@ -14,12 +14,12 @@
         </div>
         <hr>
         <div>
-          <button @click="toggleText" class="nav-toggle">
+          <button @click="goToReadRecipe()" class="nav-toggle">
             <img :src="showText ? require('@/assets/images/fixed/sidebar/open-book.png') : require('@/assets/images/fixed/sidebar/book.png')"
               alt="Toggle icon" class="toggle-icon">
             <span>My Recipes</span>
           </button>
-          <div v-show="showText">
+          <!-- <div v-show="showText">
             <div v-if="this.recipes.length !== 0">
               <div v-for="(recipe, index) in recipes" :key="index" class="nav-button chat">
                 <i class="fas fa-palette"></i>
@@ -32,7 +32,7 @@
                 <span> 저장된 레시피가 없습니다!</span>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
         <br>
         <hr>

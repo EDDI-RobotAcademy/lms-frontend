@@ -6,16 +6,17 @@ import { SAVE_RECIPE_TO_FASTAPI, GET_RECIPE_FROM_FASTAPI, CHECK_GET_RECIPE} from
 import {SWITCH_FALSE} from '@/chatbot/store/mutation-types';
 
 export type RecipeActions = {
-    requestRedisGetHashKeyToFastAPI(context: ActionContext<RecipeState, any>, accountId: number): Promise<void>;
+    requestRedisGetHashKeyToDjango(context: ActionContext<RecipeState, any>, accountId: number): Promise<void>;
     saveRecipeToFastAPI(context: ActionContext<RecipeState, any>, 
                         payload: { accountId: number, recipeHash: string, recipe: string }):Promise<void>;
     getRecipeFromFastAPI(context: ActionContext<RecipeState, any>): Promise<void>;
 };
 
 const actions: RecipeActions = { // 이름 바꿔야함
-    async requestRedisGetHashKeyToFastAPI(context: ActionContext<RecipeState, any>, accountId: number): Promise<void>{
-        const res = await axiosInst.fastapiAxiosInst.post('/레디스야-account_id줘', {accountId : accountId})
-        return res.data.hash
+    async requestRedisGetHashKeyToDjango(context: ActionContext<RecipeState, any>, accountId: number): Promise<void>{
+        const res = await axiosInst.djangoAxiosInst.post('/google_oauth/get-recipe-hashes', {accountId})
+        console.log("1", res)
+        return res.data.recipe_hashes
     },
     async saveRecipeToFastAPI(
         context: ActionContext<RecipeState, any>, 

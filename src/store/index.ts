@@ -20,5 +20,6 @@ export default createStore({
     accountModule,
     authenticationModule,
     chatbotModule,
+    recipeModule
   }
 })
