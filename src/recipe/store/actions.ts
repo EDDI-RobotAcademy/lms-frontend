@@ -46,6 +46,7 @@ const actions: RecipeActions = { // 이름 바꿔야함
         context.commit(GET_RECIPE_FROM_FASTAPI, true);
         context.commit(CHECK_GET_RECIPE, res.data.log_data.recipe)
         context.commit(SWITCH_FALSE, false);
+        return res.data.log_data.recipe
     }
 }
 export default actions
