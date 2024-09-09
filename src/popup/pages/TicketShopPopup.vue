@@ -53,9 +53,9 @@ export default {
     return {
       dialog: true,
       ticketOptions: [
-        { amount: 10, price: 1000, loading: false, icon: 'mdi-ticket-outline' },
-        { amount: 30, price: 2700, loading: false, icon: 'mdi-ticket-outline' },
-        { amount: 50, price: 78000, loading: false, icon: 'mdi-ticket-outline' },
+        { amount: 1, price: 10, loading: false, icon: 'mdi-ticket-outline' },
+        { amount: 5, price: 50, loading: false, icon: 'mdi-ticket-outline' },
+        { amount: 10, price: 100, loading: false, icon: 'mdi-ticket-outline' },
       ],
     }
   },
