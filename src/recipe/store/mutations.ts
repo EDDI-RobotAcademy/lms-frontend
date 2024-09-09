@@ -1,24 +1,24 @@
 import { MutationTree } from "vuex";
 import { RecipeState } from "./states"
-import { REQUEST_SAVE_RECIPE_TO_DJANGO, REQUEST_GET_RECIPE_TO_DJANGO, CHECK_GET_RECIPE} from "./mutation-types";
+import { SAVE_RECIPE_TO_FASTAPI, GET_RECIPE_FROM_FASTAPI, CHECK_GET_RECIPE} from "./mutation-types";
 import recipeModule from "./recipeModule";
 
 export interface RecipeMutations extends MutationTree<RecipeState> {
-    [REQUEST_SAVE_RECIPE_TO_DJANGO](state: RecipeState, receivedData: boolean): void
-    [REQUEST_GET_RECIPE_TO_DJANGO](state: RecipeState, receivedData: []): void
-    [CHECK_GET_RECIPE](state: RecipeState, receivedData: boolean): void
+    [SAVE_RECIPE_TO_FASTAPI](state: RecipeState, receivedData: boolean): void
+    [GET_RECIPE_FROM_FASTAPI](state: RecipeState, receivedData: boolean): void
+    [CHECK_GET_RECIPE](state: RecipeState, receivedData: []): void
 
 }
 
 const mutations: MutationTree<RecipeState> = {
-    [REQUEST_SAVE_RECIPE_TO_DJANGO](state: RecipeState, receivedData: boolean): void{
-        state.isRecipeSaved = receivedData
-    },
-    [REQUEST_GET_RECIPE_TO_DJANGO](state: RecipeState, receivedData: []): void{
+    [SAVE_RECIPE_TO_FASTAPI](state: RecipeState, receivedData: boolean): void{
         state.savedRecipe = receivedData
     },
-    [CHECK_GET_RECIPE](state: RecipeState, receivedData: boolean): void{
-        state.getRecipe = receivedData
+    [GET_RECIPE_FROM_FASTAPI](state: RecipeState, receivedData: boolean): void{
+        state.gotRecipe = receivedData
+    },
+    [CHECK_GET_RECIPE](state: RecipeState, receivedData: []): void{
+        state.recipes = receivedData
     }
 }
 
