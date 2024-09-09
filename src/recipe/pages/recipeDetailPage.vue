@@ -3,7 +3,7 @@
     <div id="app">
       <v-container class="recipe-container">
         <v-card-title class="recipe-title">My Recipe Note</v-card-title>
-        <v-card-text v-if="this.getRecipe">
+        <v-card-text v-if="this.gotRecipe">
           <v-card-text class="recipe-number">Recipe No. {{ storageNumber }}</v-card-text>
           <p class="content">
             <strong class="recipe-name">{{ recipeName }} 만들기</strong>
@@ -21,6 +21,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 const recipeModule = 'recipeModule';
+const chatbotModule = 'chatbotModule'
 const authenticationModule = 'authenticationModule'
 
 export default {
@@ -45,42 +46,43 @@ export default {
     };
   },
   computed: {
-    ...mapState(recipeModule, ["savedRecipe", "gotRecipe"]),
+    ...mapState(recipeModule, ["gotRecipe", "recipes"]),
+    
     recipeId() {
       return this.$route.params.recipeId;
       },
-      hashKey() {
-        return this.$route.query.hashKey;
-      }
-    },
-    mounted() {
-      console.log('Hash Key:', this.hashKey) // hashed된 recipe를 해당 페이지에서 this.hashkey로 불러올 수 있음
-    },
-  
+    },  
     methods: {
     ...mapActions(recipeModule, ['getRecipeFromFastAPI', 'requestRedisGetHashKeyToFastAPI']),
     ...mapActions(authenticationModule, ['requestRedisGetAccountIdToDjango']),
+    ...mapActions(chatbotModule, ['sendDataToFastAPI']),
 
-    async getRecipes() {
+    async getRecipe() {
       const accountId = await this.requestRedisGetAccountIdToDjango(this.userToken.trim())
       const recipeHash = await this.requestRedisGetHashKeyToFastAPI(accountId)
+      
       const payload = { command: 55, data: [accountId, recipeHash] }
-      await this.saveRecipeToFastAPI(payload);
+      await this.sendDataToFastAPI(payload);
 
       if (this.gotRecipe) {
-        await this.getRecipeFromFastAPI();
-      }
-      
-      console.log('get Recipe?: ', this.getRecipe)
-      this.recipeName = this.content.match(/\[레시피 명\]:\s*(.*)/)?.[1] || '';
-      this.styledRecipeContent = this.content
-        .replace(/\[레시피 명\]:.*\n*/, '') 
-        .replace(/\[(.*?)\]:\s*/g, '<strong>[$1]</strong><br/>') 
-        .replace(/\n/g, '<br/>'); 
+        const recipeContent = await this.getRecipeFromFastAPI();
+        this.recipeName = recipeContent.match(/\[레시피 명\]:\s*(.*)/)?.[1] || '';
+        this.styledRecipeContent = recipeContent
+          .replace(/\[레시피 명\]:.*\n*/, '') 
+          .replace(/\[(.*?)\]:\s*/g, '<strong>[$1]</strong><br/>') 
+          .replace(/\n/g, '<br/>'); 
+      }  
+      else {
+        this.recipeName = this.content.match(/\[레시피 명\]:\s*(.*)/)?.[1] || '';
+        this.styledRecipeContent = this.content
+          .replace(/\[레시피 명\]:.*\n*/, '') 
+          .replace(/\[(.*?)\]:\s*/g, '<strong>[$1]</strong><br/>') 
+          .replace(/\n/g, '<br/>'); 
+      }  
     }
   },
   created() {
-    this.getRecipes();
+    this.getRecipe();
   }
 };
 </script>

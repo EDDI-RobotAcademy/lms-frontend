@@ -20,10 +20,10 @@
             <span>My Recipes</span>
           </button>
           <div v-show="showText">
-            <div v-if="recipes">
+            <div v-if="this.recipes.length !== 0">
               <div v-for="(recipe, index) in recipes" :key="index" class="nav-button chat">
                 <i class="fas fa-palette"></i>
-                <button @click="goToReadRecipe(index, recipe)">{{ `레시피_${index + 1}` }}</button>
+                <button @click="goToReadRecipe(index)">{{ `레시피_${index + 1}` }}</button>
               </div>
             </div>
             <div v-else>
@@ -128,7 +128,7 @@ export default ({
   },
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated", "ticket"]),
-    ...mapState(recipeModule, ['recipes', 'savedRecipe']),
+    ...mapState(recipeModule, ['recipes']),
     imageSrc() {
       return require(`@/assets/images/fixed/img${this.ProfileImg}.jpg`);
     },
@@ -161,9 +161,9 @@ export default ({
     goToHome() {
       router.push('/')
     },
-    goToReadRecipe(recipeId, hashKey) {
+    goToReadRecipe(recipeId) {
       console.log('recipe 읽기 페이지로 이동', recipeId);
-      router.push({ path: `/recipe/${recipeId}`, query: { hashKey } });
+      router.push({ path: `/recipe/${recipeId}`});
     },
     goToAttendanceCheck() {
       this.showStateAttendanceCheckPop = !this.showStateAttendanceCheckPop
