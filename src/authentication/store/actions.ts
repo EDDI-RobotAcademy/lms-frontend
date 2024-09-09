@@ -9,6 +9,10 @@ export type AuthenticationActions = {
     context: ActionContext<AuthenticationState, any>,
     email: string
   ): Promise<any>;
+  requestRedisGetAccountIdToDjango(
+    context: ActionContext<AuthenticationState, any>,
+    usertoken: string
+  ): Promise<any>,
   requestRedisGetEmailToDjango(
     context: ActionContext<AuthenticationState, any>,
     usertoken: string
@@ -82,6 +86,14 @@ const actions: AuthenticationActions = {
       console.error("Error adding redis access token:", error);
       throw error;
     }
+  },
+  async requestRedisGetAccountIdToDjango(
+    context: ActionContext<AuthenticationState, any>, 
+    usertoken: string): Promise<any> {
+    const accountIdResponse = 
+    await axiosInst.djangoAxiosInst.post('/google_oauth/redis-get-account-id', { userToken: usertoken });
+    const account_id = accountIdResponse.data.account_id;
+    return account_id
   },
   async requestRedisGetEmailToDjango(
     { commit, state }: ActionContext<AuthenticationState, any>,

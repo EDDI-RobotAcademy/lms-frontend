@@ -1,14 +1,14 @@
 
 export interface RecipeState {
-    savedRecipe : []
-    getRecipe: boolean
-    isRecipeSaved : boolean
+    savedRecipe : boolean
+    gotRecipe: boolean
+    recipes : []
 }
 
 const state: RecipeState = {
-    savedRecipe: [],
-    getRecipe: false,
-    isRecipeSaved: false
+    savedRecipe: false,
+    gotRecipe: false,
+    recipes: []
 };
 
 export default state;

@@ -20,10 +20,10 @@
             <span>My Recipes</span>
           </button>
           <div v-show="showText">
-            <div v-if="isRecipeSaved">
-              <div v-for="(savedRecipe, index) in savedRecipe" :key="index" class="nav-button chat">
+            <div v-if="recipes">
+              <div v-for="(recipe, index) in recipes" :key="index" class="nav-button chat">
                 <i class="fas fa-palette"></i>
-                <button @click="goToReadRecipe(index, savedRecipe)">{{ `레시피_${index + 1}` }}</button>
+                <button @click="goToReadRecipe(index, recipe)">{{ `레시피_${index + 1}` }}</button>
               </div>
             </div>
             <div v-else>
@@ -124,13 +124,11 @@ export default ({
       userToken: localStorage.getItem("userToken"),
       showText: false,
       showStateAttendanceCheckPop: false,
-      isRecipeSaved: true,
-      savedRecipe: ['테스트1', '테스트2', '테스트3']
     }
   },
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated", "ticket"]),
-    // ...mapState(recipeModule, ['savedRecipe', 'isRecipeSaved']), //isRecipeSaved savedRecipe
+    ...mapState(recipeModule, ['recipes', 'savedRecipe']),
     imageSrc() {
       return require(`@/assets/images/fixed/img${this.ProfileImg}.jpg`);
     },

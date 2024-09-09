@@ -21,6 +21,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 const recipeModule = 'recipeModule';
+const authenticationModule = 'authenticationModule'
 
 export default {
   data() {
@@ -44,7 +45,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(recipeModule, ["savedRecipe", "getRecipe"]),
+    ...mapState(recipeModule, ["savedRecipe", "gotRecipe"]),
     recipeId() {
       return this.$route.params.recipeId;
       },
@@ -57,10 +58,19 @@ export default {
     },
   
     methods: {
-    ...mapActions(recipeModule, ['requestGetRecipeToDjango']),
+    ...mapActions(recipeModule, ['getRecipeFromFastAPI', 'requestRedisGetHashKeyToFastAPI']),
+    ...mapActions(authenticationModule, ['requestRedisGetAccountIdToDjango']),
 
     async getRecipes() {
-      await this.requestGetRecipeToDjango({userToken : this.userToken.trim()});
+      const accountId = await this.requestRedisGetAccountIdToDjango(this.userToken.trim())
+      const recipeHash = await this.requestRedisGetHashKeyToFastAPI(accountId)
+      const payload = { command: 55, data: [accountId, recipeHash] }
+      await this.saveRecipeToFastAPI(payload);
+
+      if (this.gotRecipe) {
+        await this.getRecipeFromFastAPI();
+      }
+      
       console.log('get Recipe?: ', this.getRecipe)
       this.recipeName = this.content.match(/\[레시피 명\]:\s*(.*)/)?.[1] || '';
       this.styledRecipeContent = this.content

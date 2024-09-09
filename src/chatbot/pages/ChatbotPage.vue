@@ -87,6 +87,7 @@
 <script>
 import { mapActions, mapState } from "vuex";
 import { nextTick } from 'vue'
+import CryptoJS from 'crypto-js';
 
 const authenticationModule = "authenticationModule";
 const chatbotModule = 'chatbotModule';
@@ -117,14 +118,13 @@ export default {
       profileNumber: '_dummy',
       userToken: localStorage.getItem("userToken"),
       isclickSaveRecipe: false,
-      saveComplete: false,
       generatedRecipe: ''
     };
   },
 
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated"]),
-    ...mapState(chatbotModule, ['getMessageResponse', 'assistantMessage', 'getVoiceResponse', 'voice']),
+    ...mapState(chatbotModule, ['getDataResponse', 'assistantMessage', 'voice']),
     ...mapState(recipeModule, ['isRecipeSaved', 'getRecipe']),
 
     audioSrc() {
@@ -178,9 +178,10 @@ export default {
   },
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango']),
-    ...mapActions(authenticationModule, ['requestRedisUpdateTicketToDjango','requestRedisGetTicketToDjango', 'requestRedisGetEmailToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
-    ...mapActions(chatbotModule, ['sendMessageToFastAPI', 'getMessageFromFastAPI', 'requestVoiceToFastAPI', 'getVoiceFromFastAPI']),
-    ...mapActions(recipeModule, ['requestSaveRecipeToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisUpdateTicketToDjango','requestRedisGetTicketToDjango', 'requestRedisGetAccountIdToDjango',
+                                         'requestRedisGetEmailToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
+    ...mapActions(chatbotModule, ['sendDataToFastAPI', 'getMessageFromFastAPI', 'getVoiceFromFastAPI']),
+    ...mapActions(recipeModule, ['saveRecipeToFastAPI']),
 
     toggleSpeechRecognition() {
       if (this.recognition) {
@@ -231,7 +232,7 @@ export default {
 
     },
     async getMessage() {
-      while (this.getMessageResponse) {
+      while (this.getDataResponse) {
         await this.getMessageFromFastAPI();
         await this.sleep(9000);
         console.log('while assistantMessage : ', this.assistantMessage)
@@ -248,7 +249,7 @@ export default {
     },
     async getVoice() {
       this.showActorOption = false;
-      while (this.getVoiceResponse) {
+      while (this.getDataResponse) {
         await this.sleep(9000);
         await this.getVoiceFromFastAPI();
         console.log('while voice : ', this.voice)
@@ -283,10 +284,10 @@ export default {
         const payload = { command: 45, data: [this.userInput] };
         this.userInput = '';
         this.isLoadingResponse = true;
-        await this.sendMessageToFastAPI(payload)
-        console.log('send Message에 true? ', this.getMessageResponse)
+        await this.sendDataToFastAPI(payload)
+        console.log('send Message에 true? ', this.getDataResponse)
 
-        if (this.getMessageResponse) {
+        if (this.getDataResponse) {
           await this.getMessage()
         }
 
@@ -310,10 +311,10 @@ export default {
 
       try {
         const payload = { command: 44, data: [this.chatbotMessage, this.selectedActor] }
-        await this.requestVoiceToFastAPI(payload)
-        console.log('request voice에 true? ', this.getVoiceResponse)
+        await this.sendDataToFastAPI(payload)
+        console.log('request voice에 true? ', this.getDataResponse)
 
-        if (this.getVoiceResponse) {
+        if (this.getDataResponse) {
           await this.getVoice()
         }
       } catch (error) {
@@ -340,24 +341,25 @@ export default {
     },
     async saveRecipe() {
       console.log('레시피 저장하기: ', this.generatedRecipe)
-      const payload = {recipe: this.generatedRecipe, userToken: this.userToken}
-      try {
-      // 요청을 보내 레시피 저장 시도
-      const isSaved = await this.requestSaveRecipeToDjango(payload);
+      const accountId = await this.requestRedisGetAccountIdToDjango(this.userToken.trim())
+      const recipeHash = CryptoJS.SHA256(this.generatedRecipe).toString(CryptoJS.enc.Hex);
 
+      const payload = { command: 56, data: [accountId, recipeHash, this.generatedRecipe] }
+      await this.sendDataToFastAPI(payload)
+      try {
+      if (this.getDataResponse) {
+        const payload = { accountId: accountId, recipeHash: recipeHash, recipe: this.generatedRecipe }
+        await this.saveRecipeToFastAPI(payload);
+      }
       // 레시피가 성공적으로 저장된 경우
       if (this.isRecipeSaved) {
-        this.saveComplete = true;
         this.generatedRecipe = ''; // 저장 성공 시 레시피 초기화
-        console.log('레시피가 성공적으로 저장되었습니다.');
-        alert(isSaved)
+        alert('레시피가 성공적으로 저장되었습니다.');
         this.closeDialog()
-      } 
-
+        } 
       } catch (error) {
         console.error('레시피 저장 실패:', error);
-    
-        }
+      }
     },
     closeDialog() {
       this.isclickSaveRecipe = false;
