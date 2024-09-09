@@ -44,6 +44,9 @@
 <script>
 import { mapActions } from 'vuex'
 import axios from 'axios';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+
 const accountModule = 'accountModule'
 const authenticationModule = 'authenticationModule'
 
@@ -140,7 +143,7 @@ export default {
           this.currentDate.getFullYear() === today.getFullYear()) {
         const todayIndex = today.getDate() - 1;
         if (this.attendance[todayIndex] > 0) {
-          alert('이미 오늘 출석 체크를 완료하였습니다.');
+          toast.error('이미 오늘 출석 체크를 완료하였습니다.');
         } else {
           this.attendance[todayIndex]++;
           const updateInfo = {
@@ -148,11 +151,15 @@ export default {
             today: today.getDate()
           };
           this.requestRedisUpdateAttendanceDateListToDjango(updateInfo);
+
+          toast.success('출석 완료 +50 체리', {
+            autoClose: 3000,
+          });
         }
       } else {
-        alert('현재 달의 출석만 가능합니다.');
+        toast.warning('현재 달의 출석만 가능합니다.');
       }
-      this.closeDialog();
+      // this.closeDialog(); // 이 줄을 제거하여 다이얼로그가 닫히지 않도록 합니다.
     },
     closeDialog() {
       this.dialog = false;
