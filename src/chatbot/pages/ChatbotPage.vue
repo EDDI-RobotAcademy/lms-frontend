@@ -91,6 +91,7 @@ import { nextTick } from 'vue'
 const authenticationModule = "authenticationModule";
 const chatbotModule = 'chatbotModule';
 const accountModule = 'accountModule';
+const recipeModule = 'recipeModule'
 
 export default {
   name: 'Corner-Chefbot',
@@ -123,8 +124,8 @@ export default {
 
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated"]),
-    ...mapState(chatbotModule, ['getMessageResponse', 'assistantMessage', 
-    'getVoiceResponse', 'voice', 'isRecipeSaved']),
+    ...mapState(chatbotModule, ['getMessageResponse', 'assistantMessage', 'getVoiceResponse', 'voice']),
+    ...mapState(recipeModule, ['isRecipeSaved', 'getRecipe']),
 
     audioSrc() {
       return this.generatedVoice ? `data:audio/mpeg;base64,${this.generatedVoice}` : '';
@@ -178,7 +179,8 @@ export default {
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango']),
     ...mapActions(authenticationModule, ['requestRedisUpdateTicketToDjango','requestRedisGetTicketToDjango', 'requestRedisGetEmailToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
-    ...mapActions(chatbotModule, ['sendMessageToFastAPI', 'getMessageFromFastAPI', 'requestVoiceToFastAPI', 'getVoiceFromFastAPI', 'requestSaveRecipeToDjango']),
+    ...mapActions(chatbotModule, ['sendMessageToFastAPI', 'getMessageFromFastAPI', 'requestVoiceToFastAPI', 'getVoiceFromFastAPI']),
+    ...mapActions(recipeModule, ['requestSaveRecipeToDjango']),
 
     toggleSpeechRecognition() {
       if (this.recognition) {
@@ -336,19 +338,26 @@ export default {
       this.isclickSaveRecipe = true;
       this.generatedRecipe = generatedRecipe
     },
-    saveRecipe() {
+    async saveRecipe() {
       console.log('레시피 저장하기: ', this.generatedRecipe)
       const payload = {recipe: this.generatedRecipe, userToken: this.userToken}
-      this.requestSaveRecipeToDjango(payload)
-      .then(() => {
-            if (this.isRecipeSaved) {
-                this.saveComplete = true;
-                this.generatedRecipe = '';
-            }
-        })
-        .catch(error => {
-            console.error('레시피 저장 실패:', error);
-      })
+      try {
+      // 요청을 보내 레시피 저장 시도
+      const isSaved = await this.requestSaveRecipeToDjango(payload);
+
+      // 레시피가 성공적으로 저장된 경우
+      if (this.isRecipeSaved) {
+        this.saveComplete = true;
+        this.generatedRecipe = ''; // 저장 성공 시 레시피 초기화
+        console.log('레시피가 성공적으로 저장되었습니다.');
+        alert(isSaved)
+        this.closeDialog()
+      } 
+
+      } catch (error) {
+        console.error('레시피 저장 실패:', error);
+    
+        }
     },
     closeDialog() {
       this.isclickSaveRecipe = false;
