@@ -2,7 +2,7 @@ import accountModule from '@/account/store/accountModule'
 import authenticationModule from '@/authentication/store/authenticationModule'
 import boardModule from '@/board/store/boardModule'
 import chatbotModule from '@/chatbot/store/chatbotModule'
-import aiCommandModule from '@/gatherEverything/store/aiCommandModule'
+
 import recipeModule from '@/recipe/store/recipeModule'
 import { createStore } from 'vuex'
 
@@ -20,7 +20,5 @@ export default createStore({
     accountModule,
     authenticationModule,
     chatbotModule,
-    aiCommandModule,
-    recipeModule,
   }
 })
