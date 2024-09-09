@@ -132,7 +132,7 @@ export default {
       this.messages.push(userMessage);
 
       try {
-        const payload = { command: 43, data: [this.userInput] }
+        const payload = { command: 45, data: [this.userInput] }
         this.userInput = '';
         this.isChatUsed = true;
         this.isLoadingResponse = true;
