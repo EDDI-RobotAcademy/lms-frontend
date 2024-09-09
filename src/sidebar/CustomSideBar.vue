@@ -20,8 +20,17 @@
             <span>My Recipes</span>
           </button>
           <div v-show="showText">
-            <div class="nav-button chat"><i class="fas fa-palette"></i>
-              <span>채팅 기록 구현 예정</span>
+            <div v-if="isRecipeSaved">
+              <div v-for="(savedRecipe, index) in savedRecipe" :key="index" class="nav-button chat">
+                <i class="fas fa-palette"></i>
+                <button @click="goToReadRecipe(index, savedRecipe)">{{ `레시피_${index + 1}` }}</button>
+              </div>
+            </div>
+            <div v-else>
+              <div class="chat none">
+                <i class="fas fa-palette"></i>
+                <span> 저장된 레시피가 없습니다!</span>
+              </div>
             </div>
           </div>
         </div>
@@ -34,7 +43,7 @@
             <AttendanceCheck v-if="showStateAttendanceCheckPop" @sendClose="closeAttendanceCheckPop" />
           </div>
         </div>
-        <div v-if="!this.isAuthenticated">
+        <div v-else>
           <div class="nav-button" @click="goToLogin()">
             <i class="fas fa-magic"></i>
             <span>출석체크</span>
@@ -68,7 +77,7 @@
           </div>
         </div>
       </div>
-      <div v-if="!this.isAuthenticated">
+      <div v-else>
         <button @click="goToLogin" class="nav-button goto-login">
           <i class="fas fa-magic"></i>
           <span>로그인하러 가기</span>
@@ -89,6 +98,7 @@
 <script>
 const authenticationModule = "authenticationModule";
 const accountModule = "accountModule";
+const recipeModule = "recipeModule";
 import { mapActions, mapState } from "vuex";
 import router from "@/router";
 import ShopPopup from "@/popup/pages/ShopPopup.vue";
@@ -114,10 +124,13 @@ export default ({
       userToken: localStorage.getItem("userToken"),
       showText: false,
       showStateAttendanceCheckPop: false,
+      isRecipeSaved: true,
+      savedRecipe: ['테스트1', '테스트2', '테스트3']
     }
   },
   computed: {
     ...mapState(authenticationModule, ["isAuthenticated", "ticket"]),
+    // ...mapState(recipeModule, ['savedRecipe', 'isRecipeSaved']), //isRecipeSaved savedRecipe
     imageSrc() {
       return require(`@/assets/images/fixed/img${this.ProfileImg}.jpg`);
     },
@@ -149,6 +162,10 @@ export default ({
     },
     goToHome() {
       router.push('/')
+    },
+    goToReadRecipe(recipeId, hashKey) {
+      console.log('recipe 읽기 페이지로 이동', recipeId);
+      router.push({ path: `/recipe/${recipeId}`, query: { hashKey } });
     },
     goToAttendanceCheck() {
       this.showStateAttendanceCheckPop = !this.showStateAttendanceCheckPop
@@ -353,6 +370,10 @@ body {
   height: 40px;
   font-family: Arial, Helvetica, sans-serif;
 
+}
+.none {
+  margin-top: 3%;
+  margin-left:20%;
 }
 
 .nav-button:hover {
