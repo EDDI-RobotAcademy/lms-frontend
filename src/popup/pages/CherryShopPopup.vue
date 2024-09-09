@@ -50,9 +50,9 @@ export default {
     return {
       dialog: true,
       cherryOptions: [
-        { amount: 10, price: 1000, loading: false },
-        { amount: 30, price: 2700, loading: false },
-        { amount: 50, price: 78000, loading: false },
+        { amount: 100, price: 1000, loading: false },
+        { amount: 500, price: 4500, loading: false },
+        { amount: 1000, price: 8000, loading: false },
       ],
       currentOption: null,
     }

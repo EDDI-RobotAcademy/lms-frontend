@@ -172,7 +172,11 @@ export default ({
       this.showStateAttendanceCheckPop = !this.showStateAttendanceCheckPop
     },
     toggleShopPopup(shop) {
-      this.currentShop = this.currentShop === shop ? null : shop;
+      if(this.userToken) {
+        this.currentShop = this.currentShop === shop ? null : shop;
+      }else{
+        this.goToLogin()
+      }
     },
     closeShopPopup() {
       this.currentShop = null;
@@ -204,7 +208,11 @@ export default ({
       }
     },
     toggleText() {
-      this.showText = !this.showText; // 토글 동작
+      if(this.userToken) {
+        this.showText = !this.showText; // 토글 동작
+      }else{
+        this.goToLogin()
+      }
     },
   },
   mounted() {
