@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router';
-import RecipeDetailPage from '@/readRecipe/pages/recipeDetailPage.vue'; 
+import RecipeDetailPage from '@/recipe/pages/recipeDetailPage.vue'; 
 
-const ReadRecipeRoutes: Array<RouteRecordRaw> = [
+const RecipeRoutes: Array<RouteRecordRaw> = [
   {
     path: '/recipe/:recipeId',
     name: 'RecipeDetail',
@@ -10,4 +10,4 @@ const ReadRecipeRoutes: Array<RouteRecordRaw> = [
   }
 ];
 
-export default ReadRecipeRoutes;
+export default RecipeRoutes;
