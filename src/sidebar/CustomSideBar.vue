@@ -15,11 +15,12 @@
         <hr>
         <div>
           <button @click="toggleText" class="nav-toggle">
-            <span v-if="showText">▼ My Recipes</span>
-            <span v-else>▲ My Recipes</span>
+            <img :src="showText ? require('@/assets/images/fixed/sidebar/open-book.png') : require('@/assets/images/fixed/sidebar/book.png')"
+              alt="Toggle icon" class="toggle-icon">
+            <span>My Recipes</span>
           </button>
           <div v-show="showText">
-            <div class="nav-button chat" ><i class="fas fa-palette"></i>
+            <div class="nav-button chat"><i class="fas fa-palette"></i>
               <span>채팅 기록 구현 예정</span>
             </div>
           </div>
@@ -30,7 +31,7 @@
           <div class="nav-button" @click="goToAttendanceCheck()">
             <i class="fas fa-magic"></i>
             <span>출석체크</span>
-              <AttendanceCheck v-if="showStateAttendanceCheckPop" @sendClose="closeAttendanceCheckPop"/>
+            <AttendanceCheck v-if="showStateAttendanceCheckPop" @sendClose="closeAttendanceCheckPop" />
           </div>
         </div>
         <div v-if="!this.isAuthenticated">
@@ -153,7 +154,7 @@ export default ({
       this.showStateAttendanceCheckPop = !this.showStateAttendanceCheckPop
     },
     closeAttendanceCheckPop() {
-      this.showStateAttendanceCheckPop =!this.showStateAttendanceCheckPop
+      this.showStateAttendanceCheckPop = !this.showStateAttendanceCheckPop
     },
     toggleShopPopup(shop) {
       this.currentShop = this.currentShop === shop ? null : shop;
@@ -307,11 +308,24 @@ body {
   overflow-x: hidden;
   transition: width 0.3s ease;
 }
+
 .nav-toggle { 
   text-align: start;
   margin-left: 19%;
   margin-top: 7%;
   margin-bottom: 2%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+}
+
+.toggle-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
 }
 
 .nav-button {
@@ -551,7 +565,9 @@ body {
   pointer-events: none;
   left: -100px;
 }
+
 hr {
-  border: 0.6px solid rgba(214, 214, 214, 0.596); /* 연한 회색 */
+  border: 0.6px solid rgba(214, 214, 214, 0.596);
+  /* 연한 회색 */
 }
 </style>
