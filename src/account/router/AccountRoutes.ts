@@ -2,6 +2,7 @@ import AccountLoginPage from "@/account/pages/login/AccountLoginPage.vue"
 import AccountRegisterPage from "@/account/pages/register/AccountRegisterPage.vue"
 import AccountMyPage from "@/account/pages/mypage/AccountMyPage.vue"
 import AttendanceCheck from "@/account/pages/attendanceCheck/AttendanceCheck.vue"
+import AccountFindPage from "@/account/pages/findPassword/findPassword.vue"
 
 const AccountRoutes = [
     {

@@ -1,6 +1,5 @@
 import { ActionContext } from "vuex"
 import axiosInst from "@/utility/axiosInstance"
-
 export type AccountActions = {
     requestEmailDuplicationCheckToDjango(context: ActionContext<any, any>, email: string): Promise<boolean>
     requestCreateNewAccountToDjango(context: ActionContext<any, any>, accountInfo: { email: string, password: string, nickname: string }): Promise<void>
@@ -13,8 +12,9 @@ export type AccountActions = {
     requestGetProfileImgToDjango(context: ActionContext<any, any>, email: string): Promise<void>
     requestSetProfileImgToDjango(context: ActionContext<any, any>, accountInfo: { email: string, img_id: string }): Promise<void>
     requestAccountCreateTimeToDjango(context: ActionContext<any, any>, email: string): Promise<void>
-    requestRedisGetAttendanceDateListToDjango(context: ActionContext<any, any>, request:{usertoken: string, month: number}):Promise<void>
-    requestRedisUpdateAttendanceDateListToDjango(context: ActionContext<any, any>, updateInfo:{usertoken:string; today:number}):Promise<void>
+    requestRedisGetAttendanceDateListToDjango(context: ActionContext<any, any>, request: { usertoken: string, month: number }): Promise<void>
+    requestRedisUpdateAttendanceDateListToDjango(context: ActionContext<any, any>, updateInfo: { usertoken: string; today: number }): Promise<void>
+    requestSendPasswordResetEmailToDjango(context: ActionContext<any, any>, email: string): Promise<void>
 }
 const actions: AccountActions = {
     async requestEmailDuplicationCheckToDjango(
@@ -40,7 +40,7 @@ const actions: AccountActions = {
         try {
             const response = await axiosInst.djangoAxiosInst.post('/account/login', accountInfo);
             if (response.data.access_token) {
-                console.log("response.data.access_token 출력",response.data.access_token)
+                console.log("response.data.access_token 출력", response.data.access_token)
                 context.commit('REQUEST_IS_LOGIN_TO_DJANGO', true);
             }
             return response.data;
@@ -127,7 +127,7 @@ const actions: AccountActions = {
     //     return response.data.attendanceDateList
     // }
     async requestRedisGetAttendanceDateListToDjango(
-        context: ActionContext<any, any>, request:{usertoken: string, month: number}
+        context: ActionContext<any, any>, request: { usertoken: string, month: number }
     ): Promise<void> {
         const response = await axiosInst.djangoAxiosInst.post(
             '/attendance/attendance-list', request)
@@ -140,10 +140,18 @@ const actions: AccountActions = {
     //         return response.data.attendance_status
     // },
     async requestRedisUpdateAttendanceDateListToDjango(
-        context: ActionContext<any, any>, updateInfo:{usertoken: string; today: number}):Promise<void>{
+        context: ActionContext<any, any>, updateInfo: { usertoken: string; today: number }): Promise<void> {
         const response = await axiosInst.djangoAxiosInst.post(
             '/attendance/mark-attendance', updateInfo)
-            return response.data.attendance_status
+        return response.data.attendance_status
+    },
+    async requestSendPasswordResetEmailToDjango(context: ActionContext<any, any>,
+        email: string): Promise<void> {
+
+        const response = await axiosInst.djangoAxiosInst.post(
+            '/account/send-password-reset-email', { email })
+
+        return response.data
     },
 };
 

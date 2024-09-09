@@ -26,10 +26,18 @@
         </div>
         <br>
         <hr>
-        <div class="nav-button" @click="goToAttendanceCheck()">
-          <i class="fas fa-magic"></i>
-          <span>출석체크</span>
-          <AttendanceCheck v-if="showStateAttendanceCheckPop" @sendClose="closeAttendanceCheckPop"/>
+        <div v-if="this.isAuthenticated">
+          <div class="nav-button" @click="goToAttendanceCheck()">
+            <i class="fas fa-magic"></i>
+            <span>출석체크</span>
+              <AttendanceCheck v-if="showStateAttendanceCheckPop" @sendClose="closeAttendanceCheckPop"/>
+          </div>
+        </div>
+        <div v-if="!this.isAuthenticated">
+          <div class="nav-button" @click="goToLogin()">
+            <i class="fas fa-magic"></i>
+            <span>출석체크</span>
+          </div>
         </div>
         <hr>
         <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
