@@ -3,7 +3,7 @@
     <div id="app">
       <v-container class="recipe-container">
         <v-card-title class="recipe-title">My Recipe Note</v-card-title>
-        <v-card-text v-if="this.savedRecipe">
+        <v-card-text v-if="this.getRecipe">
           <v-card-text class="recipe-number">Recipe No. {{ storageNumber }}</v-card-text>
           <p class="content">
             <strong class="recipe-name">{{ recipeName }} 만들기</strong>
@@ -26,7 +26,7 @@ export default {
   data() {
     return {
       userToken: localStorage.getItem("userToken"),
-      content: 
+      content: // mongoDB에서 가져오면 업데이트해야하는 값
         `[레시피 명]: 망고빙수\n
         \n\n[요리 인분 수]: 1인분
 
@@ -44,7 +44,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(recipeModule, ["savedRecipe"]),
+    ...mapState(recipeModule, ["savedRecipe", "getRecipe"]),
     recipeId() {
       return this.$route.params.recipeId;
       },
@@ -59,18 +59,18 @@ export default {
     methods: {
     ...mapActions(recipeModule, ['requestGetRecipeToDjango']),
 
-    async getRecipe() {
-      await this.requestGetRecipeToDjango(this.userToken.trim());
-      console.log('')
+    async getRecipes() {
+      await this.requestGetRecipeToDjango({userToken : this.userToken.trim()});
+      console.log('get Recipe?: ', this.getRecipe)
       this.recipeName = this.content.match(/\[레시피 명\]:\s*(.*)/)?.[1] || '';
       this.styledRecipeContent = this.content
-        .replace(/\[레시피 명\]:.*\n*/, '') // 레시피 명 중복 제거
-        .replace(/\[(.*?)\]:\s*/g, '<strong>[$1]</strong><br/>') // 대괄호 안 내용 두껍게 + 콜론 제거 + 줄바꿈
-        .replace(/\n/g, '<br/>'); // 줄바꿈 처리
+        .replace(/\[레시피 명\]:.*\n*/, '') 
+        .replace(/\[(.*?)\]:\s*/g, '<strong>[$1]</strong><br/>') 
+        .replace(/\n/g, '<br/>'); 
     }
   },
   created() {
-    this.getRecipe(); // 컴포넌트가 생성될 때 레시피를 가져옴
+    this.getRecipes();
   }
 };
 </script>

@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 
 export type RecipeActions = {
     requestSaveRecipeToDjango(context: ActionContext<RecipeState, any>, payload: {recipe: string}):Promise<void>;
-    requestGetRecipeToDjango(context: ActionContext<RecipeState, any>, userToken: string): Promise<void>;
+    requestGetRecipeToDjango(context: ActionContext<RecipeState, any>, payload: {userToken: string}): Promise<void>;
     requestRedisGetRecipeToDjango(context: ActionContext<RecipeState, any>, account_id: number): Promise<void>;
 };
 
@@ -49,14 +49,14 @@ const actions: RecipeActions = {
         }
     },
 
-    async requestGetRecipeToDjango(context: ActionContext<RecipeState, any>, userToken: string): Promise<void> {
-        const accountIdResponse = await axiosInst.djangoAxiosInst.post('/google_oauth/redis-get-account-id', { userToken: userToken });
+    async requestGetRecipeToDjango(context: ActionContext<RecipeState, any>, payload: {userToken: string}): Promise<void> {
+        const accountIdResponse = await axiosInst.djangoAxiosInst.post('/google_oauth/redis-get-account-id', { userToken: payload.userToken });
         const accountId = accountIdResponse.data.account_id;
         try {
-            const res = await axiosInst.djangoAxiosInst.post('/user_recipe/get-recipe', accountId);
-            // 해시와 account_id 값을 통해 mongo에 요청하는 함수
+            const res = await axiosInst.djangoAxiosInst.post('/user_recipe/get-recipe', {accountId : accountId});
+            // 해시와 account_id 값을 통해 mongo에 요청하는 함수 개별적으로 정의
             
-            context.commit(REQUEST_GET_RECIPE_TO_DJANGO, res.data.recipe);
+            context.commit(REQUEST_GET_RECIPE_TO_DJANGO, res.data.message);
             context.commit(CHECK_GET_RECIPE, true);
 
         } catch (error) {
