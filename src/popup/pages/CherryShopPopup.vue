@@ -114,7 +114,7 @@ export default {
       try {
         const readyInfo = {
           amount: option.price,
-          approval_url: 'http://localhost:8080/kakao_oauth/kakao-approve',
+          approval_url: 'http://54.180.92.79//kakao_oauth/kakao-approve',
         };
         const response = await this.requestReadyKakaoPayRedirection(readyInfo);
         console.log("response.data 출력", response.data)
