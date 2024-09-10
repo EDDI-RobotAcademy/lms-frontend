@@ -79,7 +79,7 @@ export default {
             const checkCherry = await this.requestRedisGetCherryToDjango(userToken.trim());
             console.log("옵션 프라이스", option.price)
             console.log("체크 체리", checkCherry.cherry)
-            if (checkCherry.cherry > option.price)
+            if (checkCherry.cherry >= option.price)
             {
               await this.requestRedisUpdateCherryToDjango(cherryInfo);
               await this.requestRedisPurchaseTicketToDjango(ticketInfo);
