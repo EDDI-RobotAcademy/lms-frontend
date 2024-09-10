@@ -50,7 +50,24 @@
           </div>
         </div>
         <hr>
-        <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
+        <div v-if="this.isAuthenticated">
+          <div class="nav-button" @click="toggleShopPopup('main')"><i class="fas fa-gem"></i><span>상점</span></div>
+          <hr>
+          <div class="nav-button" @click="toggleShopPopup('cherry')"><i class="fas fa-gem"></i><span>체리 상점</span></div>
+          <hr>
+          <div class="nav-button" @click="toggleShopPopup('ticket')"><i class="fas fa-gem"></i><span>티켓 상점</span></div>
+          <hr>
+          <div class="nav-button" @click="goToMyPage()"><i class="fas fa-user"></i><span>마이페이지</span></div>
+        </div>
+        <div v-else>
+          <div class="nav-button" @click="goToLogin()"><i class="fas fa-gem"></i><span>상점</span></div>
+          <hr>
+          <div class="nav-button" @click="goToLogin()"><i class="fas fa-gem"></i><span>체리 상점</span></div>
+          <hr>
+          <div class="nav-button" @click="goToLogin()"><i class="fas fa-gem"></i><span>티켓 상점</span></div>
+          <hr>
+          <div class="nav-button" @click="goToLogin()"><i class="fas fa-user"></i><span>마이페이지</span></div>
+        </div>
         <div id="nav-content-highlight"></div>
       </div>
       <div v-if="this.isAuthenticated">
