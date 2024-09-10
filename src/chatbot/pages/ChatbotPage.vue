@@ -88,6 +88,7 @@
 import { mapActions, mapState } from "vuex";
 import { nextTick } from 'vue'
 import CryptoJS from 'crypto-js';
+import { toast } from 'vue3-toastify';
 
 const authenticationModule = "authenticationModule";
 const chatbotModule = 'chatbotModule';
@@ -274,6 +275,10 @@ export default {
         await this.requestRedisUpdateTicketToDjango(this.userToken.trim());
         // 티켓 정보 가져오기
         const ticketResponse = await this.requestRedisGetTicketToDjango(this.userToken.trim());
+        if (ticketResponse.ticket == 0 ) {
+          toast.error('티켓이 없습니다.');
+          throw new Error("티켓이 없습니다.")
+        }
         this.$store.commit(`${authenticationModule}/SET_TICKET`, ticketResponse.ticket);
 
         if (!this.userInput.trim()) return;
