@@ -53,13 +53,13 @@ export default {
       },
     },  
     methods: {
-    ...mapActions(recipeModule, ['getRecipeFromFastAPI', 'requestRedisGetHashKeyToFastAPI']),
+    ...mapActions(recipeModule, ['getRecipeFromFastAPI', 'requestRedisGetHashKeyToDjango']),
     ...mapActions(authenticationModule, ['requestRedisGetAccountIdToDjango']),
     ...mapActions(chatbotModule, ['sendDataToFastAPI']),
 
     async getRecipe() {
       const accountId = await this.requestRedisGetAccountIdToDjango(this.userToken.trim())
-      const recipeHash = await this.requestRedisGetHashKeyToFastAPI(accountId)
+      const recipeHash = await this.requestRedisGetHashKeyToDjango(accountId)
       
       const payload = { command: 55, data: [accountId, recipeHash] }
       await this.sendDataToFastAPI(payload);
