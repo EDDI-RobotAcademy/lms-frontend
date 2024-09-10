@@ -17,10 +17,11 @@
           <div v-for="(message, index) in messages" :key="index" class="message-container">
             <img v-if="message.role === 'user' && isAuthenticated" class="avatar" :src="profileImageSrc">
             <img v-if="message.role === 'assistant'" class="robot" :src="require('@/assets/images/fixed/chef_bot.png')">
-            
+
             <div :class="['message-content', message.role]">
               <div v-html="formatMessage(message.content)"></div>
-              <button v-if="message.role === 'assistant'" @click="openSaveDialog(message.content)" class="save-recipe-button">
+              <button v-if="message.role === 'assistant'" @click="openSaveDialog(message.content)"
+                class="save-recipe-button">
                 <i class="mdi mdi-content-save icon-align"></i>
               </button>
             </div>
@@ -59,20 +60,10 @@
       </div>
 
       <div class="chat-input">
-        <input
-          type="text"
-          v-model="userInput"
-          @keyup.enter="sendMessage"
-          placeholder="어떤 레시피를 알려드릴까요?"
-          class="custom-input"
-          :disabled="isInputDisabled"
-        />
-        <v-btn
-          @click="toggleSpeechRecognition"
-          :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
-          :color="isListening ? '#F2B8B5' : '#333333'"
-          class="mic-button"
-        />
+        <input type="text" v-model="userInput" @keyup.enter="sendMessage" placeholder="어떤 레시피를 알려드릴까요?"
+          class="custom-input" :disabled="isInputDisabled" />
+        <v-btn @click="toggleSpeechRecognition" :icon="isListening ? 'mdi-stop' : 'mdi-microphone'"
+          :color="isListening ? '#F2B8B5' : '#333333'" class="mic-button" />
       </div>
 
       <div v-if="showActorOption" class="voice-options">
@@ -81,6 +72,7 @@
         </button>
       </div>
     </main>
+    <TicketShopPopup v-if="showTicketShop" @close="closeTicketShop" />
   </div>
 </template>
 
@@ -88,6 +80,9 @@
 import { mapActions, mapState } from "vuex";
 import { nextTick } from 'vue'
 import CryptoJS from 'crypto-js';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+import TicketShopPopup from '@/popup/pages/TicketShopPopup.vue';
 
 const authenticationModule = "authenticationModule";
 const chatbotModule = 'chatbotModule';
@@ -96,6 +91,9 @@ const recipeModule = 'recipeModule'
 
 export default {
   name: 'Corner-Chefbot',
+  components: {
+    TicketShopPopup
+  },
   data() {
     return {
       isListening: false,
@@ -118,7 +116,8 @@ export default {
       profileNumber: '_dummy',
       userToken: localStorage.getItem("userToken"),
       isclickSaveRecipe: false,
-      generatedRecipe: ''
+      generatedRecipe: '',
+      showTicketShop: false,
     };
   },
 
@@ -178,8 +177,8 @@ export default {
   },
   methods: {
     ...mapActions(accountModule, ['requestGetProfileImgToDjango']),
-    ...mapActions(authenticationModule, ['requestRedisUpdateTicketToDjango','requestRedisGetTicketToDjango', 'requestRedisGetAccountIdToDjango',
-                                         'requestRedisGetEmailToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
+    ...mapActions(authenticationModule, ['requestRedisUpdateTicketToDjango', 'requestRedisGetTicketToDjango', 'requestRedisGetAccountIdToDjango',
+      'requestRedisGetEmailToDjango', 'requestRedisUpdateTicketToDjango', 'requestRedisGetNicknameToDjango']),
     ...mapActions(chatbotModule, ['sendDataToFastAPI', 'getMessageFromFastAPI', 'getVoiceFromFastAPI']),
     ...mapActions(recipeModule, ['saveRecipeToFastAPI']),
 
@@ -267,25 +266,32 @@ export default {
       if (this.isInputDisabled) return;
 
       this.isInputDisabled = true;
-      this.isLoadingResponse = true;
-      
+
       try {
-        // 티켓 업데이트
-        await this.requestRedisUpdateTicketToDjango(this.userToken.trim());
-        // 티켓 정보 가져오기
         const ticketResponse = await this.requestRedisGetTicketToDjango(this.userToken.trim());
         this.$store.commit(`${authenticationModule}/SET_TICKET`, ticketResponse.ticket);
 
+        if (ticketResponse.ticket <= 0) {
+          toast.error("티켓이 부족합니다.", {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 3000,
+          });
+          this.showTicketShop = true;
+          return;
+        }
+
         if (!this.userInput.trim()) return;
+
+        this.isLoadingResponse = true;
+
+        await this.requestRedisUpdateTicketToDjango(this.userToken.trim());
 
         const userMessage = { role: 'user', content: this.userInput };
         this.messages.push(userMessage);
 
         const payload = { command: 45, data: [this.userInput] };
         this.userInput = '';
-        this.isLoadingResponse = true;
         await this.sendDataToFastAPI(payload)
-        console.log('send Message에 true? ', this.getDataResponse)
 
         if (this.getDataResponse) {
           await this.getMessage()
@@ -299,6 +305,9 @@ export default {
         this.isInputDisabled = false;
         this.generated = false;
       }
+    },
+    closeTicketShop() {
+      this.showTicketShop = false;
     },
     async selectVoiceActor(actor) {
       this.selectedActor = actor;
@@ -347,16 +356,16 @@ export default {
       const payload = { command: 56, data: [accountId, recipeHash, this.generatedRecipe] }
       await this.sendDataToFastAPI(payload)
       try {
-      if (this.getDataResponse) {
-        const payload = { accountId: accountId, recipeHash: recipeHash, recipe: this.generatedRecipe }
-        await this.saveRecipeToFastAPI(payload);
-      }
-      // 레시피가 성공적으로 저장된 경우
-      if (this.isRecipeSaved) {
-        this.generatedRecipe = ''; // 저장 성공 시 레시피 초기화
-        alert('레시피가 성공적으로 저장되었습니다.');
-        this.closeDialog()
-        } 
+        if (this.getDataResponse) {
+          const payload = { accountId: accountId, recipeHash: recipeHash, recipe: this.generatedRecipe }
+          await this.saveRecipeToFastAPI(payload);
+        }
+        // 레시피가 성공적으로 저장된 경우
+        if (this.isRecipeSaved) {
+          this.generatedRecipe = ''; // 저장 성공 시 레시피 초기화
+          alert('레시피가 성공적으로 저장되었습니다.');
+          this.closeDialog()
+        }
       } catch (error) {
         console.error('레시피 저장 실패:', error);
       }
@@ -532,7 +541,7 @@ export default {
 .save-recipe-button {
   position: absolute;
   bottom: 0.5px;
-  right: 1px; 
+  right: 1px;
   z-index: 40;
   cursor: pointer;
   color: #ffa70f;
@@ -738,11 +747,13 @@ export default {
   margin-bottom: 1%;
   margin-left: 0.5%;
 }
+
 .profile-image {
   max-width: 50px;
   max-height: 50px;
   object-fit: contain;
 }
+
 .save-recipe-button {
   z-index: 40;
   cursor: pointer;
@@ -753,6 +764,7 @@ export default {
 .save-recipe-button:hover {
   color: #fff8f7;
 }
+
 .pop-up-dialog {
   text-align: center;
   width: 400px;
@@ -761,18 +773,25 @@ export default {
   height: 300px;
   padding: 20px;
 }
+
 .dialog-botton {
   align-self: center;
   color: white;
 
 }
-.button-go-page{
-  font-weight:lighter;
-  background-color: rgb(55, 55, 55); /* 버튼 배경색 */
-  text-decoration: white; /* 버튼 텍스트 색 */
-  border-radius: 10px; /* 버튼 모서리 둥글게 */
-  padding: 13px 15px; /* 버튼 패딩 */
+
+.button-go-page {
+  font-weight: lighter;
+  background-color: rgb(55, 55, 55);
+  /* 버튼 배경색 */
+  text-decoration: white;
+  /* 버튼 텍스트 색 */
+  border-radius: 10px;
+  /* 버튼 모서리 둥글게 */
+  padding: 13px 15px;
+  /* 버튼 패딩 */
 }
+
 .close-btn {
   position: absolute !important;
   top: 8px;
