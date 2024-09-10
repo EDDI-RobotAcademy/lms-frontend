@@ -164,6 +164,7 @@ export default {
     closeDialog() {
       this.dialog = false;
       this.$emit('sendClose');
+      window.location.reload();
     },
   }
 };
