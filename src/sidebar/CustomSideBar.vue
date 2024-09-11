@@ -180,7 +180,7 @@ export default ({
     },
     goToReadRecipe(recipeId) {
       console.log('recipe 읽기 페이지로 이동', recipeId);
-      router.push({ path: `/recipe/${recipeId}`});
+      router.push({ path: `/recipe/repo`});
     },
     goToAttendanceCheck() {
       this.showStateAttendanceCheckPop = !this.showStateAttendanceCheckPop

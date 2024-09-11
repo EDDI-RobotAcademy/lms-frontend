@@ -29,7 +29,7 @@ const actions: RecipeActions = { // 이름 바꿔야함
             context.commit(SWITCH_FALSE, false);
 
             // redis
-            await axiosInst.djangoAxiosInst.post('/google_oauth/save-recipe-to-redis', {
+            await axiosInst.djangoAxiosInst.post('/google_oauth/save-recipe-hash', {
                 accountId: payload.accountId,
                 recipeHash: payload.recipeHash,
                 recipe: payload.recipe
@@ -47,7 +47,7 @@ const actions: RecipeActions = { // 이름 바꿔야함
         context.commit(GET_RECIPE_FROM_FASTAPI, true);
         context.commit(CHECK_GET_RECIPE, res.data.log_data.recipe)
         context.commit(SWITCH_FALSE, false);
-        return res.data.log_data.recipe
+        return res.data.recipe
     }
 }
 export default actions

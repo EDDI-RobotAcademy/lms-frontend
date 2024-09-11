@@ -8,6 +8,7 @@ export type ChatActions = {
     sendDataToFastAPI(context: ActionContext<ChatState, any>, payload: {command: number, data: []}):Promise<void>;//socket서버 연결 시 {command: number, data: unknown}
     getMessageFromFastAPI(context: ActionContext<ChatState, any>):Promise<void>;
     getVoiceFromFastAPI(context: ActionContext<ChatState, any>):Promise<void>;
+    saveHashDataToDjano(context: ActionContext<ChatState, any>, payload: {accountId: number, data: string }):Promise<void>;
    
 };
 
@@ -28,7 +29,7 @@ const actions: ChatActions = {
             const res: AxiosResponse<any> = await axiosInst.fastapiAxiosInst.post('/request-generate-recipe-to-openai', {timeout: 1000000
               });
             context.commit(REQUEST_GET_MESSAGE_FROM_FASTAPI, res.data);
-            context.commit(SWITCH_FALSE, false);
+            // context.commit(SWITCH_FALSE, false);
         } catch (error) {
             console.error('Error sending message:', error);
             throw error;
@@ -43,6 +44,14 @@ const actions: ChatActions = {
         } catch (error) {
             console.error('Error sending message:', error);
             throw error;
+        }
+    },
+    async saveHashDataToDjano(context: ActionContext<ChatState, any>, payload: {accountId: number, data: string }):Promise<void>{
+        try{
+            const res: AxiosResponse<any> = await axiosInst.djangoAxiosInst.post('/save-recipe-hash')
+        } catch(error){
+            console.error('', error)
+            throw error
         }
     },
 }

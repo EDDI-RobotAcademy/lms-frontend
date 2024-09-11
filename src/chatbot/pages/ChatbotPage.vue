@@ -232,8 +232,8 @@ export default {
     },
     async getMessage() {
       while (this.getDataResponse) {
-        await this.getMessageFromFastAPI();
         await this.sleep(9000);
+        await this.getMessageFromFastAPI();
         console.log('while assistantMessage : ', this.assistantMessage)
 
         if (this.assistantMessage !== '큐 비었잖아 뭐함?') {
@@ -361,7 +361,7 @@ export default {
           await this.saveRecipeToFastAPI(payload);
         }
         // 레시피가 성공적으로 저장된 경우
-        if (this.isRecipeSaved) {
+        if (this.getDataResponse) {
           this.generatedRecipe = ''; // 저장 성공 시 레시피 초기화
           alert('레시피가 성공적으로 저장되었습니다.');
           this.closeDialog()
