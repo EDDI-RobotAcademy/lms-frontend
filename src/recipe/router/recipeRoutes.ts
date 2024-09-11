@@ -3,7 +3,7 @@ import RecipeDetailPage from '@/recipe/pages/recipeDetailPage.vue';
 
 const RecipeRoutes: Array<RouteRecordRaw> = [
   {
-    path: '/recipe/:recipeId',
+    path: '/recipe/repo',
     name: 'RecipeDetail',
     component: RecipeDetailPage,
     props: true

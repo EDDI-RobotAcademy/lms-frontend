@@ -90,8 +90,7 @@ const actions: AuthenticationActions = {
   async requestRedisGetAccountIdToDjango(
     context: ActionContext<AuthenticationState, any>, 
     usertoken: string): Promise<any> {
-    const accountIdResponse = 
-    await axiosInst.djangoAxiosInst.post('/google_oauth/redis-get-account-id', { userToken: usertoken });
+    const accountIdResponse = await axiosInst.djangoAxiosInst.post('/google_oauth/redis-get-account-id', { userToken: usertoken });
     const account_id = accountIdResponse.data.account_id;
     return account_id
   },

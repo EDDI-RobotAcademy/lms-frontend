@@ -60,8 +60,8 @@ export default {
     async getRecipe() {
       const accountId = await this.requestRedisGetAccountIdToDjango(this.userToken.trim())
       const recipeHash = await this.requestRedisGetHashKeyToDjango(accountId)
-      
       const payload = { command: 55, data: [accountId, recipeHash] }
+      console.log(payload)
       await this.sendDataToFastAPI(payload);
 
       if (this.gotRecipe) {
